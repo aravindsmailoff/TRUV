@@ -5,7 +5,7 @@ import { Hero } from "@/components/sites/spade/Hero";
 import { LogoCloud } from "@/components/sites/spade/LogoCloud";
 import { ScrollRevealIntro } from "@/components/sites/spade/ScrollRevealIntro";
 import { RiskAuthSection } from "@/components/sites/spade/RiskAuthSection";
-import { RewardsSection } from "@/components/sites/spade/RewardsSection";
+import { TradeExecutionSection } from "@/components/sites/spade/TradeExecutionSection";
 import { AnalyticsAndAiSection } from "@/components/sites/spade/AnalyticsAndAiSection";
 import { IndustriesGrid } from "@/components/sites/spade/IndustriesGrid";
 import { CustomerStories } from "@/components/sites/spade/CustomerStories";
@@ -28,7 +28,7 @@ export default function Home() {
         <LogoCloud />
         <ScrollRevealIntro />
         <RiskAuthSection />
-        <RewardsSection />
+        <TradeExecutionSection />
         <AnalyticsAndAiSection />
         <IndustriesGrid />
         <CustomerStories />
