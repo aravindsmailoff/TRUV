@@ -164,6 +164,14 @@ export function Navbar() {
                 </Link>
               </li>
 
+              {/* Manufacturer Dashboard */}
+              <li>
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-15px-btn text-[#3f7308] hover:text-[#18280e] font-semibold cursor-pointer transition-colors bg-[#ebf7d9] px-2.5 py-1 rounded-md">
+                  <span>Dashboard</span>
+                  <span className="size-1.5 rounded-full bg-[#3f7308] animate-pulse" />
+                </Link>
+              </li>
+
               {/* Company */}
               <li
                 className="relative"

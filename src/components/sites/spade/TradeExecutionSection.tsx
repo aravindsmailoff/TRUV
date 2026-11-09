@@ -17,6 +17,9 @@ import {
   Scale,
   FileSpreadsheet,
   RefreshCw,
+  LayoutDashboard,
+  ExternalLink,
+  Package,
 } from "lucide-react";
 import { Magnet } from "@/components/reactbits/Magnet";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
@@ -24,10 +27,10 @@ import { DecryptedText } from "@/components/reactbits/DecryptedText";
 import { ShinyText } from "@/components/reactbits/ShinyText";
 import { SEED_MANUFACTURERS, SEED_RFQS } from "@/lib/trade/tradeStore";
 
-type TabKey = "rfq" | "mfg" | "commercial" | "paypal" | "logistics" | "moat";
+type TabKey = "dashboard_mockup" | "rfq" | "mfg" | "commercial" | "paypal" | "logistics" | "moat";
 
 export function TradeExecutionSection() {
-  const [activeTab, setActiveTab] = useState<TabKey>("rfq");
+  const [activeTab, setActiveTab] = useState<TabKey>("dashboard_mockup");
 
   // RFQ Selection
   const [selectedRfqId, setSelectedRfqId] = useState<string>(SEED_RFQS[0].id);
@@ -127,6 +130,7 @@ export function TradeExecutionSection() {
             {/* Tabbed Navigation (Watermelon UI Modular Pills) */}
             <div className="flex items-center gap-1.5 p-3 sm:p-4 border-b border-[#2d421d] bg-[#14200c] overflow-x-auto select-none scrollbar-none">
               {[
+                { id: "dashboard_mockup", label: "🏢 Manufacturer Dashboard (Mockup)", icon: LayoutDashboard, count: "Customer View" },
                 { id: "rfq", label: "1. Buyer RFQ Demand", icon: Globe, count: "3 Active" },
                 { id: "mfg", label: "2. MSME Vetting & Clusters", icon: Building2, count: "3 Hubs" },
                 { id: "commercial", label: "3. Commercial Negotiation (AI)", icon: Scale, count: "PO vs PI" },
@@ -162,6 +166,268 @@ export function TradeExecutionSection() {
 
             {/* TAB CONTENT PANELS */}
             <div className="p-5 sm:p-7 lg:p-9 min-h-[520px]">
+              {/* ========================================================================= */}
+              {/* TAB 0: MANUFACTURER DASHBOARD PERSPECTIVE (MOCKUP PREVIEW) */}
+              {/* ========================================================================= */}
+              {activeTab === "dashboard_mockup" && (
+                <div className="space-y-6">
+                  {/* Mockup Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-[#b2eb76] animate-pulse" />
+                        <h3 className="text-lg font-semibold text-white tracking-tight font-mono">
+                          Moradabad Precision Foundry &amp; Castings LLP — Manufacturer View
+                        </h3>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#223514] text-[#b2eb76] border border-[#3b5424]">
+                          MOCKUP PREVIEW
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-400 font-mono mt-1">
+                        Customer &amp; exporter perspective: monitoring real-time buyer demand, production runs, and PayPal milestone releases.
+                      </p>
+                    </div>
+
+                    <Magnet padding={20} magnetStrength={2}>
+                      <Link
+                        href="/dashboard"
+                        className="px-4 py-2 rounded-md bg-[#b2eb76] text-[#18280e] font-semibold text-xs inline-flex items-center gap-1.5 hover:bg-[#b2eb76]/90 transition-all cursor-pointer shadow-sm"
+                      >
+                        <span>Open Full Dedicated Dashboard</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+                    </Magnet>
+                  </div>
+
+                  {/* Top 4 KPI Metrics (Matching Image 1) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d]">
+                      <div className="flex justify-between items-center text-[11px] font-mono text-stone-400 mb-1">
+                        <span>Page Views / Inquiries</span>
+                        <span>👁️</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-white font-mono">16,431</span>
+                        <span className="text-[10px] font-mono font-bold text-[#b2eb76] bg-[#223514] px-1.5 py-0.2 rounded">
+                          ▲ +15.5%
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-stone-500 block mt-1">vs. 14,653 last period</span>
+                    </SpotlightCard>
+
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d]">
+                      <div className="flex justify-between items-center text-[11px] font-mono text-stone-400 mb-1">
+                        <span>Foreign Visitors</span>
+                        <span>🌐</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-white font-mono">6,225</span>
+                        <span className="text-[10px] font-mono font-bold text-[#b2eb76] bg-[#223514] px-1.5 py-0.2 rounded">
+                          ▲ +8.4%
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-stone-500 block mt-1">USA, UK &amp; Germany buyers</span>
+                    </SpotlightCard>
+
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d]">
+                      <div className="flex justify-between items-center text-[11px] font-mono text-stone-400 mb-1">
+                        <span>RFQ Click Rate</span>
+                        <span>🎯</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-white font-mono">2,832</span>
+                        <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-950 px-1.5 py-0.2 rounded">
+                          ▼ 10.5%
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-stone-500 block mt-1">UCP 600 compliance validated</span>
+                    </SpotlightCard>
+
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d]">
+                      <div className="flex justify-between items-center text-[11px] font-mono text-stone-400 mb-1">
+                        <span>Commercial Orders</span>
+                        <span>📦</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-white font-mono">1,224</span>
+                        <span className="text-[10px] font-mono font-bold text-[#b2eb76] bg-[#223514] px-1.5 py-0.2 rounded">
+                          ▲ +4.4%
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-stone-500 block mt-1">0.08% dispute ratio</span>
+                    </SpotlightCard>
+                  </div>
+
+                  {/* Middle Split: Profit Graph + Capacity Speedometer Gauge */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left: Total Profit Chart (Matching Image 1) */}
+                    <SpotlightCard className="p-5 rounded-xl bg-[#121c0b] border border-[#2d421d] lg:col-span-2 space-y-4">
+                      <div className="flex justify-between items-center pb-2 border-b border-[#2d421d]">
+                        <div>
+                          <span className="text-[11px] font-mono text-stone-400 uppercase">Total Export Settlement Revenue</span>
+                          <div className="flex items-baseline gap-2 mt-0.5">
+                            <span className="text-2xl font-bold text-[#b2eb76] font-mono">$446.7K</span>
+                            <span className="text-[11px] font-mono text-stone-300 bg-[#223514] px-1.5 py-0.2 rounded border border-[#3b5424]">
+                              ▲ 24.4% vs last period
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] border border-[#2d421d]">
+                          PayPal Orders v2 Rails
+                        </span>
+                      </div>
+
+                      {/* SVG Mini Trend Curve */}
+                      <div className="relative h-28 w-full flex items-end">
+                        <svg className="w-full h-full overflow-visible" viewBox="0 0 500 100" fill="none">
+                          <defs>
+                            <linearGradient id="mockupProfit" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#b2eb76" stopOpacity="0.3" />
+                              <stop offset="100%" stopColor="#b2eb76" stopOpacity="0.0" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M0,80 Q40,65 80,75 T160,55 T240,80 T320,40 T400,50 T480,25 T500,20"
+                            stroke="#b2eb76"
+                            strokeWidth="2.5"
+                            fill="none"
+                          />
+                          <path
+                            d="M0,80 Q40,65 80,75 T160,55 T240,80 T320,40 T400,50 T480,25 T500,20 L500,100 L0,100 Z"
+                            fill="url(#mockupProfit)"
+                          />
+                          <circle cx="320" cy="40" r="3.5" fill="#18280e" stroke="#b2eb76" strokeWidth="2" />
+                          <circle cx="480" cy="25" r="3.5" fill="#18280e" stroke="#b2eb76" strokeWidth="2" />
+                        </svg>
+
+                        <div className="absolute inset-x-0 bottom-0 flex justify-between text-[9px] font-mono text-stone-500 pt-1 border-t border-[#2d421d]">
+                          <span>1 Jan (30% Advance)</span>
+                          <span>8 Jan (Production)</span>
+                          <span>15 Jan (QIMA Inspection)</span>
+                          <span>22 Jan (Customs LEO)</span>
+                          <span>29 Jan (BL Balance Release)</span>
+                        </div>
+                      </div>
+
+                      {/* Buyer Channel Breakdown */}
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#2d421d] text-[11px] font-mono">
+                        <div className="p-2 rounded bg-[#14200c] border border-[#2d421d]">
+                          <span className="text-stone-400 block text-[9px]">Retailers</span>
+                          <span className="text-white font-bold">2,884 Orders</span>
+                        </div>
+                        <div className="p-2 rounded bg-[#14200c] border border-[#2d421d]">
+                          <span className="text-stone-400 block text-[9px]">Distributors</span>
+                          <span className="text-white font-bold">1,432 Orders</span>
+                        </div>
+                        <div className="p-2 rounded bg-[#14200c] border border-[#2d421d]">
+                          <span className="text-stone-400 block text-[9px]">Wholesalers</span>
+                          <span className="text-white font-bold">562 Orders</span>
+                        </div>
+                      </div>
+                    </SpotlightCard>
+
+                    {/* Right: Factory Capacity Speedometer Gauge (Matching Image 1) */}
+                    <SpotlightCard className="p-5 rounded-xl bg-[#121c0b] border border-[#2d421d] text-center space-y-3 flex flex-col justify-between">
+                      <div className="flex justify-between items-center text-[11px] font-mono text-stone-400">
+                        <span className="font-semibold uppercase">Factory Capacity</span>
+                        <span className="text-[10px] text-[#b2eb76]">QIMA Audited</span>
+                      </div>
+
+                      {/* Semi-Circle SVG Gauge */}
+                      <div className="relative flex flex-col items-center justify-center">
+                        <div className="relative size-28">
+                          <svg className="size-full -rotate-90" viewBox="0 0 36 36">
+                            <path
+                              className="text-stone-800"
+                              strokeWidth="3.8"
+                              strokeDasharray="75, 100"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path
+                              className="text-[#b2eb76]"
+                              strokeWidth="3.8"
+                              strokeDasharray="51, 100"
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-2xl font-bold font-mono text-white">68%</span>
+                            <span className="text-[8px] font-mono text-stone-400 uppercase">Utilized</span>
+                          </div>
+                        </div>
+                        <p className="text-[10px] font-mono text-stone-400 mt-1">Targeting 80% monthly export run</p>
+                      </div>
+
+                      <div className="p-2 rounded bg-[#14200c] text-[10px] font-mono text-[#b2eb76] border border-[#2d421d] flex items-center justify-center gap-1.5">
+                        <CheckCircle2 className="w-3 h-3 text-[#b2eb76]" />
+                        <span>Next Port Gate-In: Mundra (Nov 14)</span>
+                      </div>
+                    </SpotlightCard>
+                  </div>
+
+                  {/* Bottom: Active Orders Table Preview */}
+                  <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#2d421d] text-xs font-mono">
+                      <span className="font-bold text-white flex items-center gap-2">
+                        <Package className="w-4 h-4 text-[#b2eb76]" />
+                        Active Export Orders (MSME Factory Queue)
+                      </span>
+                      <Link href="/dashboard" className="text-[#b2eb76] hover:underline text-[11px] flex items-center gap-1">
+                        <span>View All in Full Dashboard</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px] font-mono text-stone-300">
+                        <thead>
+                          <tr className="border-b border-[#2d421d] text-stone-500 uppercase text-[9px]">
+                            <th className="py-1.5 px-2">Order ID</th>
+                            <th className="py-1.5 px-2">Foreign Buyer</th>
+                            <th className="py-1.5 px-2">Product Description</th>
+                            <th className="py-1.5 px-2">Value</th>
+                            <th className="py-1.5 px-2">PayPal Escrow</th>
+                            <th className="py-1.5 px-2">Inspection Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#2d421d]/60">
+                          <tr className="hover:bg-white/5">
+                            <td className="py-2 px-2 font-bold text-white">#ORD-9921</td>
+                            <td className="py-2 px-2">Pacific Arch Hardware (USA)</td>
+                            <td className="py-2 px-2 text-stone-300">Solid Brass Mortise Locksets (5,000 sets)</td>
+                            <td className="py-2 px-2 font-bold text-[#b2eb76]">$142,500</td>
+                            <td className="py-2 px-2">
+                              <span className="px-1.5 py-0.2 rounded bg-[#223514] text-[#b2eb76] text-[10px]">
+                                30% Captured ($42,750)
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-[#b2eb76]">QIMA AQL 1.5 Passed</td>
+                          </tr>
+                          <tr className="hover:bg-white/5">
+                            <td className="py-2 px-2 font-bold text-white">#ORD-9918</td>
+                            <td className="py-2 px-2">EuroBespoke Fittings (UK)</td>
+                            <td className="py-2 px-2 text-stone-300">Brass Window Espagnolettes (3,200 pcs)</td>
+                            <td className="py-2 px-2 font-bold text-[#b2eb76]">$76,800</td>
+                            <td className="py-2 px-2">
+                              <span className="px-1.5 py-0.2 rounded bg-[#223514] text-[#b2eb76] text-[10px]">
+                                100% Settled ($76,800)
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-stone-300">Delivered (Port of Felixstowe)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </SpotlightCard>
+                </div>
+              )}
+
               {/* ========================================================================= */}
               {/* TAB 1: BUYER RFQ DEMAND */}
               {/* ========================================================================= */}
