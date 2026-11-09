@@ -1,0 +1,260 @@
+import {
+  BusinessEntity,
+  ManufacturingCapability,
+  CommercialTransaction,
+  PayPalFinancialEvent,
+  TransactionMilestone,
+} from "@/types/intelligence";
+
+// Seed benchmark entities
+export const INITIAL_BUSINESSES: BusinessEntity[] = [
+  {
+    id: "biz_in_textiles_01",
+    legalName: "Vardhman Precision Fabrics Private Limited",
+    tradeName: "Vardhman Textiles & Precision Weaving",
+    country: "India",
+    registrationNumber: "U17111PB1973PTC003345",
+    gstin: "03AABCV1234F1Z8",
+    iecCode: "0394012938",
+    role: "seller",
+    verificationStatus: "verified_evidence",
+    verificationEvidence: {
+      verifiedAt: "2025-10-15T09:30:00Z",
+      verifiedBy: "DGFT_IEC_GATEWAY_V2",
+      checkedRegistries: ["DGFT IEC Registry", "GSTN API", "MCA 21 Portal"],
+      notes: "IEC active, GST active with clean tax filing record for 24 consecutive quarters.",
+    },
+    documents: [
+      {
+        id: "doc_iec_01",
+        name: "DGFT_IEC_Certificate_2025.pdf",
+        type: "iec_certificate",
+        documentUrl: "https://dgft.gov.in/verify/0394012938",
+        uploadedAt: "2025-01-10T11:00:00Z",
+        verificationStatus: "verified_evidence",
+        verifiedAgainst: "DGFT Central Repository",
+      },
+      {
+        id: "doc_iso_01",
+        name: "ISO_9001_2015_Certificate.pdf",
+        type: "iso_certification",
+        documentUrl: "https://tuv-sud.com/certs/iso9001-vardhman",
+        uploadedAt: "2024-06-15T10:00:00Z",
+        expiresAt: "2027-06-14T23:59:59Z",
+        verificationStatus: "verified_evidence",
+        verifiedAgainst: "TÜV SÜD Audit Trail",
+      },
+    ],
+    createdAt: "2024-01-15T08:00:00Z",
+    updatedAt: "2025-10-15T09:30:00Z",
+  },
+  {
+    id: "biz_us_apparel_02",
+    legalName: "Pacific Retail Group LLC",
+    tradeName: "Pacific Goods USA",
+    country: "United States",
+    registrationNumber: "DE-LLC-7839210",
+    role: "buyer",
+    verificationStatus: "verified_evidence",
+    verificationEvidence: {
+      verifiedAt: "2025-09-01T14:15:00Z",
+      verifiedBy: "Delaware_DOS_Direct",
+      checkedRegistries: ["Delaware Division of Corporations", "Dun & Bradstreet D-U-N-S #83-912-4019"],
+      notes: "Good standing verified in Delaware. Active commercial buyer since 2018.",
+    },
+    documents: [
+      {
+        id: "doc_us_cert_01",
+        name: "Delaware_Good_Standing_2025.pdf",
+        type: "bank_statement",
+        documentUrl: "https://corp.delaware.gov/verify/7839210",
+        uploadedAt: "2025-09-01T12:00:00Z",
+        verificationStatus: "verified_evidence",
+      },
+    ],
+    createdAt: "2024-05-10T12:00:00Z",
+    updatedAt: "2025-09-01T14:15:00Z",
+  },
+  {
+    id: "biz_in_brass_03",
+    legalName: "Moradabad Artisans & Precision Castings LLP",
+    tradeName: "MAP Brassware",
+    country: "India",
+    registrationNumber: "AAH-9201",
+    gstin: "09AAHFM9201L1Z4",
+    iecCode: "0508012491",
+    role: "seller",
+    verificationStatus: "in_progress",
+    verificationEvidence: {
+      checkedRegistries: ["GSTN API"],
+      notes: "GST active. Factory audit report pending on-site verification.",
+    },
+    documents: [
+      {
+        id: "doc_gst_03",
+        name: "GST_Registration_Certificate.pdf",
+        type: "gst_certificate",
+        documentUrl: "https://gst.gov.in/verify/09AAHFM9201L1Z4",
+        uploadedAt: "2025-10-20T10:00:00Z",
+        verificationStatus: "verified_evidence",
+      },
+    ],
+    createdAt: "2025-02-01T10:00:00Z",
+    updatedAt: "2025-10-20T10:00:00Z",
+  },
+];
+
+export const INITIAL_CAPABILITIES: Record<string, ManufacturingCapability> = {
+  biz_in_textiles_01: {
+    businessId: "biz_in_textiles_01",
+    categories: ["Apparel & Home Textiles", "Technical Organic Cotton Weaving"],
+    primaryProducts: [
+      "400-TC Egyptian & GOTS Organic Cotton Bedding Sets",
+      "Yarn-Dyed Jacquard Upholstery Fabric",
+    ],
+    productionCapacityMonthlyUnits: 150000,
+    machineryAndEquipment: [
+      "24x Picanol OmniPlus-i Airjet Looms",
+      "4x Monforts Continuous Dyeing Ranges",
+      "Automatic High-Speed Fabric Inspection & Laser Grading Stations",
+    ],
+    certifications: [
+      {
+        name: "GOTS (Global Organic Textile Standard)",
+        issuer: "Control Union",
+        issuedDate: "2024-01-10",
+        expiryDate: "2026-01-09",
+        isVerified: true,
+      },
+      {
+        name: "OEKO-TEX Standard 100 Class I",
+        issuer: "Hohenstein Institute",
+        issuedDate: "2024-03-01",
+        expiryDate: "2026-02-28",
+        isVerified: true,
+      },
+      {
+        name: "Sedex SMETA 4-Pillar Social Audit",
+        issuer: "SGS India",
+        issuedDate: "2024-08-15",
+        expiryDate: "2025-08-14",
+        isVerified: true,
+      },
+    ],
+    exportExperienceYears: 16,
+    standardLeadTimeDays: 45,
+    qualityInspectionReportsCount: 88,
+    independentAuditScore: 94,
+  },
+};
+
+export const INITIAL_TRANSACTIONS: CommercialTransaction[] = [
+  {
+    id: "tx_global_9921",
+    transactionReference: "TX-IND-USA-2025-9921",
+    buyerId: "biz_us_apparel_02",
+    sellerId: "biz_in_textiles_01",
+    productDescription: "Organic Cotton Sateen Bedding Sets (King & Queen, 400TC)",
+    agreedSpecifications: [
+      "100% GOTS Certified Organic Long-Staple Cotton",
+      "Thread count 400 Single-Pick Sateen",
+      "Azo-free reactive low-impact dyes (Pantone 14-4102 & 11-0601)",
+      "Individual polybag packaging with barcode label ASIN compliant",
+    ],
+    quantityUnits: 5000,
+    unitPrice: 28.5,
+    totalAmount: 142500,
+    currency: "USD",
+    deliveryTerms: "FOB",
+    paymentTerms: "30% Advance, 70% Upon BL",
+    purchaseOrderNumber: "PO-PRG-2025-0881",
+    commercialInvoiceNumber: "INV-VARD-2025-410",
+    documents: [
+      {
+        type: "purchase_order",
+        name: "PO_PRG_2025_0881.pdf",
+        url: "/docs/tx_global_9921/po.pdf",
+        declaredAmount: 142500,
+        declaredQuantity: 5000,
+        uploadedAt: "2025-10-01T09:00:00Z",
+      },
+      {
+        type: "commercial_invoice",
+        name: "INV_VARD_2025_410.pdf",
+        url: "/docs/tx_global_9921/invoice.pdf",
+        declaredAmount: 142500,
+        declaredQuantity: 5000,
+        uploadedAt: "2025-10-03T11:20:00Z",
+      },
+    ],
+    status: "in_fulfillment",
+    createdAt: "2025-10-01T09:00:00Z",
+    updatedAt: "2025-10-25T14:30:00Z",
+  },
+];
+
+export const INITIAL_PAYPAL_EVENTS: PayPalFinancialEvent[] = [
+  {
+    id: "pp_evt_88301",
+    commercialTransactionId: "tx_global_9921",
+    paypalOrderId: "5O190127TN364711E",
+    paypalCaptureId: "9C827104KL920194A",
+    status: "COMPLETED",
+    amount: {
+      currencyCode: "USD",
+      value: "42750.00", // 30% advance on $142,500
+    },
+    payerEmail: "procurement@pacificgoods.com",
+    payeeMerchantId: "VARDHMAN_GLOBAL_MERCHANT_ID",
+    reconciled: true,
+    createdAt: "2025-10-02T16:20:00Z",
+  },
+];
+
+export const INITIAL_MILESTONES: TransactionMilestone[] = [
+  {
+    id: "ms_01",
+    transactionId: "tx_global_9921",
+    title: "Commercial PO & Invoice Registered and Reconciled",
+    stage: "order_created",
+    status: "verified",
+    sourceType: "confirmed",
+    evidenceReference: "PO-PRG-2025-0881 / INV-VARD-2025-410",
+    notes: "Total amount $142,500 and 5,000 unit quantities match across both commercial contracts.",
+    timestamp: "2025-10-01T09:30:00Z",
+  },
+  {
+    id: "ms_02",
+    transactionId: "tx_global_9921",
+    title: "PayPal 30% Advance Deposit Captured ($42,750 USD)",
+    stage: "payment_cleared",
+    status: "verified",
+    sourceType: "confirmed",
+    evidenceReference: "PayPal Capture ID: 9C827104KL920194A",
+    notes: "Funds received in escrow account. Milestone verified via PayPal webhook.",
+    timestamp: "2025-10-02T16:22:00Z",
+  },
+  {
+    id: "ms_03",
+    transactionId: "tx_global_9921",
+    title: "Raw Material Batch Quality Lab Test (GOTS Lot #6610)",
+    stage: "production",
+    status: "verified",
+    sourceType: "third_party",
+    evidenceReference: "Control Union Lot Cert #GOTS-IN-2025-99",
+    notes: "Tensile strength and colorfastness exceed ISO standard 105-C06.",
+    timestamp: "2025-10-18T11:00:00Z",
+  },
+  {
+    id: "ms_04",
+    transactionId: "tx_global_9921",
+    title: "Pre-Shipment Third-Party Physical Inspection (QIMA)",
+    stage: "pre_shipment_inspection",
+    status: "verified",
+    sourceType: "third_party",
+    evidenceReference: "QIMA Report #PSI-IND-9912",
+    notes: "AQL 1.5 standard met. Defect rate 0.2% below allowable tolerance.",
+    timestamp: "2025-10-25T14:00:00Z",
+  },
+];
+
