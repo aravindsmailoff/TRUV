@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, Heart, BarChart3, User, Building2, Landmark, Bot } from "lucide-react";
+import { ShieldCheck, Heart, BarChart3, User, Building2, Landmark, Bot, LogOut } from "lucide-react";
 import { Magnet } from "@/components/reactbits/Magnet";
 import { IntelligenceConsoleModal } from "./IntelligenceConsoleModal";
+import { getCurrentSessionUser, setCurrentSessionUser, RegisteredUser } from "@/lib/auth/authStore";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,13 +13,24 @@ export function Navbar() {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
   const [consoleOpen, setConsoleOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const updateSession = () => {
+      setCurrentUser(getCurrentSessionUser());
+    };
+    updateSession();
+    window.addEventListener("truv-auth-changed", updateSession);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("truv-auth-changed", updateSession);
+    };
   }, []);
 
   return (
@@ -220,18 +232,63 @@ export function Navbar() {
             </ul>
           </nav>
 
-          {/* Right Button */}
-          <div className="flex gap-x-4 max-lg:hidden">
-            <Magnet padding={20} magnetStrength={3}>
-              <button
-                type="button"
-                onClick={() => setConsoleOpen(true)}
-                className="group relative inline-flex appearance-none items-center py-2.5 select-none transition-[color] justify-center text-black min-h-9.75 px-4 cursor-pointer"
-              >
-                <span className="absolute inset-0 rounded-md transition-[background-color,transform] group-hover:scale-[0.98] origin-center bg-black/5 group-hover:bg-black/10" />
-                <span className="text-15px-btn relative z-10 font-medium">Contact sales</span>
-              </button>
-            </Magnet>
+          {/* Right Button / Auth CTAs */}
+          <div className="flex items-center gap-x-3 max-lg:hidden">
+            {currentUser ? (
+              <div className="flex items-center gap-x-3">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#f4faed] border border-[#d8e5ca] text-xs font-mono font-medium text-[#18280e] hover:bg-[#ebf7d9] transition-colors"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#18280e] animate-pulse" />
+                  <span className="font-semibold">{currentUser.name}</span>
+                  <span className="text-[#4a5b38]">({currentUser.role.toUpperCase()})</span>
+                </Link>
+
+                <Link
+                  href="/admin"
+                  className="text-xs font-mono text-[#4a5b38] hover:text-[#18280e] px-2 py-1 transition-colors"
+                  title="Admin Verification Desk"
+                >
+                  Admin Desk
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentSessionUser(null)}
+                  className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1.5 rounded hover:bg-rose-100 transition-colors cursor-pointer"
+                  title="Sign out of TRUV"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-x-2">
+                <Link
+                  href="/signin"
+                  className="px-3.5 py-2 text-xs font-mono font-semibold text-[#18280e] hover:text-[#3f7308] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/admin"
+                  className="px-2.5 py-1 text-[11px] font-mono text-[#4a5b38] hover:text-[#18280e] bg-stone-100 hover:bg-stone-200 rounded transition-colors"
+                  title="Administrative Whitelist Console"
+                >
+                  Admin Desk
+                </Link>
+                <Magnet padding={20} magnetStrength={3}>
+                  <Link
+                    href="/signup"
+                    className="group relative inline-flex appearance-none items-center py-2 select-none transition-[color] justify-center text-white min-h-[36px] px-4 cursor-pointer"
+                  >
+                    <span className="absolute inset-0 rounded-md transition-[background-color,transform] group-hover:scale-[0.98] origin-center bg-[#18280e] group-hover:bg-[#253d16]" />
+                    <span className="text-xs font-mono font-semibold relative z-10 tracking-tight">Request Access</span>
+                  </Link>
+                </Magnet>
+              </div>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -262,16 +319,60 @@ export function Navbar() {
           <Link href="https://docs.spade.com/" target="_blank" className="block text-sm font-medium py-1">
             Docs
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              setConsoleOpen(true);
-            }}
-            className="block text-center mt-4 w-full py-2.5 rounded-md text-xs font-semibold bg-[#18280e] text-[#b2eb76]"
-          >
-            Contact sales
-          </button>
+          <div className="pt-3 border-t border-stone-200 space-y-2">
+            {currentUser ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-sm font-semibold text-[#18280e] py-1"
+                >
+                  Dashboard ({currentUser.name})
+                </Link>
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-sm font-mono text-[#4a5b38] py-1"
+                >
+                  Admin Whitelist Console
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentSessionUser(null);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block text-left w-full text-sm font-semibold text-rose-700 py-1"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-sm font-semibold text-[#18280e] py-1"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-center mt-2 w-full py-2.5 rounded-md text-xs font-mono font-semibold bg-[#18280e] text-[#b2eb76]"
+                >
+                  Request Whitelisted Access
+                </Link>
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-center w-full py-2 rounded-md text-xs font-mono text-stone-600 bg-stone-100"
+                >
+                  Admin Console
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
 
