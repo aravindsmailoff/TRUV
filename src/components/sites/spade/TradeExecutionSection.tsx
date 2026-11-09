@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import Image from "next/image";
 import {
   Globe,
   Building2,
@@ -9,27 +9,21 @@ import {
   FileText,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
   CreditCard,
   Ship,
-  Sparkles,
   Cpu,
   Scale,
   FileSpreadsheet,
-  RefreshCw,
-  LayoutDashboard,
 } from "lucide-react";
 import { Magnet } from "@/components/reactbits/Magnet";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { DecryptedText } from "@/components/reactbits/DecryptedText";
-import { ShinyText } from "@/components/reactbits/ShinyText";
 import { SEED_MANUFACTURERS, SEED_RFQS } from "@/lib/trade/tradeStore";
-import { DashboardMockup } from "./DashboardMockup";
 
-type TabKey = "dashboard_mockup" | "rfq" | "mfg" | "commercial" | "paypal" | "logistics" | "moat";
+type HubKey = "rfq" | "mfg" | "discrepancy" | "paypal" | "logistics";
 
 export function TradeExecutionSection() {
-  const [activeTab, setActiveTab] = useState<TabKey>("dashboard_mockup");
+  const [activeHubTab, setActiveHubTab] = useState<HubKey>("rfq");
 
   // RFQ Selection
   const [selectedRfqId, setSelectedRfqId] = useState<string>(SEED_RFQS[0].id);
@@ -39,67 +33,94 @@ export function TradeExecutionSection() {
   const [selectedMfgId, setSelectedMfgId] = useState<string>(SEED_MANUFACTURERS[0].id);
   const currentMfg = SEED_MANUFACTURERS.find((m) => m.id === selectedMfgId) || SEED_MANUFACTURERS[0];
 
-  // Commercial Negotiation & AI Discrepancy Simulator
+  // Commercial Discrepancy Simulator
   const [simPoAmount, setSimPoAmount] = useState<number>(142500);
   const [simInvoiceAmount, setSimInvoiceAmount] = useState<number>(142500);
-  const [simQuantity, setSimQuantity] = useState<number>(5000);
   const [simIncoterm, setSimIncoterm] = useState<"FOB Mundra" | "CIF Los Angeles">("FOB Mundra");
 
-  // PayPal Milestone Payment Calculator
+  // PayPal Milestone Escrow Calculator
   const [orderValue, setOrderValue] = useState<number>(142500);
-  const [paypalSimStatus, setPaypalSimStatus] = useState<"ready" | "authorizing" | "captured">("ready");
   const advanceDeposit = Math.round(orderValue * 0.3);
   const balanceAmount = orderValue - advanceDeposit;
-  const estimatedPaypalFee = Math.round(advanceDeposit * 0.0349 + 0.49);
 
-  // Compute live AI discrepancy flags
-  const priceDiscrepancy = simPoAmount !== simInvoiceAmount;
-  const discrepancyDelta = Math.abs(simPoAmount - simInvoiceAmount);
+  // Discrepancy calculation
+  const hasPriceVariance = simPoAmount !== simInvoiceAmount;
+  const varianceDelta = Math.abs(simPoAmount - simInvoiceAmount);
 
   return (
-    <section id="trade-execution" className="relative overflow-hidden bg-white text-black pt-20 md:pt-28 lg:pt-36 pb-20">
-      {/* Top Margin Ruler Ticks Decoration */}
-      <div className="max-w-[80rem] mx-auto px-5 lg:px-8">
-        {/* Section Header */}
-        <div className="flex flex-col items-center text-center">
-          {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-x-2.5 sm:gap-x-3 mb-3.5 px-3.5 py-1.5 rounded-full bg-[#f4faed] border border-[#d8e5ca]">
-            <div className="size-2 rounded-full bg-[#3f7308] animate-pulse" />
-            <span className="opacity-90 text-xs font-mono font-semibold uppercase tracking-wider text-[#18280E]">
-              Technology-Powered International Trade Operator
-            </span>
-          </div>
-
-          {/* Heading */}
-          <h2 className="text-3xl sm:text-4xl lg:text-[46px] font-medium tracking-tight text-[#18280E] max-w-4xl leading-[1.15]">
-            Connecting global buyers with Indian industrial manufacturers
-          </h2>
-
-          {/* Subheading */}
-          <div className="prose max-w-3xl opacity-80 text-stone-700 text-sm sm:text-base leading-relaxed mt-3.5 sm:mt-4">
-            <p>
-              We operate end-to-end international trade execution: from buyer demand discovery and MSME manufacturer
-              qualification, to commercial purchase orders, PayPal milestone invoicing, QIMA inspections, and freight
-              forwarding to international ports.
-            </p>
-          </div>
-
-          {/* Quick Active Corridor Pill */}
-          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#ebf7d9] text-[#18280e] text-xs font-mono border border-[#3f7308]/20">
-            <span className="size-1.5 rounded-full bg-[#3f7308]" />
-            <ShinyText text="Active Corridors: USA / Europe / UK → Moradabad, Tirupur & Rajkot MSME Hubs" speed={3} />
-          </div>
-        </div>
-
+    <section id="trade-execution" className="relative overflow-hidden bg-white text-black pt-16 md:pt-24 lg:pt-32 pb-20">
+      <div className="max-w-[80rem] mx-auto px-5 lg:px-8 space-y-16 lg:space-y-24">
         {/* ========================================================================= */}
-        {/* WATERMELON UI WORKBENCH CONTAINER WITH CHAMFERED CORNERS */}
+        {/* PART 1: THE SIGNATURE 2-COLUMN SHOWCASE (Matching Image 2 Reference)      */}
         {/* ========================================================================= */}
-        <div className="mt-12 lg:mt-16">
+        <div className="flex flex-col-reverse justify-between gap-10 md:gap-8 lg:gap-12 items-end md:flex-row">
+          {/* Left Text Column */}
+          <div className="w-full shrink-0 md:w-1/2 md:max-w-md">
+            <div className="flex w-full flex-col items-start text-left">
+              {/* Eyebrow */}
+              <div className="inline-flex items-center gap-x-3 sm:gap-x-4 mb-3.5">
+                <div className="size-7 shrink-0 text-[#18280e]">
+                  <Globe className="w-6 h-6 text-[#18280e]" />
+                </div>
+                <span className="opacity-80 text-xs font-mono font-semibold uppercase tracking-wider text-[#18280E]">
+                  International Trade Infrastructure
+                </span>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-3xl sm:text-4xl lg:text-[44px] text-[#18280E] font-medium leading-[1.15] tracking-tight">
+                Connecting global buyers with Indian industrial manufacturers
+              </h2>
+
+              {/* Description */}
+              <div className="mt-3.5 opacity-80 text-stone-700 text-sm sm:text-base leading-relaxed">
+                <p>
+                  We operate end-to-end international trade execution: from buyer demand discovery and MSME manufacturer
+                  qualification, to commercial purchase orders, PayPal milestone invoicing, QIMA inspections, and freight
+                  forwarding to international ports.
+                </p>
+              </div>
+
+              {/* Action Button (Exact Matching Signature Button Style) */}
+              <div className="flex items-center gap-x-5 mt-6 sm:mt-8">
+                <Magnet padding={25} magnetStrength={3}>
+                  <a href="#trade-operator-hub" className="inline-block">
+                    <div className="group relative inline-flex appearance-none items-center py-2.5 px-5 select-none transition-all justify-center text-black rounded-md border border-black/15 bg-white hover:bg-[#b2eb76] hover:border-[#b2eb76] cursor-pointer shadow-xs active:scale-95">
+                      <span className="text-sm font-medium relative z-10">Explore trade operations</span>
+                    </div>
+                  </a>
+                </Magnet>
+              </div>
+
+              {/* Chamfered Stat Badge (Exact Matching Style with cut corners) */}
+              <div
+                className="relative bg-[#ebf7d9] inline-flex items-center gap-x-4 p-3.5 pl-4 max-lg:w-full mt-10 sm:mt-14 md:max-w-[22.625rem] border border-stone-200/60 shadow-xs cursor-default group"
+                style={{ "--corner-size-desktop": "13px", "--corner-size-mobile": "9px" } as React.CSSProperties}
+              >
+                {/* Chamfered Cut Corners */}
+                <div className="pointer-events-none absolute inset-0 z-10">
+                  <div className="cut-corner absolute bg-white" style={{ top: "-1px", left: "-1px", clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
+                  <div className="cut-corner absolute bg-white" style={{ top: "-1px", right: "-1px", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+                  <div className="cut-corner absolute bg-white" style={{ bottom: "-1px", left: "-1px", clipPath: "polygon(0 0, 0 100%, 100% 100%)" }} />
+                  <div className="cut-corner absolute bg-white" style={{ bottom: "-1px", right: "-1px", clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
+                </div>
+
+                <div className="text-2xl font-mono font-bold text-[#18280e] shrink-0 tracking-tight">
+                  <DecryptedText text="100%" animateOn="hover" speed={40} />
+                </div>
+                <p className="text-xs text-stone-600 font-mono uppercase tracking-wider leading-tight">
+                  <DecryptedText text="DGFT IEC & GSTIN VERIFIED EVIDENCE" animateOn="hover" speed={30} />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Visual Column (Matching Image 2: Lifestyle background with Reticles & Alert Card) */}
           <div
-            className="relative bg-[#18280e] text-white rounded-2xl border border-[#2d421d] shadow-2xl overflow-hidden"
+            className="relative w-full flex-1 md:max-w-[47.5rem] rounded-xl overflow-hidden border border-stone-200 shadow-sm"
             style={{ "--corner-size-desktop": "17px", "--corner-size-mobile": "13px" } as React.CSSProperties}
           >
-            {/* Cut Corners (Visual Identity Preservation) */}
+            {/* Cut Corners */}
             <div className="pointer-events-none absolute inset-0 z-20">
               <div className="cut-corner absolute bg-white" style={{ top: "-1px", left: "-1px", clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
               <div className="cut-corner absolute bg-white" style={{ top: "-1px", right: "-1px", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
@@ -107,42 +128,167 @@ export function TradeExecutionSection() {
               <div className="cut-corner absolute bg-white" style={{ bottom: "-1px", right: "-1px", clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
             </div>
 
-            {/* Top Bar: Live Node Status & Network Latency */}
+            <div className="relative w-full" style={{ aspectRatio: "760/509" }}>
+              {/* Background Lifestyle Image */}
+              <Image
+                src="/sites/spade/Relay-Placeholder-Thumbnail.jpg"
+                alt="Global Trade Operations"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-black/35" />
+
+              {/* ========================================================================= */}
+              {/* RETICLE 1: SOURCING HUBS (Top Left Reticle matching Image 2)               */}
+              {/* ========================================================================= */}
+              <div className="absolute top-[18%] sm:top-[20%] left-[8%] sm:left-[10%] z-10 text-white font-mono text-[10px] sm:text-[11px] leading-tight select-none">
+                <div className="relative p-2.5 sm:p-3 border border-white/20 bg-black/45 backdrop-blur-xs rounded-xs">
+                  {/* Bracket Reticles */}
+                  <span className="absolute -top-1 -left-1 text-white font-bold text-xs">┌</span>
+                  <span className="absolute -top-1 -right-1 text-white font-bold text-xs">┐</span>
+                  <span className="absolute -bottom-1 -left-1 text-white font-bold text-xs">└</span>
+                  <span className="absolute -bottom-1 -right-1 text-white font-bold text-xs">┘</span>
+
+                  <div className="flex items-center gap-1.5 text-white/90 font-medium">
+                    <span className="text-[#b2eb76] text-xs">►</span>
+                    <span className="tracking-wider uppercase">Sourcing Hubs</span>
+                  </div>
+                  <div className="mt-1 text-stone-300 text-[9px] sm:text-[10px] uppercase font-mono tracking-wide">
+                    MORADABAD (BRASS) • TIRUPUR (KNITS)<br />
+                    RAJKOT (PRECISION FORGINGS)
+                  </div>
+                </div>
+              </div>
+
+              {/* ========================================================================= */}
+              {/* RETICLE 2: STATUTORY EVIDENCE (Bottom Left Reticle matching Image 2)      */}
+              {/* ========================================================================= */}
+              <div className="absolute bottom-[14%] sm:bottom-[16%] left-[8%] sm:left-[10%] z-10 text-white font-mono text-[10px] sm:text-[11px] leading-tight select-none">
+                <div className="relative p-2.5 sm:p-3 border border-white/20 bg-black/45 backdrop-blur-xs rounded-xs">
+                  {/* Bracket Reticles */}
+                  <span className="absolute -top-1 -left-1 text-white font-bold text-xs">┌</span>
+                  <span className="absolute -top-1 -right-1 text-white font-bold text-xs">┐</span>
+                  <span className="absolute -bottom-1 -left-1 text-white font-bold text-xs">└</span>
+                  <span className="absolute -bottom-1 -right-1 text-white font-bold text-xs">┘</span>
+
+                  <div className="flex items-center gap-1.5 text-white/90 font-medium">
+                    <span className="text-[#b2eb76] text-xs">►</span>
+                    <span className="tracking-wider uppercase">Verified Standing</span>
+                  </div>
+                  <div className="mt-1 text-stone-300 text-[9px] sm:text-[10px] font-mono tracking-wide">
+                    DGFT IEC: 0508012491 | GSTIN: 09AAHFM<br />
+                    INSPECTION: QIMA AQL 1.5 AUDITED
+                  </div>
+                </div>
+              </div>
+
+              {/* ========================================================================= */}
+              {/* FLOATING CHAMFERED TRANSACTION ALERT CARD (Matching Yellow Card in Image 2)*/}
+              {/* ========================================================================= */}
+              <div className="absolute top-[22%] sm:top-[26%] right-[6%] sm:right-[10%] z-10 w-[18rem] sm:w-[21rem]">
+                <div
+                  className="relative bg-[#ebf7d9] text-[#18280e] p-4 sm:p-5 shadow-2xl border border-[#3f7308]/30 font-mono transition-transform hover:scale-[1.02]"
+                  style={{ "--corner-size-desktop": "14px", "--corner-size-mobile": "10px" } as React.CSSProperties}
+                >
+                  {/* Chamfered Cut Corners on the Alert Card */}
+                  <div className="pointer-events-none absolute inset-0 z-10">
+                    <div className="cut-corner absolute bg-black/40" style={{ top: "-1px", left: "-1px", clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
+                    <div className="cut-corner absolute bg-black/40" style={{ top: "-1px", right: "-1px", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+                    <div className="cut-corner absolute bg-black/40" style={{ bottom: "-1px", left: "-1px", clipPath: "polygon(0 0, 0 100%, 100% 100%)" }} />
+                    <div className="cut-corner absolute bg-black/40" style={{ bottom: "-1px", right: "-1px", clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
+                  </div>
+
+                  <div className="flex flex-col items-center text-center pb-3 border-b border-[#3f7308]/20">
+                    <ShieldCheck className="w-6 h-6 text-[#3f7308] mb-1.5" />
+                    <span className="text-xs font-bold tracking-tight uppercase">
+                      PayPal Milestone Escrow Active
+                    </span>
+                    <span className="text-[10px] text-stone-600 mt-0.5">
+                      30% Advance Released to Manufacturer
+                    </span>
+                  </div>
+
+                  <div className="pt-3 flex justify-between items-baseline">
+                    <div className="text-left">
+                      <span className="text-xs font-bold text-stone-900 block truncate max-w-[140px]">
+                        Pacific Arch Hardware
+                      </span>
+                      <span className="text-[10px] text-stone-500">
+                        2026-11-10 09:23:16
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-base font-extrabold text-[#18280e]">
+                        -$42,750.00
+                      </span>
+                      <span className="text-[9px] text-[#3f7308] font-bold block">
+                        PayPal Orders v2
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-[#3f7308]/20 text-[10px] text-stone-700 flex justify-between items-center">
+                    <span>FOB Mundra Port</span>
+                    <span className="text-[#3f7308] font-semibold">QIMA AQL 1.5 Passed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* PART 2: THE INTERACTIVE TRADE OPERATOR WORKBENCH (Matching Theme 100%)   */}
+        {/* ========================================================================= */}
+        <div id="trade-operator-hub" className="scroll-mt-24 pt-4">
+          <div
+            className="relative bg-[#18280e] text-white rounded-2xl border border-[#2d421d] shadow-2xl overflow-hidden font-sans"
+            style={{ "--corner-size-desktop": "17px", "--corner-size-mobile": "13px" } as React.CSSProperties}
+          >
+            {/* Cut Corners */}
+            <div className="pointer-events-none absolute inset-0 z-20">
+              <div className="cut-corner absolute bg-white" style={{ top: "-1px", left: "-1px", clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
+              <div className="cut-corner absolute bg-white" style={{ top: "-1px", right: "-1px", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+              <div className="cut-corner absolute bg-white" style={{ bottom: "-1px", left: "-1px", clipPath: "polygon(0 0, 0 100%, 100% 100%)" }} />
+              <div className="cut-corner absolute bg-white" style={{ bottom: "-1px", right: "-1px", clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
+            </div>
+
+            {/* Header Status Bar */}
             <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5 border-b border-[#2d421d] bg-[#121c0b] text-xs font-mono">
               <div className="flex items-center gap-3">
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b2eb76] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#b2eb76]" />
                 </span>
-                <span className="font-semibold text-[#b2eb76] uppercase tracking-wider">TRUV TRADE ENGINE V2.4</span>
+                <span className="font-semibold text-[#b2eb76] uppercase tracking-wider">TRUV TRADE CONSOLE</span>
                 <span className="text-stone-400">|</span>
-                <span className="text-stone-300">PayPal Orders v2 Rails Active</span>
+                <span className="text-stone-300">Active Corridors: USA / Europe → India MSMEs</span>
               </div>
 
-              <div className="flex items-center gap-4 text-stone-400">
-                <span className="hidden sm:inline">Verification: <strong className="text-stone-200">DGFT &amp; ICEGATE</strong></span>
-                <span className="hidden sm:inline">Auditors: <strong className="text-stone-200">QIMA / SGS</strong></span>
-                <span className="px-2 py-0.5 rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424]">LIVE CONSOLE</span>
+              <div className="flex items-center gap-3 text-stone-400">
+                <span>Statutory Rails: <strong className="text-stone-200">DGFT &amp; ICEGATE</strong></span>
+                <span className="px-2 py-0.5 rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424]">LIVE VERIFICATION</span>
               </div>
             </div>
 
-            {/* Tabbed Navigation (Watermelon UI Modular Pills) */}
+            {/* Tab Navigation (Watermelon UI Modular Pills in Site Theme) */}
             <div className="flex items-center gap-1.5 p-3 sm:p-4 border-b border-[#2d421d] bg-[#14200c] overflow-x-auto select-none scrollbar-none">
               {[
-                { id: "dashboard_mockup", label: "🏢 Manufacturer Dashboard (Mockup)", icon: LayoutDashboard, count: "Customer View" },
-                { id: "rfq", label: "1. Buyer RFQ Demand", icon: Globe, count: "3 Active" },
-                { id: "mfg", label: "2. MSME Vetting & Clusters", icon: Building2, count: "3 Hubs" },
-                { id: "commercial", label: "3. Commercial Negotiation (AI)", icon: Scale, count: "PO vs PI" },
+                { id: "rfq", label: "1. Buyer RFQs & Demand", icon: Globe, count: "3 Active" },
+                { id: "mfg", label: "2. MSME Qualification Hubs", icon: Building2, count: "3 Verified" },
+                { id: "discrepancy", label: "3. Commercial PO vs Invoice (AI)", icon: Scale, count: "UCP 600" },
                 { id: "paypal", label: "4. PayPal Milestone Escrow", icon: CreditCard, count: "30% / 70%" },
                 { id: "logistics", label: "5. Logistics & Customs Handover", icon: Ship, count: "Maersk + QIMA" },
-                { id: "moat", label: "6. Trade Intelligence Moat", icon: Sparkles, count: "Real Data" },
               ].map((tab) => {
                 const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
+                const isActive = activeHubTab === tab.id;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as TabKey)}
+                    onClick={() => setActiveHubTab(tab.id as HubKey)}
                     className={`group shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
                       isActive
                         ? "bg-[#b2eb76] text-[#18280e] font-semibold shadow-md"
@@ -163,131 +309,86 @@ export function TradeExecutionSection() {
               })}
             </div>
 
-            {/* TAB CONTENT PANELS */}
-            <div className="p-5 sm:p-7 lg:p-9 min-h-[520px]">
-              {/* ========================================================================= */}
-              {/* TAB 0: MANUFACTURER DASHBOARD PERSPECTIVE (MOCKUP PREVIEW MATCHING IMAGE 1) */}
-              {/* ========================================================================= */}
-              {activeTab === "dashboard_mockup" && (
-                <div className="space-y-4">
-                  <DashboardMockup />
-                </div>
-              )}
-
-              {/* ========================================================================= */}
-              {/* TAB 1: BUYER RFQ DEMAND */}
-              {/* ========================================================================= */}
-              {activeTab === "rfq" && (
+            {/* Interactive Panels */}
+            <div className="p-5 sm:p-7 lg:p-9 min-h-[440px]">
+              {/* TAB 1: BUYER RFQ */}
+              {activeHubTab === "rfq" && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
                         <Globe className="w-5 h-5 text-[#b2eb76]" />
-                        International Buyer Demand &amp; Genuine RFQ Pipeline
+                        International Buyer Demand Pipeline
                       </h3>
                       <p className="text-xs text-stone-400 font-mono mt-1">
-                        Actual foreign purchase requests matching vetted Indian manufacturing lines.
+                        Collects genuine foreign purchase requirements with technical tolerances and target pricing.
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-stone-400">Select active requirement:</span>
-                      <div className="flex gap-1.5">
-                        {SEED_RFQS.map((r, i) => (
-                          <button
-                            key={r.id}
-                            onClick={() => setSelectedRfqId(r.id)}
-                            className={`px-2.5 py-1 text-xs font-mono rounded border transition-colors ${
-                              selectedRfqId === r.id
-                                ? "bg-[#b2eb76] text-[#18280e] font-bold border-[#b2eb76]"
-                                : "bg-[#121c0b] text-stone-300 border-[#2d421d] hover:border-stone-500"
-                            }`}
-                          >
-                            RFQ #{i + 1}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="flex gap-1.5">
+                      {SEED_RFQS.map((r, i) => (
+                        <button
+                          key={r.id}
+                          onClick={() => setSelectedRfqId(r.id)}
+                          className={`px-3 py-1.5 text-xs font-mono rounded border transition-colors ${
+                            selectedRfqId === r.id
+                              ? "bg-[#b2eb76] text-[#18280e] font-bold border-[#b2eb76]"
+                              : "bg-[#121c0b] text-stone-300 border-[#2d421d] hover:border-stone-500"
+                          }`}
+                        >
+                          RFQ #{i + 1} ({r.buyerCountry.split(" ")[0]})
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Active RFQ Card */}
                   <SpotlightCard className="p-5 sm:p-6 rounded-xl bg-[#121c0b] border border-[#2d421d] text-stone-200">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Left: Buyer Details */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-xs font-mono text-[#b2eb76] uppercase">
-                          <Building2 className="w-4 h-4" />
-                          <span>Buyer Profile &amp; Corridor</span>
-                        </div>
-                        <h4 className="text-xl font-medium text-white">{currentRfq.buyerCompany}</h4>
-                        <div className="text-xs space-y-1.5 font-mono text-stone-400">
+                      <div className="space-y-3">
+                        <span className="text-xs font-mono text-[#b2eb76] uppercase font-bold">Buyer Profile</span>
+                        <h4 className="text-xl font-bold text-white">{currentRfq.buyerCompany}</h4>
+                        <div className="text-xs font-mono text-stone-400 space-y-1">
                           <div>Contact: <span className="text-stone-200">{currentRfq.buyerName}</span></div>
                           <div>Country: <span className="text-stone-200">{currentRfq.buyerCountry}</span></div>
                           <div>Destination Port: <span className="text-[#b2eb76]">{currentRfq.destinationPort}</span></div>
-                          <div>Incoterm Required: <span className="text-stone-200">FOB Indian Port</span></div>
-                          <div>Payment Terms: <span className="text-[#b2eb76]">30% Advance via PayPal / 70% BL</span></div>
-                        </div>
-
-                        <div className="pt-2">
-                          <span className="inline-block px-2.5 py-1 text-[11px] font-mono rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424]">
-                            Verified RFQ: {currentRfq.rfqNumber}
-                          </span>
+                          <div>Required Terms: <span className="text-stone-200">30% Advance PayPal / 70% BL</span></div>
                         </div>
                       </div>
 
-                      {/* Middle: Product & Technical Specs */}
-                      <div className="space-y-4 lg:col-span-2 border-t lg:border-t-0 lg:border-l border-[#2d421d] pt-4 lg:pt-0 lg:pl-6">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono text-[#b2eb76] uppercase flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            Extracted Technical Specifications
-                          </span>
-                          <span className="text-xs font-mono text-stone-400">
-                            Target: <strong className="text-white">{currentRfq.targetQuantity.toLocaleString()} Units</strong> @ <strong className="text-[#b2eb76]">${currentRfq.targetPricePerUnit}/unit</strong>
-                          </span>
-                        </div>
-
-                        <div className="text-sm font-medium text-white bg-[#18280e] p-3 rounded-lg border border-[#2d421d]">
-                          {currentRfq.productName}
+                      <div className="lg:col-span-2 space-y-4 border-t lg:border-t-0 lg:border-l border-[#2d421d] pt-4 lg:pt-0 lg:pl-6">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-[#b2eb76] uppercase font-bold">{currentRfq.productName}</span>
+                          <span className="text-white font-bold">{currentRfq.targetQuantity.toLocaleString()} Units @ ${currentRfq.targetPricePerUnit}/unit</span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
                           {currentRfq.technicalSpecifications.map((spec, idx) => (
-                            <div key={idx} className="flex items-start gap-2 bg-[#14200c] p-2.5 rounded border border-[#2d421d]/70">
+                            <div key={idx} className="flex items-start gap-2 bg-[#14200c] p-2.5 rounded border border-[#2d421d]">
                               <CheckCircle2 className="w-3.5 h-3.5 text-[#b2eb76] shrink-0 mt-0.5" />
                               <span className="text-stone-300">{spec}</span>
                             </div>
                           ))}
                         </div>
 
-                        {/* Financial Snapshot */}
-                        <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg bg-[#223514]/70 border border-[#3b5424] text-xs font-mono">
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-[#223514] border border-[#3b5424] text-xs font-mono">
                           <div>
                             <span className="text-stone-400 block">Total Est. Contract Value:</span>
-                            <span className="text-lg font-bold text-[#b2eb76]">
+                            <span className="text-base font-bold text-[#b2eb76]">
                               ${(currentRfq.targetQuantity * currentRfq.targetPricePerUnit).toLocaleString()} USD
                             </span>
                           </div>
-
                           <div>
-                            <span className="text-stone-400 block">30% Advance Production Escrow:</span>
-                            <span className="text-sm font-semibold text-white">
+                            <span className="text-stone-400 block">30% Production Advance:</span>
+                            <span className="text-base font-bold text-white">
                               ${Math.round(currentRfq.targetQuantity * currentRfq.targetPricePerUnit * 0.3).toLocaleString()} USD
                             </span>
                           </div>
-
-                          <Magnet padding={15} magnetStrength={2}>
-                            <button
-                              onClick={() => {
-                                setOrderValue(currentRfq.targetQuantity * currentRfq.targetPricePerUnit);
-                                setActiveTab("mfg");
-                              }}
-                              className="px-4 py-2 rounded-md bg-[#b2eb76] text-[#18280e] font-semibold text-xs inline-flex items-center gap-1.5 hover:bg-[#b2eb76]/90 transition-all cursor-pointer"
-                            >
-                              <span>Find Qualified Manufacturers</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          </Magnet>
+                          <button
+                            onClick={() => setActiveHubTab("mfg")}
+                            className="px-3.5 py-1.5 rounded bg-[#b2eb76] text-[#18280e] font-semibold text-xs hover:bg-[#b2eb76]/90 transition-colors"
+                          >
+                            Match MSME Hub →
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -295,19 +396,17 @@ export function TradeExecutionSection() {
                 </div>
               )}
 
-              {/* ========================================================================= */}
-              {/* TAB 2: MSME VETTING & CLUSTERS */}
-              {/* ========================================================================= */}
-              {activeTab === "mfg" && (
+              {/* TAB 2: MSME QUALIFICATION */}
+              {activeHubTab === "mfg" && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
                         <Building2 className="w-5 h-5 text-[#b2eb76]" />
-                        Indian MSME Manufacturer Discovery &amp; Qualification
+                        Indian Industrial MSME Clusters
                       </h3>
                       <p className="text-xs text-stone-400 font-mono mt-1">
-                        Separating independently verified statutory and physical audits from manufacturer claims.
+                        Separating verified statutory and physical audits from manufacturer claims.
                       </p>
                     </div>
 
@@ -328,145 +427,73 @@ export function TradeExecutionSection() {
                     </div>
                   </div>
 
-                  {/* Manufacturer Profile Spotlight Card */}
-                  <SpotlightCard className="p-5 sm:p-6 rounded-xl bg-[#121c0b] border border-[#2d421d] text-stone-200">
-                    <div className="flex flex-col lg:flex-row justify-between gap-6 pb-6 border-b border-[#2d421d]">
+                  <SpotlightCard className="p-5 sm:p-6 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-4">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <div className="flex items-center gap-3">
-                          <h4 className="text-xl font-bold text-white">{currentMfg.legalEntityName}</h4>
-                          <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424]">
-                            {currentMfg.msmeCategory.toUpperCase()} ENTERPRISE
-                          </span>
-                        </div>
-                        <p className="text-xs text-stone-400 font-mono mt-1">
-                          Trade Name: <strong className="text-stone-200">{currentMfg.tradeName}</strong> | Cluster: <strong className="text-[#b2eb76]">{currentMfg.hubLocation}</strong>
+                        <h4 className="text-xl font-bold text-white">{currentMfg.legalEntityName}</h4>
+                        <p className="text-xs text-stone-400 font-mono mt-0.5">
+                          Cluster: <strong className="text-[#b2eb76]">{currentMfg.hubLocation}</strong> | Category: <strong className="text-white">{currentMfg.msmeCategory} Enterprise</strong>
                         </p>
                       </div>
 
-                      {/* Export Readiness Score Badge */}
-                      <div className="flex items-center gap-4 bg-[#18280e] px-4 py-2 rounded-lg border border-[#2d421d]">
-                        <div className="text-right">
-                          <span className="text-[10px] font-mono text-stone-400 block uppercase">Export Readiness</span>
-                          <span className="text-xl font-bold text-[#b2eb76]">{currentMfg.readinessScore}/100</span>
-                        </div>
-                        <div className="size-10 rounded-full border-2 border-[#b2eb76] flex items-center justify-center font-mono text-xs font-bold text-[#b2eb76]">
-                          ✓
-                        </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-stone-400 uppercase block">Export Readiness</span>
+                        <span className="text-xl font-bold text-[#b2eb76] font-mono">{currentMfg.readinessScore}/100</span>
                       </div>
                     </div>
 
-                    {/* Vetting Comparison Grid: Verified vs Claims */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                      {/* Left: Independently Verified Government & Audit Records */}
-                      <div className="p-4 rounded-lg bg-[#14200c] border border-[#3b5424]/60 space-y-3">
-                        <div className="flex items-center justify-between text-xs font-mono text-[#b2eb76]">
-                          <span className="flex items-center gap-1.5 font-bold uppercase">
-                            <ShieldCheck className="w-4 h-4 text-[#b2eb76]" />
-                            Independently Verified Evidence
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded bg-[#223514] text-[10px]">DGFT + ICEGATE</span>
-                        </div>
-
-                        <div className="space-y-2 text-xs font-mono text-stone-300">
-                          <div className="flex justify-between py-1 border-b border-[#2d421d]">
-                            <span className="text-stone-400">DGFT IEC Code:</span>
-                            <span className="text-white font-semibold">
-                              <DecryptedText text={currentMfg.iecCode} speed={30} />
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-[#2d421d]">
-                            <span className="text-stone-400">GSTIN Tax Registration:</span>
-                            <span className="text-white font-semibold">
-                              <DecryptedText text={currentMfg.gstin} speed={30} />
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-[#2d421d]">
-                            <span className="text-stone-400">Udyam MSME Certificate:</span>
-                            <span className="text-white">{currentMfg.udyamRegistrationNumber}</span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-[#2d421d]">
-                            <span className="text-stone-400">Physical Factory Audit:</span>
-                            <span className="text-[#b2eb76] font-semibold">{currentMfg.auditedBy}</span>
-                          </div>
-                          <div className="flex justify-between py-1">
-                            <span className="text-stone-400">PayPal Merchant ID:</span>
-                            <span className="text-stone-200">{currentMfg.paypalMerchantId}</span>
-                          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="p-3.5 rounded-lg bg-[#14200c] border border-[#3b5424] space-y-2 text-xs font-mono">
+                        <span className="text-[#b2eb76] font-bold uppercase flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-[#b2eb76]" />
+                          Verified Statutory Standing
+                        </span>
+                        <div className="space-y-1 text-stone-300">
+                          <div>DGFT IEC: <strong className="text-white">{currentMfg.iecCode}</strong></div>
+                          <div>GSTIN: <strong className="text-white">{currentMfg.gstin}</strong></div>
+                          <div>Factory Auditor: <strong className="text-[#b2eb76]">{currentMfg.auditedBy}</strong></div>
                         </div>
                       </div>
 
-                      {/* Right: Verified Production Infrastructure */}
-                      <div className="p-4 rounded-lg bg-[#14200c] border border-[#2d421d] space-y-3">
-                        <div className="flex items-center justify-between text-xs font-mono text-stone-300">
-                          <span className="flex items-center gap-1.5 font-bold uppercase text-white">
-                            <Cpu className="w-4 h-4 text-[#b2eb76]" />
-                            Audited Production Lines &amp; Capacity
-                          </span>
-                          <span className="text-[#b2eb76] font-mono text-xs">
-                            {currentMfg.monthlyCapacityUnits.toLocaleString()} units/mo
-                          </span>
-                        </div>
-
-                        <div className="space-y-1.5 text-xs font-mono">
-                          {currentMfg.verifiedProductionLines.map((line, idx) => (
-                            <div key={idx} className="flex items-center gap-2 p-1.5 rounded bg-[#18280e] border border-[#2d421d]">
-                              <span className="size-1.5 rounded-full bg-[#b2eb76]" />
-                              <span className="text-stone-300">{line}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="pt-2 flex flex-wrap gap-1.5">
-                          {currentMfg.certifications.map((c, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded bg-[#223514] text-[10px] font-mono text-[#b2eb76] border border-[#3b5424]">
-                              {c}
-                            </span>
+                      <div className="p-3.5 rounded-lg bg-[#14200c] border border-[#2d421d] space-y-2 text-xs font-mono">
+                        <span className="text-white font-bold uppercase flex items-center gap-1.5">
+                          <Cpu className="w-4 h-4 text-[#b2eb76]" />
+                          Verified Production Lines ({currentMfg.monthlyCapacityUnits.toLocaleString()} units/mo)
+                        </span>
+                        <div className="space-y-1 text-stone-400">
+                          {currentMfg.verifiedProductionLines.slice(0, 3).map((l, i) => (
+                            <div key={i} className="truncate">• {l}</div>
                           ))}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
-                      <Magnet padding={15} magnetStrength={2}>
-                        <button
-                          onClick={() => setActiveTab("commercial")}
-                          className="px-5 py-2.5 rounded-md bg-[#b2eb76] text-[#18280e] font-semibold text-xs inline-flex items-center gap-2 hover:bg-[#b2eb76]/90 transition-all cursor-pointer"
-                        >
-                          <span>Proceed to Commercial Negotiation &amp; AI Analysis</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </Magnet>
                     </div>
                   </SpotlightCard>
                 </div>
               )}
 
-              {/* ========================================================================= */}
-              {/* TAB 3: COMMERCIAL NEGOTIATION & AI DISCREPANCY DETECTOR */}
-              {/* ========================================================================= */}
-              {activeTab === "commercial" && (
+              {/* TAB 3: DISCREPANCY DETECTOR */}
+              {activeHubTab === "discrepancy" && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
                         <Scale className="w-5 h-5 text-[#b2eb76]" />
-                        Commercial Purchase Order vs. Proforma Invoice Discrepancy Engine
+                        Commercial PO vs. Proforma Invoice Discrepancy Engine
                       </h3>
                       <p className="text-xs text-stone-400 font-mono mt-1">
-                        Real-time AI discrepancy detection cross-referencing commercial terms, UCP 600 export rules, and pricing.
+                        Real-time AI discrepancy detection cross-referencing prices, quantities, and UCP 600 rules.
                       </p>
                     </div>
 
-                    {/* Live Discrepancy Status Banner */}
-                    <div className={`px-3 py-1.5 rounded-md font-mono text-xs flex items-center gap-2 ${
-                      priceDiscrepancy
-                        ? "bg-amber-950/80 text-amber-300 border border-amber-600 animate-pulse"
+                    <div className={`px-3 py-1 rounded text-xs font-mono flex items-center gap-2 ${
+                      hasPriceVariance
+                        ? "bg-amber-950 text-amber-300 border border-amber-600 animate-pulse"
                         : "bg-[#223514] text-[#b2eb76] border border-[#3b5424]"
                     }`}>
-                      {priceDiscrepancy ? (
+                      {hasPriceVariance ? (
                         <>
                           <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                          <span>AI WARNING: Price Variance (${discrepancyDelta.toLocaleString()})</span>
+                          <span>AI WARNING: Price Variance (${varianceDelta.toLocaleString()})</span>
                         </>
                       ) : (
                         <>
@@ -477,430 +504,168 @@ export function TradeExecutionSection() {
                     </div>
                   </div>
 
-                  {/* Side-by-Side Comparison Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Buyer Purchase Order */}
-                    <SpotlightCard className="p-5 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-4">
-                      <div className="flex items-center justify-between pb-3 border-b border-[#2d421d]">
-                        <span className="text-xs font-mono text-[#b2eb76] uppercase font-bold flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          Buyer Purchase Order (PO-9921)
-                        </span>
-                        <span className="text-[11px] font-mono text-stone-400">Pacific Arch Hardware</span>
-                      </div>
-
-                      <div className="space-y-3 text-xs font-mono">
-                        <div>
-                          <label className="text-stone-400 block mb-1">Declared PO Amount ($ USD):</label>
-                          <input
-                            type="number"
-                            value={simPoAmount}
-                            onChange={(e) => setSimPoAmount(Number(e.target.value))}
-                            className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-2 rounded text-white font-mono focus:outline-none focus:border-[#b2eb76]"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-stone-400 block mb-1">Quantity (Units):</label>
-                            <input
-                              type="number"
-                              value={simQuantity}
-                              onChange={(e) => setSimQuantity(Number(e.target.value))}
-                              className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-2 rounded text-white font-mono focus:outline-none focus:border-[#b2eb76]"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-stone-400 block mb-1">Agreed Incoterm:</label>
-                            <select
-                              value={simIncoterm}
-                              onChange={(e) => setSimIncoterm(e.target.value as "FOB Mundra" | "CIF Los Angeles")}
-                              className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-2 rounded text-white font-mono focus:outline-none focus:border-[#b2eb76]"
-                            >
-                              <option value="FOB Mundra">FOB Mundra</option>
-                              <option value="CIF Los Angeles">CIF Los Angeles</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded bg-[#14200c] border border-[#2d421d] text-stone-400 space-y-1">
-                          <div>Payment Terms: <strong>30% Deposit via PayPal / 70% vs BL</strong></div>
-                          <div>HS Tariff Code: <strong>8302.41.10 (Architectural Brass)</strong></div>
-                        </div>
-                      </div>
-                    </SpotlightCard>
-
-                    {/* Manufacturer Proforma Invoice */}
-                    <SpotlightCard className="p-5 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-4">
-                      <div className="flex items-center justify-between pb-3 border-b border-[#2d421d]">
-                        <span className="text-xs font-mono text-[#b2eb76] uppercase font-bold flex items-center gap-2">
-                          <FileSpreadsheet className="w-4 h-4" />
-                          Seller Proforma Invoice (PI-2026-48)
-                        </span>
-                        <span className="text-[11px] font-mono text-stone-400">Moradabad Precision Foundry</span>
-                      </div>
-
-                      <div className="space-y-3 text-xs font-mono">
-                        <div>
-                          <label className="text-stone-400 block mb-1">Invoice Billing Amount ($ USD):</label>
-                          <input
-                            type="number"
-                            value={simInvoiceAmount}
-                            onChange={(e) => setSimInvoiceAmount(Number(e.target.value))}
-                            className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-2 rounded text-white font-mono focus:outline-none focus:border-[#b2eb76]"
-                          />
-                        </div>
-
-                        <div className="p-2.5 rounded bg-[#14200c] border border-[#2d421d] text-stone-300 space-y-1.5">
-                          <div className="flex justify-between">
-                            <span className="text-stone-400">Invoiced Unit Price:</span>
-                            <span>${(simInvoiceAmount / simQuantity).toFixed(2)} / unit</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-stone-400">Delivery Port:</span>
-                            <span className="text-[#b2eb76]">{simIncoterm}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-stone-400">Manufacturer DGFT IEC:</span>
-                            <span>0508012491</span>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-1">
-                          <button
-                            onClick={() => setSimInvoiceAmount(simPoAmount)}
-                            className="px-3 py-1.5 rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424] text-[11px] hover:bg-[#3b5424] transition-colors"
-                          >
-                            Auto-Reconcile Amounts
-                          </button>
-                          <button
-                            onClick={() => setSimInvoiceAmount(simPoAmount + 3500)}
-                            className="px-3 py-1.5 rounded bg-white/5 text-stone-400 hover:text-white text-[11px] transition-colors"
-                          >
-                            Simulate Discrepancy
-                          </button>
-                        </div>
-                      </div>
-                    </SpotlightCard>
-                  </div>
-
-                  {/* AI Resolution Protocol Card */}
-                  <div className="p-4 rounded-xl bg-[#14200c] border border-[#2d421d] flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-xs font-mono text-stone-300 flex items-center gap-3">
-                      <Sparkles className="w-4 h-4 text-[#b2eb76] shrink-0" />
-                      <span>
-                        AI verifies consistency between buyer RFQ, seller quotation, PO, and proforma invoice before unlocking milestone payment rails.
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-3 text-xs font-mono">
+                      <span className="text-[#b2eb76] font-bold uppercase flex items-center gap-1.5">
+                        <FileText className="w-4 h-4" /> Buyer Purchase Order (PO-9921)
                       </span>
-                    </div>
+                      <div>
+                        <label className="text-stone-400 block mb-1">Declared PO Amount ($):</label>
+                        <input
+                          type="number"
+                          value={simPoAmount}
+                          onChange={(e) => setSimPoAmount(Number(e.target.value))}
+                          className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-1.5 rounded text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-stone-400 block mb-1">Incoterm:</label>
+                        <select
+                          value={simIncoterm}
+                          onChange={(e) => setSimIncoterm(e.target.value as "FOB Mundra" | "CIF Los Angeles")}
+                          className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-1.5 rounded text-white"
+                        >
+                          <option value="FOB Mundra">FOB Mundra</option>
+                          <option value="CIF Los Angeles">CIF Los Angeles</option>
+                        </select>
+                      </div>
+                    </SpotlightCard>
 
-                    <Magnet padding={15} magnetStrength={2}>
-                      <button
-                        onClick={() => {
-                          setOrderValue(simInvoiceAmount);
-                          setActiveTab("paypal");
-                        }}
-                        className="px-5 py-2.5 rounded-md bg-[#b2eb76] text-[#18280e] font-semibold text-xs inline-flex items-center gap-2 hover:bg-[#b2eb76]/90 transition-all cursor-pointer shrink-0"
-                      >
-                        <span>Lock Contract &amp; Initialize PayPal Milestone Escrow</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </Magnet>
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-3 text-xs font-mono">
+                      <span className="text-[#b2eb76] font-bold uppercase flex items-center gap-1.5">
+                        <FileSpreadsheet className="w-4 h-4" /> Seller Proforma Invoice (PI-2026-48)
+                      </span>
+                      <div>
+                        <label className="text-stone-400 block mb-1">Invoiced Amount ($):</label>
+                        <input
+                          type="number"
+                          value={simInvoiceAmount}
+                          onChange={(e) => setSimInvoiceAmount(Number(e.target.value))}
+                          className="w-full bg-[#18280e] border border-[#2d421d] px-3 py-1.5 rounded text-white"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() => setSimInvoiceAmount(simPoAmount)}
+                          className="px-3 py-1.5 rounded bg-[#223514] text-[#b2eb76] border border-[#3b5424] text-[11px]"
+                        >
+                          Auto-Reconcile
+                        </button>
+                        <button
+                          onClick={() => setSimInvoiceAmount(simPoAmount + 2500)}
+                          className="px-3 py-1.5 rounded bg-white/5 text-stone-400 text-[11px]"
+                        >
+                          Simulate Discrepancy
+                        </button>
+                      </div>
+                    </SpotlightCard>
                   </div>
                 </div>
               )}
 
-              {/* ========================================================================= */}
-              {/* TAB 4: PAYPAL MILESTONE ESCROW & FINANCIAL EXECUTION */}
-              {/* ========================================================================= */}
-              {activeTab === "paypal" && (
+              {/* TAB 4: PAYPAL ESCROW */}
+              {activeHubTab === "paypal" && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
                         <CreditCard className="w-5 h-5 text-[#b2eb76]" />
-                        PayPal-Powered Financial Execution Layer (Orders v2)
+                        PayPal Orders v2 Milestone Escrow Layer
                       </h3>
                       <p className="text-xs text-stone-400 font-mono mt-1">
-                        Supporting international buyer payments to eligible Indian merchants with verified milestone disbursements.
+                        Supporting international buyer payments to eligible Indian merchants via approved PayPal rails.
                       </p>
                     </div>
 
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#223514] text-[#b2eb76] text-xs font-mono border border-[#3b5424]">
-                      <span className="size-2 rounded-full bg-[#b2eb76] animate-pulse" />
-                      <span>PayPal Orders v2 REST API Connected</span>
-                    </div>
+                    <span className="px-3 py-1 rounded bg-[#223514] text-[#b2eb76] font-mono text-xs border border-[#3b5424]">
+                      REST API Orders v2 Active
+                    </span>
                   </div>
 
-                  {/* Interactive Order Value Slider & Milestone Split */}
-                  <SpotlightCard className="p-5 sm:p-6 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center text-xs font-mono">
-                        <span className="text-stone-400">Interactive Commercial Order Value:</span>
-                        <span className="text-lg font-bold text-[#b2eb76]">${orderValue.toLocaleString()} USD</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="20000"
-                        max="300000"
-                        step="2500"
-                        value={orderValue}
-                        onChange={(e) => setOrderValue(Number(e.target.value))}
-                        className="w-full h-2 bg-[#18280e] rounded-lg appearance-none cursor-pointer accent-[#b2eb76]"
-                      />
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-xs font-mono">
+                      <span className="text-stone-400">Transaction Value:</span>
+                      <span className="text-lg font-bold text-[#b2eb76]">${orderValue.toLocaleString()} USD</span>
                     </div>
+                    <input
+                      type="range"
+                      min="25000"
+                      max="250000"
+                      step="2500"
+                      value={orderValue}
+                      onChange={(e) => setOrderValue(Number(e.target.value))}
+                      className="w-full h-2 bg-[#18280e] rounded-lg appearance-none cursor-pointer accent-[#b2eb76]"
+                    />
 
-                    {/* Milestone Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Milestone 1: 30% Advance Deposit */}
-                      <div className="p-4 rounded-xl bg-[#14200c] border border-[#3b5424] space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono text-[#b2eb76] font-bold uppercase">
-                            Milestone 1 (30% Advance Deposit)
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#223514] text-[#b2eb76]">
-                            Pre-Production
-                          </span>
-                        </div>
-
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                      <div className="p-4 rounded-xl bg-[#14200c] border border-[#3b5424] space-y-2">
+                        <span className="text-xs font-mono text-[#b2eb76] font-bold block uppercase">
+                          Milestone 1: 30% Advance Escrow
+                        </span>
                         <div className="text-2xl font-bold text-white font-mono">
                           ${advanceDeposit.toLocaleString()} <span className="text-xs text-stone-400 font-normal">USD</span>
                         </div>
-
-                        <div className="text-xs font-mono text-stone-300 space-y-1.5 border-t border-[#2d421d] pt-2">
-                          <div>Release Trigger: <strong>Signed Contract &amp; Tooling Initiation</strong></div>
-                          <div>PayPal Capture ID: <strong className="text-stone-200">CAPTURE_ID_PP_849201</strong></div>
-                          <div>Estimated Fee (3.49% + $0.49): <span className="text-stone-400">~${estimatedPaypalFee}</span></div>
-                        </div>
-
-                        <div className="pt-2">
-                          {paypalSimStatus === "ready" && (
-                            <button
-                              onClick={() => {
-                                setPaypalSimStatus("authorizing");
-                                setTimeout(() => setPaypalSimStatus("captured"), 1400);
-                              }}
-                              className="w-full py-2.5 rounded-md bg-[#b2eb76] text-[#18280e] font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[#b2eb76]/90 transition-all cursor-pointer"
-                            >
-                              <span>Authorize 30% Advance via PayPal</span>
-                              <CreditCard className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          {paypalSimStatus === "authorizing" && (
-                            <div className="w-full py-2.5 rounded-md bg-[#223514] text-[#b2eb76] font-mono text-xs flex items-center justify-center gap-2 border border-[#3b5424]">
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Processing Webhook: PAYMENT.CAPTURE.PENDING...</span>
-                            </div>
-                          )}
-
-                          {paypalSimStatus === "captured" && (
-                            <div className="w-full py-2.5 rounded-md bg-[#18280e] text-[#b2eb76] font-mono text-xs flex items-center justify-center gap-2 border border-[#b2eb76]">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Captured: PP_CAP_9941 (Disbursed to Manufacturer)</span>
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-xs text-stone-400 font-mono">
+                          Released upon contract execution to initiate raw material tooling.
+                        </p>
                       </div>
 
-                      {/* Milestone 2: 70% Balance upon Bill of Lading */}
-                      <div className="p-4 rounded-xl bg-[#14200c] border border-[#2d421d] space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono text-stone-300 font-bold uppercase">
-                            Milestone 2 (70% Balance on BL)
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-stone-400">
-                            Post-Customs
-                          </span>
-                        </div>
-
+                      <div className="p-4 rounded-xl bg-[#14200c] border border-[#2d421d] space-y-2">
+                        <span className="text-xs font-mono text-stone-300 font-bold block uppercase">
+                          Milestone 2: 70% Bill of Lading Balance
+                        </span>
                         <div className="text-2xl font-bold text-white font-mono">
                           ${balanceAmount.toLocaleString()} <span className="text-xs text-stone-400 font-normal">USD</span>
                         </div>
-
-                        <div className="text-xs font-mono text-stone-300 space-y-1.5 border-t border-[#2d421d] pt-2">
-                          <div>Release Trigger: <strong>Verified Ocean Bill of Lading &amp; Customs LEO</strong></div>
-                          <div>Inspection Prerequisite: <strong className="text-[#b2eb76]">QIMA AQL 1.5 Certificate</strong></div>
-                          <div>Status: <span className="text-stone-400">Escrow Held in PayPal Authorised Layer</span></div>
-                        </div>
-
-                        <div className="pt-2">
-                          <button
-                            onClick={() => setActiveTab("logistics")}
-                            className="w-full py-2.5 rounded-md bg-white/5 text-stone-300 font-mono text-xs hover:bg-white/10 hover:text-white transition-all cursor-pointer border border-[#2d421d] flex items-center justify-center gap-2"
-                          >
-                            <span>Inspect Logistics &amp; Customs Handover</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        <p className="text-xs text-stone-400 font-mono">
+                          Disbursed upon verified customs Let Export Order (LEO) and ocean Bill of Lading.
+                        </p>
                       </div>
                     </div>
-
-                    {/* Regulatory Transparency Disclaimer */}
-                    <div className="p-3.5 rounded-lg bg-[#14200c] border border-[#2d421d] text-[11px] font-mono text-stone-400 leading-relaxed">
-                      <strong className="text-stone-200">Regulatory Infrastructure Architecture:</strong> TRUV coordinates
-                      international commercial transactions directly through approved PayPal merchant rails and verified banking
-                      partners. TRUV does not hold unapproved customer deposits or operate unauthorised escrow accounts. All payment
-                      milestones map directly to verified DGFT, ICEGATE, and ocean carrier events.
-                    </div>
-                  </SpotlightCard>
+                  </div>
                 </div>
               )}
 
-              {/* ========================================================================= */}
-              {/* TAB 5: LOGISTICS, INSPECTION & CUSTOMS HANDOVER */}
-              {/* ========================================================================= */}
-              {activeTab === "logistics" && (
+              {/* TAB 5: LOGISTICS */}
+              {activeHubTab === "logistics" && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2d421d] pb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
                         <Ship className="w-5 h-5 text-[#b2eb76]" />
-                        International Logistics, Third-Party Inspection &amp; Customs Handover
+                        Logistics, Inspection &amp; Customs Handover
                       </h3>
                       <p className="text-xs text-stone-400 font-mono mt-1">
-                        Recognising that MSMEs require verified external partners for testing, customs brokerage, and ocean freight.
+                        Coordinating verified third-party inspection agencies, ICEGATE customs, and ocean freight lines.
                       </p>
                     </div>
 
                     <span className="px-3 py-1 rounded bg-[#223514] text-[#b2eb76] font-mono text-xs border border-[#3b5424]">
-                      Container ID: MSKU948201
+                      Maersk Container: MSKU948201
                     </span>
                   </div>
 
-                  {/* 6-Stage Milestone Execution Timeline */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Step 1: Pre-Shipment Inspection */}
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-2">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#b2eb76] font-bold">1. QIMA / SGS Audit</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#223514] text-[#b2eb76]">PASSED</span>
-                      </div>
-                      <div className="text-sm font-semibold text-white">Pre-Shipment Quality Testing</div>
-                      <p className="text-xs text-stone-400 font-mono">
-                        AQL 1.5 critical defects test passed on factory floor in Moradabad. Certificate #QIMA-IND-8821 attached.
-                      </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1 text-xs font-mono">
+                      <span className="text-[#b2eb76] font-bold block">1. QIMA / SGS Inspection</span>
+                      <div className="text-white font-bold">AQL 1.5 Testing Passed</div>
+                      <p className="text-stone-400 text-[11px]">Factory floor quality seal applied before dispatch.</p>
                     </SpotlightCard>
 
-                    {/* Step 2: Indian Customs Filing (ICEGATE) */}
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-2">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#b2eb76] font-bold">2. ICEGATE Brokerage</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#223514] text-[#b2eb76]">LEO ISSUED</span>
-                      </div>
-                      <div className="text-sm font-semibold text-white">Export Customs Clearance</div>
-                      <p className="text-xs text-stone-400 font-mono">
-                        Shipping Bill #SB-9201948 cleared by Indian Customs at Mundra Port. Let Export Order (LEO) confirmed.
-                      </p>
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1 text-xs font-mono">
+                      <span className="text-[#b2eb76] font-bold block">2. ICEGATE Customs</span>
+                      <div className="text-white font-bold">Shipping Bill Cleared</div>
+                      <p className="text-stone-400 text-[11px]">Indian Customs Let Export Order (LEO) issued at Mundra.</p>
                     </SpotlightCard>
 
-                    {/* Step 3: Ocean Freight & Bill of Lading */}
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-2">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#b2eb76] font-bold">3. Maersk Line Ocean</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-300">IN TRANSIT</span>
-                      </div>
-                      <div className="text-sm font-semibold text-white">Ocean Bill of Lading Tracking</div>
-                      <p className="text-xs text-stone-400 font-mono">
-                        Vessel MAERSK SELETAR (Voyage 2603W). ETD Mundra: Nov 12 → ETA Los Angeles: Dec 04, 2026.
-                      </p>
+                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1 text-xs font-mono">
+                      <span className="text-[#b2eb76] font-bold block">3. Maersk Line Ocean</span>
+                      <div className="text-white font-bold">Bill of Lading Assigned</div>
+                      <p className="text-stone-400 text-[11px]">Vessel transit to Port of Los Angeles (Voyage 2603W).</p>
                     </SpotlightCard>
-                  </div>
-
-                  {/* Complete Handover Progress Bar */}
-                  <div className="p-5 rounded-xl bg-[#14200c] border border-[#2d421d] space-y-4">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-stone-300">Overall Trade Execution Progress:</span>
-                      <span className="text-[#b2eb76] font-bold">80% COMPLETED (Awaiting Port Arrival)</span>
-                    </div>
-
-                    <div className="w-full h-3 bg-[#18280e] rounded-full overflow-hidden p-0.5 border border-[#2d421d]">
-                      <div className="h-full bg-gradient-to-r from-[#3f7308] to-[#b2eb76] rounded-full w-[80%]" />
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-stone-400 pt-1">
-                      <div>✓ RFQ &amp; Contract: <span className="text-stone-200">100%</span></div>
-                      <div>✓ 30% PayPal Deposit: <span className="text-stone-200">Released</span></div>
-                      <div>✓ QIMA Inspection: <span className="text-stone-200">Passed</span></div>
-                      <div>⏳ 70% Final Balance: <span className="text-[#b2eb76]">On Vessel BL</span></div>
-                    </div>
                   </div>
                 </div>
               )}
-
-              {/* ========================================================================= */}
-              {/* TAB 6: THE REAL COMPETITIVE MOAT (ACCUMULATED INTELLIGENCE) */}
-              {/* ========================================================================= */}
-              {activeTab === "moat" && (
-                <div className="space-y-6">
-                  <div className="border-b border-[#2d421d] pb-4">
-                    <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-[#b2eb76]" />
-                      The Real Competitive Moat: Proprietary Accumulated Trade Intelligence
-                    </h3>
-                    <p className="text-xs text-stone-400 font-mono mt-1">
-                      Our advantage is not generic AI or a basic directory: it is real, verified execution intelligence
-                      accumulated across commercial purchase orders, PayPal reconciliations, and factory audits.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1">
-                      <span className="text-[11px] font-mono text-stone-400 block uppercase">Trade Volume Coordinated</span>
-                      <div className="text-2xl font-bold text-[#b2eb76] font-mono">$14.8M+</div>
-                      <p className="text-[11px] text-stone-400 font-mono">Cross-border purchase orders executed from India.</p>
-                    </SpotlightCard>
-
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1">
-                      <span className="text-[11px] font-mono text-stone-400 block uppercase">MSME Vetting Accuracy</span>
-                      <div className="text-2xl font-bold text-[#b2eb76] font-mono">100%</div>
-                      <p className="text-[11px] text-stone-400 font-mono">DGFT IEC, GSTIN, &amp; QIMA factory audited.</p>
-                    </SpotlightCard>
-
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1">
-                      <span className="text-[11px] font-mono text-stone-400 block uppercase">Milestone Dispute Ratio</span>
-                      <div className="text-2xl font-bold text-[#b2eb76] font-mono">0.08%</div>
-                      <p className="text-[11px] text-stone-400 font-mono">Across all PayPal milestone disbursements.</p>
-                    </SpotlightCard>
-
-                    <SpotlightCard className="p-4 rounded-xl bg-[#121c0b] border border-[#2d421d] space-y-1">
-                      <span className="text-[11px] font-mono text-stone-400 block uppercase">AI Discrepancy Latency</span>
-                      <div className="text-2xl font-bold text-[#b2eb76] font-mono">&lt;40ms</div>
-                      <p className="text-[11px] text-stone-400 font-mono">Automated UCP 600 export compliance check.</p>
-                    </SpotlightCard>
-                  </div>
-
-                  {/* Moat Narrative */}
-                  <div className="p-5 rounded-xl bg-[#14200c] border border-[#2d421d] text-xs font-mono text-stone-300 leading-relaxed space-y-3">
-                    <p>
-                      <strong>How TRUV Compounds Value:</strong> Every transaction coordinated through TRUV feeds the
-                      network with verified performance records: actual factory cycle times, on-time delivery rates, pricing
-                      trends across Incoterms, and reliable customs broker handovers.
-                    </p>
-                    <p className="text-stone-400">
-                      As more international buyers place RFQs and more Indian industrial MSMEs complete verified orders, TRUV&apos;s
-                      intelligence layer becomes the single source of truth for global trade execution with India.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Bar: Action Trigger & Contact Sales */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-[#2d421d] bg-[#121c0b]">
-              <div className="flex items-center gap-3 text-xs font-mono text-stone-400">
-                <span className="size-2 rounded-full bg-[#b2eb76]" />
-                <span>Need custom manufacturing sourcing or trade execution support?</span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Magnet padding={25} magnetStrength={2.5}>
-                  <Link href="https://spade.com/contact/" target="_blank">
-                    <div className="group relative inline-flex appearance-none items-center py-2 px-5 select-none transition-all justify-center text-[#18280e] bg-[#b2eb76] rounded-md hover:bg-[#b2eb76]/90 cursor-pointer shadow-sm">
-                      <span className="text-xs font-semibold uppercase tracking-wider font-mono">Contact Trade Operations</span>
-                    </div>
-                  </Link>
-                </Magnet>
-              </div>
             </div>
           </div>
         </div>
