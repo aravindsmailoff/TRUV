@@ -46,6 +46,7 @@ import {
   DocumentItem,
 } from "@/lib/buyer/buyerStore";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
+import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 
 export function TradeOracleBuyerApp() {
   const router = useRouter();
@@ -329,6 +330,15 @@ export function TradeOracleBuyerApp() {
             <HelpCircle className="w-4 h-4" />
           </button>
 
+          {/* WhatsApp Live Alerts */}
+          <WhatsAppNotificationCenter
+            role="buyer"
+            recipientPhone="+1 (949) 555-0192"
+            recipientName="Pacific Architectural Hardware LLC"
+            orderNumber="ORD-2026-081"
+            compact={true}
+          />
+
           {/* User Company Info */}
           <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
             <div className="size-7 rounded-lg bg-[#ebf7d9] text-[#18280e] font-bold text-xs flex items-center justify-center font-mono">
@@ -525,8 +535,16 @@ export function TradeOracleBuyerApp() {
             </button>
           </div>
 
-          {/* Bottom Card: PayPal Sandbox Connection Status */}
+          {/* Bottom Card: WhatsApp Updates & PayPal Connection */}
           <div className="p-4 border-t border-stone-200/90 space-y-3">
+            <WhatsAppNotificationCenter
+              role="buyer"
+              recipientPhone="+1 (949) 555-0192"
+              recipientName="Pacific Architectural Hardware LLC"
+              orderNumber="ORD-2026-081"
+              compact={false}
+            />
+
             <div className="p-3.5 rounded-2xl bg-[#18280e] text-white space-y-2">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-[#b2eb76] font-bold">PayPal Orders v2</span>

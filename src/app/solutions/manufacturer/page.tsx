@@ -176,6 +176,28 @@ export default function ManufacturerSolutionPage() {
               </div>
             </SpotlightCard>
           </div>
+
+          {/* New WhatsApp Integration Spotlight for Indian Factory Owners */}
+          <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#25D366]/10 via-[#128C7E]/10 to-[#ebf7d9] border border-[#25D366]/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+            <div className="space-y-2 max-w-2xl text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366] text-white text-[11px] font-mono font-bold">
+                <span>💬 WhatsApp Live Order &amp; Payment Updates</span>
+              </div>
+              <h3 className="text-2xl font-bold text-[#18280E] font-sans">
+                Get every order update in simple, plain language on WhatsApp.
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                No struggling with trade jargon or complex customs portals. Whenever a foreign buyer places an order, pays the 30% PayPal advance, passes inspection, or releases bank funds, TradeOracle sends a simple, plain-English summary directly to your mobile phone.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 shadow-md font-mono text-xs space-y-1.5 shrink-0 max-w-xs">
+              <span className="text-[10px] text-[#075E54] font-bold uppercase block">Sample WhatsApp Alert:</span>
+              <p className="text-[11px] text-stone-800 leading-relaxed">
+                🟢 <strong>₹21.45 Lakhs Advance Paid!</strong><br />
+                Buyer deposited 30% into PayPal for 1,500 Brass Handles. Money is safe in escrow. You can start production.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ========================================================================= */}

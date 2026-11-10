@@ -40,6 +40,7 @@ import { ActiveDayChart } from "@/components/kokonutui/ActiveDayChart";
 import { TotalProfitChart } from "@/components/kokonutui/TotalProfitChart";
 import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
 import { ForeignBuyerPortal } from "@/components/kokonutui/ForeignBuyerPortal";
+import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 
 // =========================================================================
 // DATA MODELS & LAYMAN ORDERS (For Indian Merchants & Foundries)
@@ -420,7 +421,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Group 2: Trade Execution Rails Accordion */}
+            {/* Group 2: Step-by-Step Order Stages (Zero Jargon) */}
             <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
@@ -429,7 +430,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Trade Engine Rails</span>
+                  <span>How Your Order Moves</span>
                 </div>
                 {tradeRailsOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
@@ -446,7 +447,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">1. Buyer RFQ Demand</span>
+                    <span className="text-xs truncate">1. New Buyer Requests</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "rfq_demand"
@@ -454,7 +455,7 @@ export default function DashboardPage() {
                           : "bg-[#ebf7d9] text-[#284905]"
                       }`}
                     >
-                      3 Active
+                      3 New
                     </span>
                   </button>
 
@@ -468,15 +469,15 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">2. MSME Vetting</span>
+                    <span className="text-xs truncate">2. Factory &amp; KYC Verified</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "msme_vetting"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-stone-100 text-stone-600"
+                          : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      3 Hubs
+                      Verified ✓
                     </span>
                   </button>
 
@@ -490,7 +491,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">3. Commercial PO (AI)</span>
+                    <span className="text-xs truncate">3. Price &amp; Deal Agreement</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "commercial_ai"
@@ -498,7 +499,7 @@ export default function DashboardPage() {
                           : "bg-stone-100 text-stone-600"
                       }`}
                     >
-                      UCP 600
+                      Agreed ✓
                     </span>
                   </button>
 
@@ -512,7 +513,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">4. PayPal Escrow</span>
+                    <span className="text-xs truncate">4. Advance in PayPal</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "paypal_escrow"
@@ -520,7 +521,7 @@ export default function DashboardPage() {
                           : "bg-[#ebf7d9] text-[#284905]"
                       }`}
                     >
-                      30% Adv
+                      30% Paid
                     </span>
                   </button>
 
@@ -534,15 +535,15 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">5. QIMA Inspection</span>
+                    <span className="text-xs truncate">5. Factory Quality Check</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "quality_qima"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-stone-100 text-stone-600"
+                          : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      AQL 1.5
+                      Passed ✓
                     </span>
                   </button>
 
@@ -556,22 +557,22 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">6. Customs & BL</span>
+                    <span className="text-xs truncate">6. Shipping &amp; Bank Payout</span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "customs_bl"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-stone-100 text-stone-600"
+                          : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      ICEGATE
+                      Dispatched
                     </span>
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Group 3: Finances Accordion */}
+            {/* Group 3: Payments & Bank Payouts Accordion */}
             <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
@@ -579,8 +580,8 @@ export default function DashboardPage() {
                 className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Receipt className="w-3.5 h-3.5" />
-                  <span>Finances</span>
+                  <Receipt className="w-3.5 h-3.5 text-[#3f7308]" />
+                  <span>Your Money &amp; Payouts</span>
                 </div>
                 {financesOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
@@ -596,7 +597,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Invoices
+                    Export Bills &amp; Invoices
                   </button>
                   <button
                     type="button"
@@ -607,7 +608,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Transactions
+                    PayPal &amp; Bank Deposits
                   </button>
                   <button
                     type="button"
@@ -618,10 +619,19 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Reports
+                    Tax &amp; CA Statements (e-FIRC)
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* WhatsApp Integration in Sidebar */}
+            <div className="pt-2 border-t border-stone-100">
+              <WhatsAppNotificationCenter
+                role="manufacturer"
+                recipientName="Moradabad Precision Foundry"
+                compact={false}
+              />
             </div>
           </nav>
         </div>
@@ -742,6 +752,9 @@ export default function DashboardPage() {
               <LayoutDashboard className="w-3.5 h-3.5 text-stone-500" />
               <span>Add widget</span>
             </button>
+
+            {/* WhatsApp Real-time Alerts */}
+            <WhatsAppNotificationCenter role="manufacturer" compact={true} />
 
             {/* Export Button matching reference */}
             <button
@@ -1244,6 +1257,12 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <WhatsAppNotificationCenter
+                      role="manufacturer"
+                      orderNumber={selectedLaymanOrder.orderNumber}
+                      recipientName={selectedLaymanOrder.foreignBuyer.company}
+                      compact={true}
+                    />
                     <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
                       ✓ {selectedLaymanOrder.status}
                     </span>
@@ -1305,8 +1324,8 @@ export default function DashboardPage() {
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <div className="flex justify-between items-center pb-3 border-b border-stone-100">
                 <div>
-                  <h2 className="text-base font-bold text-[#18280e]">1. Buyer RFQ Demand (3 Active Corridors)</h2>
-                  <span className="text-stone-500">Foreign buyer requests with verified purchasing budgets</span>
+                  <h2 className="text-base font-bold text-[#18280e]">1. New Buyer Requests (3 Active Corridors)</h2>
+                  <span className="text-stone-500">Foreign buyer orders translated into plain language with verified budgets</span>
                 </div>
                 <KokonutButton
                   variant="secondary"
@@ -1344,7 +1363,7 @@ export default function DashboardPage() {
           {activeNav === "msme_vetting" && (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                2. MSME Vetting &amp; Industrial Clusters
+                2. Factory Verification &amp; KYC (Government Verified MSMEs)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
@@ -1379,12 +1398,12 @@ export default function DashboardPage() {
           {activeNav === "commercial_ai" && (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                3. Commercial Negotiation (AI) &amp; UCP 600 Harmonization
+                3. Price &amp; Deal Agreement (Plain-English Terms)
               </h2>
               <div className="p-5 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-2 text-stone-700">
-                <span className="font-bold text-[#18280e] block">Automated Purchase Order vs Invoice Comparison:</span>
+                <span className="font-bold text-[#18280e] block">Plain-English Purchase Order vs Invoice Verification:</span>
                 <p className="leading-relaxed">
-                  Our trade engine cross-references the foreign buyer&apos;s Purchase Order against the Indian exporter&apos;s Proforma Invoice, verifying Incoterms 2020 (FOB Mundra), ASTM alloy specifications, and milestone disbursement triggers to eliminate payment disputes before production begins.
+                  Our system verifies the buyer&apos;s order against your proforma invoice in simple words: product quantity, material grade, and delivery port (Mundra), so both sides are 100% agreed before raw materials are purchased.
                 </p>
               </div>
             </div>
@@ -1395,8 +1414,8 @@ export default function DashboardPage() {
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <div className="flex justify-between items-center pb-3 border-b border-stone-100">
                 <div>
-                  <h2 className="text-base font-bold text-[#18280e]">4. PayPal Milestone Escrow Execution</h2>
-                  <span className="text-stone-500">Live Orders v2 API settlement console</span>
+                  <h2 className="text-base font-bold text-[#18280e]">4. Advance Money in PayPal (30% Upfront Escrow)</h2>
+                  <span className="text-stone-500">Secured funding held safely in PayPal before production begins</span>
                 </div>
                 <KokonutButton
                   variant="primary"
@@ -1442,7 +1461,7 @@ export default function DashboardPage() {
           {activeNav === "quality_qima" && (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                5. Quality &amp; QIMA Pre-Shipment Inspection
+                5. Factory Quality Check (Inspection Passed Prior to Shipment)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
@@ -1471,7 +1490,7 @@ export default function DashboardPage() {
           {activeNav === "customs_bl" && (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                6. Customs LEO &amp; Bill of Lading (ICEGATE Electronic Gate-In)
+                6. Shipping &amp; Bank Payout (Dispatched &amp; Remaining 70% Released)
               </h2>
               <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex justify-between items-center">

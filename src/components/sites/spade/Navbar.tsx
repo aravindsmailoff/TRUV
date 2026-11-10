@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Heart, BarChart3, User, Building2, Landmark, Bot, LogOut } from "lucide-react";
+import { ShieldCheck, Heart, BarChart3, User, Building2, Landmark, Bot, LogOut, Globe, Code2, Factory, PackageCheck } from "lucide-react";
 import { Magnet } from "@/components/reactbits/Magnet";
 import { IntelligenceConsoleModal } from "./IntelligenceConsoleModal";
 import { getCurrentSessionUser, setCurrentSessionUser, RegisteredUser } from "@/lib/auth/authStore";
@@ -95,10 +95,10 @@ export function Navbar() {
                     <Link
                       href="/solutions/manufacturer"
                       onClick={() => setSolutionsOpen(false)}
-                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                      className="group flex items-start gap-3.5 p-3 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#ebf7d9] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76] transition-colors shrink-0 text-base">
-                        🏭
+                      <div className="w-10 h-10 rounded-xl bg-[#ebf7d9] border border-[#d8e5ca] flex items-center justify-center text-[#18280e] group-hover:bg-[#18280e] group-hover:text-[#b2eb76] transition-all shrink-0 shadow-xs">
+                        <Building2 className="w-5 h-5 stroke-[1.75]" />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
@@ -117,10 +117,10 @@ export function Navbar() {
                     <Link
                       href="/solutions/buyer"
                       onClick={() => setSolutionsOpen(false)}
-                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                      className="group flex items-start gap-3.5 p-3 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#ebf7d9] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76] transition-colors shrink-0 text-base">
-                        🌍
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-800 group-hover:bg-blue-900 group-hover:text-white transition-all shrink-0 shadow-xs">
+                        <Globe className="w-5 h-5 stroke-[1.75]" />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
@@ -139,15 +139,15 @@ export function Navbar() {
                     <Link
                       href="/solutions/service"
                       onClick={() => setSolutionsOpen(false)}
-                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                      className="group flex items-start gap-3.5 p-3 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-900 group-hover:bg-blue-100 transition-colors shrink-0 text-base">
-                        💻
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-800 group-hover:bg-[#18280e] group-hover:text-[#b2eb76] transition-all shrink-0 shadow-xs">
+                        <Code2 className="w-5 h-5 stroke-[1.75]" />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
                           <span>Freelancers &amp; IT Agencies</span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 font-bold">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold">
                             Service Export
                           </span>
                         </div>
@@ -294,23 +294,32 @@ export function Navbar() {
           <Link
             href="/solutions/manufacturer"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
+            className="flex items-center gap-2.5 py-2 text-stone-800 font-bold hover:text-[#3f7308]"
           >
-            <span>🏭 Indian Manufacturers</span>
+            <div className="w-6 h-6 rounded-md bg-[#ebf7d9] flex items-center justify-center text-[#18280e]">
+              <Building2 className="w-3.5 h-3.5" />
+            </div>
+            <span>Indian Manufacturers</span>
           </Link>
           <Link
             href="/solutions/buyer"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
+            className="flex items-center gap-2.5 py-2 text-stone-800 font-bold hover:text-[#3f7308]"
           >
-            <span>🌍 Foreign Buyers</span>
+            <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center text-blue-800">
+              <Globe className="w-3.5 h-3.5" />
+            </div>
+            <span>Foreign Buyers</span>
           </Link>
           <Link
             href="/solutions/service"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
+            className="flex items-center gap-2.5 py-2 text-stone-800 font-bold hover:text-[#3f7308]"
           >
-            <span>💻 Freelancers &amp; IT Agencies</span>
+            <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-800">
+              <Code2 className="w-3.5 h-3.5" />
+            </div>
+            <span>Freelancers &amp; IT Agencies</span>
           </Link>
           <div className="pt-2 border-t border-stone-100">
             <Link href="/customers" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-stone-600">

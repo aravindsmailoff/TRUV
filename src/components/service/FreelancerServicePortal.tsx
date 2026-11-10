@@ -32,6 +32,7 @@ import { ClickSpark } from "@/components/reactbits/ClickSpark";
 import { CountUp } from "@/components/reactbits/CountUp";
 import { KokonutButton } from "@/components/kokonutui/KokonutButton";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
+import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 
 export function FreelancerServicePortal() {
   const router = useRouter();
@@ -319,6 +320,13 @@ export function FreelancerServicePortal() {
 
         {/* Bottom Section: Freelancer Profile & Logout */}
         <div className="p-3.5 space-y-3 border-t border-stone-100">
+          <WhatsAppNotificationCenter
+            role="service"
+            recipientPhone="+91 98450 88721"
+            recipientName="HyperScale Software Labs"
+            compact={false}
+          />
+
           <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1 text-xs font-mono">
             <span className="text-[10px] text-stone-400 block font-bold uppercase">Verified Freelancer</span>
             <strong className="text-[#18280e] block">HyperScale Software Labs</strong>
@@ -387,6 +395,14 @@ export function FreelancerServicePortal() {
               <LayoutDashboard className="w-3.5 h-3.5 text-stone-500" />
               <span>Add widget</span>
             </button>
+
+            {/* WhatsApp Live Alerts */}
+            <WhatsAppNotificationCenter
+              role="service"
+              recipientPhone="+91 98450 88721"
+              recipientName="HyperScale Software Labs"
+              compact={true}
+            />
 
             {/* Export Button */}
             <button

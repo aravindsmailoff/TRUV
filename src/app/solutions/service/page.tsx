@@ -165,6 +165,28 @@ export default function ServiceSolutionPage() {
               </div>
             </SpotlightCard>
           </div>
+
+          {/* WhatsApp Milestone Alert Center */}
+          <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#25D366]/10 via-emerald-50 to-[#ebf7d9] border border-[#25D366]/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+            <div className="space-y-2 max-w-2xl text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366] text-white text-[11px] font-mono font-bold">
+                <span>💬 WhatsApp Freelancer Escrow Alerts</span>
+              </div>
+              <h3 className="text-2xl font-bold text-[#18280E] font-sans">
+                Never miss a client milestone deposit or approved payout.
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                Receive instant WhatsApp notifications when overseas clients fund milestone escrows on PayPal, when GitHub PR proofs are recorded, and when funds are deposited directly to your Indian bank account with automated service export e-FIRC compliance.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 shadow-md font-mono text-xs space-y-1.5 shrink-0 max-w-xs">
+              <span className="text-[10px] text-[#075E54] font-bold uppercase block">Service WhatsApp Alert:</span>
+              <p className="text-[11px] text-stone-800 leading-relaxed">
+                🎉 <strong>Milestone Escrow Funded!</strong><br />
+                Client deposited $2,500 USD into PayPal. Escrow is locked. You can start engineering safely.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ========================================================================= */}

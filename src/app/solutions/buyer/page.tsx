@@ -165,6 +165,28 @@ export default function BuyerSolutionPage() {
               </div>
             </SpotlightCard>
           </div>
+
+          {/* WhatsApp Procurement Telemetry */}
+          <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#25D366]/10 via-blue-50 to-[#ebf7d9] border border-[#25D366]/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+            <div className="space-y-2 max-w-2xl text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366] text-white text-[11px] font-mono font-bold">
+                <span>💬 WhatsApp Factory Telemetry</span>
+              </div>
+              <h3 className="text-2xl font-bold text-[#18280E] font-sans">
+                Real-time factory milestones delivered to WhatsApp.
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                Keep your overseas procurement teams in the loop. Get instant WhatsApp alerts when Indian manufacturers accept purchase orders, complete casting batches, pass QIMA quality inspections, and load shipping containers at Mundra Port.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 shadow-md font-mono text-xs space-y-1.5 shrink-0 max-w-xs">
+              <span className="text-[10px] text-[#075E54] font-bold uppercase block">Buyer WhatsApp Alert:</span>
+              <p className="text-[11px] text-stone-800 leading-relaxed">
+                ✅ <strong>Factory Inspection Passed!</strong><br />
+                QIMA audited 1,500 Brass Handles in Moradabad. 0 defects. Photos and lab certificates attached.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ========================================================================= */}
