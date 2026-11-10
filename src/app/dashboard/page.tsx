@@ -25,6 +25,8 @@ import {
   ShieldCheck,
   Layers,
   Check,
+  LogOut,
+  Globe,
 } from "lucide-react";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
@@ -36,6 +38,7 @@ import { HoldToConfirm } from "@/components/kokonutui/HoldToConfirm";
 import { ActiveDayChart } from "@/components/kokonutui/ActiveDayChart";
 import { TotalProfitChart } from "@/components/kokonutui/TotalProfitChart";
 import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
+import { ForeignBuyerPortal } from "@/components/kokonutui/ForeignBuyerPortal";
 
 // =========================================================================
 // DATA MODELS & LAYMAN ORDERS (For Indian Merchants & Foundries)
@@ -168,6 +171,7 @@ export default function DashboardPage() {
   const [activeNav, setActiveNav] = useState<
     | "dashboard"
     | "storyline"
+    | "buyer_portal"
     | "layman_store"
     | "orders"
     | "products"
@@ -313,7 +317,32 @@ export default function DashboardPage() {
                 </span>
               </button>
 
-              {/* 3. Foreigner Orders (Layman E-Commerce View) */}
+              {/* 3. Foreign Buyer AI Sourcing Portal */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("buyer_portal")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "buyer_portal"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Globe className={`w-4 h-4 shrink-0 ${activeNav === "buyer_portal" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
+                  <span className="text-xs truncate">Foreign Buyer AI</span>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    activeNav === "buyer_portal"
+                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
+                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
+                  }`}
+                >
+                  BUYER AI
+                </span>
+              </button>
+
+              {/* 4. Foreigner Orders (Layman E-Commerce View for Indian Merchant) */}
               <button
                 type="button"
                 onClick={() => setActiveNav("layman_store")}
@@ -325,7 +354,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <Store className={`w-4 h-4 shrink-0 ${activeNav === "layman_store" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
-                  <span className="text-xs truncate">Foreigner Orders</span>
+                  <span className="text-xs truncate">Merchant Orders</span>
                 </div>
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
@@ -625,6 +654,17 @@ export default function DashboardPage() {
               <HelpCircle className="w-4 h-4 shrink-0" />
               <span>Help &amp; Support</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentSessionUser(null);
+                router.push("/signin");
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors cursor-pointer text-rose-700 hover:bg-rose-50 font-semibold"
+            >
+              <LogOut className="w-4 h-4 shrink-0 text-rose-600" />
+              <span>Sign Out</span>
+            </button>
           </div>
 
           {/* Kokonut UI / React Bits Verified Trade Card */}
@@ -663,7 +703,8 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold text-[#18280e] tracking-tight capitalize font-sans">
               {activeNav === "dashboard" && "Dashboard"}
               {activeNav === "storyline" && "TradeOracle Transaction Storyline"}
-              {activeNav === "layman_store" && "Foreigner Orders (Merchant View)"}
+              {activeNav === "buyer_portal" && "Foreign Buyer AI Sourcing Portal"}
+              {activeNav === "layman_store" && "Merchant Layman Orders View"}
               {activeNav === "orders" && "Active Orders Queue"}
               {activeNav === "products" && "Products & International RFQs"}
               {activeNav === "customers" && "Customers & Global Importers"}
@@ -685,6 +726,32 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Direct Switcher: Merchant View vs Foreign Buyer AI */}
+            <div className="hidden lg:flex items-center gap-1 p-1 bg-[#f4faed] rounded-xl border border-[#d8e5ca]">
+              <button
+                type="button"
+                onClick={() => setActiveNav("dashboard")}
+                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  activeNav === "dashboard"
+                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
+                    : "text-stone-600 hover:text-black"
+                }`}
+              >
+                🏢 Merchant View
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveNav("buyer_portal")}
+                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  activeNav === "buyer_portal"
+                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
+                    : "text-stone-600 hover:text-black"
+                }`}
+              >
+                🌍 Foreign Buyer AI
+              </button>
+            </div>
+
             {/* View Switcher: Template vs Journey Storyline */}
             <KokonutButton
               variant={activeNav === "storyline" ? "primary" : "secondary"}
@@ -713,7 +780,7 @@ export default function DashboardPage() {
               <span>Export</span>
             </KokonutButton>
 
-            {/* Back to Home & Logout */}
+            {/* Back to Home & Direct Always-Visible Sign Out */}
             <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
               <Link
                 href="/"
@@ -722,17 +789,22 @@ export default function DashboardPage() {
                 Home
               </Link>
               {currentUser && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCurrentSessionUser(null);
-                    router.push("/signin");
-                  }}
-                  className="text-xs font-mono text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-md hover:bg-rose-100 transition-colors cursor-pointer"
-                >
-                  Logout
-                </button>
+                <span className="text-[11px] font-mono text-stone-400 hidden xl:inline px-1">
+                  {currentUser.email}
+                </span>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentSessionUser(null);
+                  router.push("/signin");
+                }}
+                className="text-xs font-mono font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title="Sign out of TradeOracle session"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
             </div>
           </div>
         </header>
@@ -743,6 +815,17 @@ export default function DashboardPage() {
           {/* VIEW 0: TRANSACTION STORYLINE (The Heart of the Project)                 */}
           {/* ========================================================================= */}
           {activeNav === "storyline" && <TradeOracleStoryline />}
+
+          {/* ========================================================================= */}
+          {/* VIEW: FOREIGN BUYER DISCOVERY & AI MATCHING PORTAL                       */}
+          {/* ========================================================================= */}
+          {activeNav === "buyer_portal" && (
+            <ForeignBuyerPortal
+              onTriggerPayPalOrder={triggerPayPalEscrow}
+              paypalLoading={paypalLoading}
+              paypalResult={paypalResult}
+            />
+          )}
 
           {/* ========================================================================= */}
           {/* VIEW A: MAIN ANALYTICS DASHBOARD (Exact Match to Previous Template)       */}
