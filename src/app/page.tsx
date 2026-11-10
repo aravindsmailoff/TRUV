@@ -4,7 +4,6 @@ import { Navbar } from "@/components/sites/spade/Navbar";
 import { Hero } from "@/components/sites/spade/Hero";
 import { LogoCloud } from "@/components/sites/spade/LogoCloud";
 import { ScrollRevealIntro } from "@/components/sites/spade/ScrollRevealIntro";
-import { RiskAuthSection } from "@/components/sites/spade/RiskAuthSection";
 import { TradeExecutionSection } from "@/components/sites/spade/TradeExecutionSection";
 import { AnalyticsAndAiSection } from "@/components/sites/spade/AnalyticsAndAiSection";
 import { IndustriesGrid } from "@/components/sites/spade/IndustriesGrid";
@@ -13,9 +12,9 @@ import { DevelopersCta } from "@/components/sites/spade/DevelopersCta";
 import { Footer } from "@/components/sites/spade/Footer";
 
 export const metadata = {
-  title: "The data & AI platform for modern finance | Spade",
+  title: "TRUV | Global Trade Execution Infrastructure",
   description:
-    "Spade takes messy transaction data and turns it into structured, verified records — with AI agents that help you use it everywhere it matters.",
+    "TRUV connects international buyers with vetted Indian manufacturers, coordinating RFQs, automated supplier qualification, and PayPal milestone escrow.",
 };
 
 export default function Home() {
@@ -27,7 +26,6 @@ export default function Home() {
         <Hero />
         <LogoCloud />
         <ScrollRevealIntro />
-        <RiskAuthSection />
         <TradeExecutionSection />
         <AnalyticsAndAiSection />
         <IndustriesGrid />

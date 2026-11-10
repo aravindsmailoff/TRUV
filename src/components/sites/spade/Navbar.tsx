@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ShieldCheck, Heart, BarChart3, User, Building2, Landmark, Bot, LogOut } from "lucide-react";
 import { Magnet } from "@/components/reactbits/Magnet";
 import { IntelligenceConsoleModal } from "./IntelligenceConsoleModal";
 import { getCurrentSessionUser, setCurrentSessionUser, RegisteredUser } from "@/lib/auth/authStore";
 
 export function Navbar() {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
@@ -21,17 +23,27 @@ export function Navbar() {
     };
     window.addEventListener("scroll", handleScroll);
 
-    const updateSession = () => {
+    const handleAuthChange = () => {
       setCurrentUser(getCurrentSessionUser());
     };
-    updateSession();
-    window.addEventListener("truv-auth-changed", updateSession);
+    handleAuthChange();
+    window.addEventListener("truv-auth-changed", handleAuthChange);
+
+    // Stealth Backdoor Entrance Shortcut: Ctrl+Shift+A or Cmd+Shift+A
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "A" || e.key === "a")) {
+        e.preventDefault();
+        router.push("/admin");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("truv-auth-changed", updateSession);
+      window.removeEventListener("truv-auth-changed", handleAuthChange);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [router]);
 
   return (
     <header
@@ -245,13 +257,15 @@ export function Navbar() {
                   <span className="text-[#4a5b38]">({currentUser.role.toUpperCase()})</span>
                 </Link>
 
-                <Link
-                  href="/admin"
-                  className="text-xs font-mono text-[#4a5b38] hover:text-[#18280e] px-2 py-1 transition-colors"
-                  title="Admin Verification Desk"
-                >
-                  Admin Desk
-                </Link>
+                {currentUser.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="text-[11px] font-mono font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-1 rounded hover:bg-amber-100 transition-colors"
+                    title="Administrative Compliance & Whitelist Console"
+                  >
+                    Backdoor Desk
+                  </Link>
+                )}
 
                 <button
                   type="button"
@@ -270,13 +284,6 @@ export function Navbar() {
                   className="px-3.5 py-2 text-xs font-mono font-semibold text-[#18280e] hover:text-[#3f7308] transition-colors"
                 >
                   Sign In
-                </Link>
-                <Link
-                  href="/admin"
-                  className="px-2.5 py-1 text-[11px] font-mono text-[#4a5b38] hover:text-[#18280e] bg-stone-100 hover:bg-stone-200 rounded transition-colors"
-                  title="Administrative Whitelist Console"
-                >
-                  Admin Desk
                 </Link>
                 <Magnet padding={20} magnetStrength={3}>
                   <Link
@@ -329,13 +336,15 @@ export function Navbar() {
                 >
                   Dashboard ({currentUser.name})
                 </Link>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-sm font-mono text-[#4a5b38] py-1"
-                >
-                  Admin Whitelist Console
-                </Link>
+                {currentUser.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm font-mono font-bold text-amber-900 bg-amber-50 px-2 py-1 rounded"
+                  >
+                    Backdoor Console
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -362,13 +371,6 @@ export function Navbar() {
                   className="block text-center mt-2 w-full py-2.5 rounded-md text-xs font-mono font-semibold bg-[#18280e] text-[#b2eb76]"
                 >
                   Request Whitelisted Access
-                </Link>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-center w-full py-2 rounded-md text-xs font-mono text-stone-600 bg-stone-100"
-                >
-                  Admin Console
                 </Link>
               </>
             )}

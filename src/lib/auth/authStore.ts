@@ -298,3 +298,4 @@ export function saveDispatchedEmail(email: DispatchedEmail): void {
     console.error("Failed to save email", e);
   }
 }
+

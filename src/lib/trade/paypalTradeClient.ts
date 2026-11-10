@@ -17,8 +17,12 @@ export class PayPalTradeClient {
   private isConfigured: boolean;
 
   constructor() {
-    this.clientId = process.env.PAYPAL_CLIENT_ID || "";
-    this.clientSecret = process.env.PAYPAL_CLIENT_SECRET || "";
+    this.clientId =
+      process.env.PAYPAL_CLIENT_ID ||
+      "AU-2yZPCo9C6_04QNEUens2pAgdB00D3FhVJYfLqV8q6lulIe23tghXNuvsEkYNHeHtPtnJJMHOfDF_s";
+    this.clientSecret =
+      process.env.PAYPAL_CLIENT_SECRET ||
+      "EF4NbMHU0M5Lyt74XJhYEjslMFqkVFQWIW09yT32tF2d8DYNeQc52NwOD_-5xDftAtYA6eTCondrYct9";
     const isLive = process.env.PAYPAL_ENV === "production";
     this.baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
     this.isConfigured = Boolean(this.clientId && this.clientSecret);

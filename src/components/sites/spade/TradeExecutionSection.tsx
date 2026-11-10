@@ -59,14 +59,6 @@ export function TradeExecutionSection() {
                     </div>
                   </Link>
                 </Magnet>
-
-                <Magnet padding={20} magnetStrength={2}>
-                  <Link href="/admin" className="inline-block">
-                    <div className="group relative inline-flex appearance-none items-center py-2.5 px-4 select-none transition-all justify-center text-stone-600 rounded-md border border-stone-200 bg-[#f4faed] hover:bg-[#ebf7d9] cursor-pointer shadow-xs active:scale-95 text-xs font-mono">
-                      <span>Admin Whitelist Desk</span>
-                    </div>
-                  </Link>
-                </Magnet>
               </div>
 
               {/* Chamfered Stat Badge (<40ms / 100%) */}

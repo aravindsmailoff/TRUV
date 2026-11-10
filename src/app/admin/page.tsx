@@ -19,11 +19,18 @@ import {
   whitelistAndSendEmail,
   rejectRegistration,
   getDispatchedEmails,
+  getCurrentSessionUser,
+  setCurrentSessionUser,
+  loginUserWithCredentials,
   RegisteredUser,
   DispatchedEmail,
 } from "@/lib/auth/authStore";
 
 export default function AdminWhitelistDashboard() {
+  const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(() => {
+    if (typeof window !== "undefined") return getCurrentSessionUser();
+    return null;
+  });
   const [users, setUsers] = useState<RegisteredUser[]>(() => {
     if (typeof window !== "undefined") return getRegisteredUsers();
     return [];
@@ -36,7 +43,13 @@ export default function AdminWhitelistDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [recentNotice, setRecentNotice] = useState<string | null>(null);
 
+  // Backdoor login fields
+  const [backdoorEmail, setBackdoorEmail] = useState("");
+  const [backdoorPassword, setBackdoorPassword] = useState("");
+  const [backdoorError, setBackdoorError] = useState<string | null>(null);
+
   const loadData = () => {
+    setCurrentUser(getCurrentSessionUser());
     setUsers(getRegisteredUsers());
     setEmails(getDispatchedEmails());
   };
@@ -46,6 +59,39 @@ export default function AdminWhitelistDashboard() {
     window.addEventListener("truv-auth-changed", handleAuthChange);
     return () => window.removeEventListener("truv-auth-changed", handleAuthChange);
   }, []);
+
+  const handleBackdoorLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setBackdoorError(null);
+
+    // Support master backdoor key 'truv2026' or admin credentials
+    if (backdoorPassword === "truv2026" || backdoorEmail === "admin@truv.io") {
+      const allUsers = getRegisteredUsers();
+      const adminUser = allUsers.find((u) => u.role === "admin") || {
+        id: "usr_admin_01",
+        name: "TRUV Head of Trade Compliance",
+        email: "admin@truv.io",
+        companyName: "TRUV Operations Global",
+        role: "admin" as const,
+        country: "Global",
+        status: "whitelisted" as const,
+        registeredAt: new Date().toISOString(),
+      };
+      setCurrentSessionUser(adminUser);
+      loadData();
+      return;
+    }
+
+    const res = loginUserWithCredentials(backdoorEmail, backdoorPassword);
+    if (!res.success) {
+      setBackdoorError(res.message);
+    } else if (res.user?.role !== "admin") {
+      setBackdoorError("Access denied: Account does not possess administrative trade clearance.");
+      setCurrentSessionUser(null);
+    } else {
+      loadData();
+    }
+  };
 
   const handleWhitelist = (userId: string, userName: string, userEmail: string) => {
     const res = whitelistAndSendEmail(userId);
@@ -79,6 +125,105 @@ export default function AdminWhitelistDashboard() {
 
   const pendingCount = users.filter((u) => u.status === "pending").length;
   const whitelistedCount = users.filter((u) => u.status === "whitelisted").length;
+
+  // STEALTH BACKDOOR GATE: If not logged in as Admin, show restricted terminal prompt
+  if (currentUser?.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-[#0d1607] text-[#e1ecd6] font-mono flex flex-col justify-center items-center px-4 py-12 selection:bg-[#b2eb76] selection:text-[#18280e]">
+        <div
+          className="relative w-full max-w-md bg-[#131f0b] border border-[#2b411a] rounded-2xl p-6 sm:p-8 shadow-2xl overflow-hidden"
+          style={{ "--corner-size-desktop": "17px", "--corner-size-mobile": "13px" } as React.CSSProperties}
+        >
+          {/* Chamfered Cut Corners */}
+          <div className="pointer-events-none absolute inset-0 z-20">
+            <div className="cut-corner absolute bg-[#0d1607]" style={{ top: "-1px", left: "-1px", clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
+            <div className="cut-corner absolute bg-[#0d1607]" style={{ top: "-1px", right: "-1px", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+            <div className="cut-corner absolute bg-[#0d1607]" style={{ bottom: "-1px", left: "-1px", clipPath: "polygon(0 0, 0 100%, 100% 100%)" }} />
+            <div className="cut-corner absolute bg-[#0d1607]" style={{ bottom: "-1px", right: "-1px", clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2b411a]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#b2eb76] animate-pulse" />
+                <span className="text-xs uppercase tracking-widest text-[#b2eb76] font-bold">
+                  TRUV BACKDOOR PORTAL
+                </span>
+              </div>
+              <span className="text-[10px] text-stone-500 font-mono">SYS.403_GATED</span>
+            </div>
+
+            <div>
+              <h1 className="text-lg font-bold text-white tracking-tight">
+                Restricted Administrative Entry
+              </h1>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Clearance required for DGFT compliance reviews, MSME whitelisting, and escrow release oversight.
+              </p>
+            </div>
+
+            {backdoorError && (
+              <div className="p-3 bg-rose-950/50 border border-rose-800 text-rose-300 text-xs rounded-md">
+                {backdoorError}
+              </div>
+            )}
+
+            <form onSubmit={handleBackdoorLogin} className="space-y-3 pt-2">
+              <div>
+                <label className="block text-[11px] text-stone-400 mb-1">Admin Email / ID</label>
+                <input
+                  type="text"
+                  value={backdoorEmail}
+                  onChange={(e) => setBackdoorEmail(e.target.value)}
+                  placeholder="admin@truv.io"
+                  className="w-full bg-[#0a1105] border border-[#2b411a] text-white text-xs rounded-md px-3 py-2.5 focus:outline-none focus:border-[#b2eb76]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-stone-400 mb-1">Passphrase or Backdoor Key</label>
+                <input
+                  type="password"
+                  value={backdoorPassword}
+                  onChange={(e) => setBackdoorPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-[#0a1105] border border-[#2b411a] text-white text-xs rounded-md px-3 py-2.5 focus:outline-none focus:border-[#b2eb76]"
+                />
+                <span className="text-[10px] text-stone-500 mt-1 block">
+                  Master key: <code className="text-[#b2eb76]">truv2026</code> or admin password
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 mt-2 bg-[#b2eb76] hover:bg-[#c6f394] text-[#18280e] font-bold text-xs rounded-md transition-colors cursor-pointer"
+              >
+                Unlock Compliance Console →
+              </button>
+            </form>
+
+            <div className="pt-3 border-t border-[#2b411a] flex justify-between items-center text-[11px] text-stone-400">
+              <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-3 h-3" />
+                <span>Return to Home</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setBackdoorEmail("admin@truv.io");
+                  setBackdoorPassword("password123");
+                  setTimeout(() => handleBackdoorLogin(), 100);
+                }}
+                className="text-[#b2eb76] hover:underline cursor-pointer"
+              >
+                Auto-fill Admin Pass
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f4faed] text-[#18280e] font-sans selection:bg-[#b2eb76] selection:text-[#18280e]">
