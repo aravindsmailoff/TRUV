@@ -24,10 +24,6 @@ import {
   ChevronRight,
   ShieldCheck,
   Layers,
-  Scale,
-  Ship,
-  ClipboardCheck,
-  Building,
   Check,
 } from "lucide-react";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
@@ -243,128 +239,165 @@ export default function DashboardPage() {
       <ClickSpark sparkColor="#b2eb76" sparkCount={9} sparkRadius={26} duration={400} />
 
       {/* ========================================================================= */}
-      {/* 1. LEFT SIDEBAR (Original Clean Spade Theme + Side Menu Stages)          */}
+      {/* 1. LEFT SIDEBAR (Original Clean Spade Theme + Polished Menu System)      */}
       {/* ========================================================================= */}
-      <aside className="w-64 bg-white border-r border-stone-200/80 flex flex-col justify-between shrink-0 min-h-screen sticky top-0 z-30 shadow-xs">
-        <div className="overflow-y-auto max-h-screen scrollbar-none">
+      <aside className="w-72 bg-white border-r border-stone-200/80 flex flex-col justify-between shrink-0 min-h-screen sticky top-0 z-30 shadow-xs">
+        <div className="overflow-y-auto max-h-screen scrollbar-none flex flex-col">
           {/* Brand Logo Header */}
-          <div className="h-16 px-6 flex items-center justify-between border-b border-stone-100">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="font-extrabold text-xl tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors">
-                TradeOracle<span className="text-[#3f7308]">.</span>
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
-                PAYPAL
-              </span>
+          <div className="h-16 px-5 flex items-center justify-between border-b border-stone-100/90">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-xl bg-[#18280e] flex items-center justify-center text-[#b2eb76] font-black text-sm shadow-xs transition-transform group-hover:scale-105">
+                TO
+              </div>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-base tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors leading-none">
+                  TradeOracle<span className="text-[#3f7308]">.</span>
+                </span>
+                <span className="text-[10px] font-mono text-stone-400 font-semibold tracking-wider uppercase mt-1">
+                  Cross-Border Rails
+                </span>
+              </div>
             </Link>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold border border-[#d8e5ca]/70">
+              PAYPAL
+            </span>
           </div>
 
           {/* Navigation Items */}
-          <nav className="p-4 space-y-1 text-xs font-medium">
-            {/* 1. Dashboard (Main Template Analytics View) */}
-            <button
-              onClick={() => setActiveNav("dashboard")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "dashboard"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <LayoutDashboard className="w-4 h-4 shrink-0" />
-                <span className="text-sm">Dashboard</span>
-              </div>
-              {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76]" />}
-            </button>
-
-            {/* 2. Transaction Storyline (Find → Agree → Pay → Deliver → Prove → Resolve) */}
-            <button
-              onClick={() => setActiveNav("storyline")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "storyline"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-[#18280e] bg-[#ebf7d9]/70 hover:bg-[#ebf7d9] font-bold"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Layers className="w-4 h-4 shrink-0 text-[#3f7308]" />
-                <span className="text-sm">Transaction Journey</span>
-              </div>
-              <span className="px-1.5 py-0.5 rounded-md bg-[#18280e] text-[#b2eb76] font-mono text-[9px] font-bold">
-                STORY
+          <nav className="p-3.5 space-y-4 text-xs font-medium">
+            {/* Group 1: Main Platform */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold px-3 py-1 block">
+                Main Menu
               </span>
-            </button>
 
-            {/* 3. Foreigner Orders (Layman E-Commerce View for Indian Merchants) */}
-            <button
-              onClick={() => setActiveNav("layman_store")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "layman_store"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Store className="w-4 h-4 shrink-0 text-[#3f7308]" />
-                <span className="text-sm">Foreigner Orders</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#3f7308] font-bold font-mono text-[10px]">
-                MERCHANT
-              </span>
-            </button>
+              {/* 1. Dashboard */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("dashboard")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "dashboard"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <LayoutDashboard className="w-4 h-4 shrink-0" />
+                  <span className="text-xs truncate">Dashboard</span>
+                </div>
+                {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76] shrink-0" />}
+              </button>
 
-            {/* 4. Orders (with badge count 46) */}
-            <button
-              onClick={() => setActiveNav("orders")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "orders"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="w-4 h-4 shrink-0" />
-                <span className="text-sm">Orders</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#3f7308] font-bold font-mono text-[11px]">
-                46
-              </span>
-            </button>
+              {/* 2. Transaction Storyline */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("storyline")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "storyline"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Layers className={`w-4 h-4 shrink-0 ${activeNav === "storyline" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
+                  <span className="text-xs truncate">Transaction Journey</span>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    activeNav === "storyline"
+                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
+                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
+                  }`}
+                >
+                  STORY
+                </span>
+              </button>
 
-            {/* 5. Products / RFQs */}
-            <button
-              onClick={() => setActiveNav("products")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "products"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <Package className="w-4 h-4 shrink-0" />
-              <span className="text-sm">Products / RFQs</span>
-            </button>
+              {/* 3. Foreigner Orders (Layman E-Commerce View) */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("layman_store")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "layman_store"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Store className={`w-4 h-4 shrink-0 ${activeNav === "layman_store" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
+                  <span className="text-xs truncate">Foreigner Orders</span>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    activeNav === "layman_store"
+                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
+                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
+                  }`}
+                >
+                  MERCHANT
+                </span>
+              </button>
 
-            {/* 6. Customers */}
-            <button
-              onClick={() => setActiveNav("customers")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "customers"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <Users className="w-4 h-4 shrink-0" />
-              <span className="text-sm">Customers</span>
-            </button>
+              {/* 4. Orders */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("orders")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "orders"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <ShoppingBag className="w-4 h-4 shrink-0" />
+                  <span className="text-xs truncate">Orders</span>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    activeNav === "orders"
+                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
+                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
+                  }`}
+                >
+                  46
+                </span>
+              </button>
 
-            {/* ================================================================= */}
-            {/* TRADE ENGINE STAGES (Clean Sidebar Rail Stages)                    */}
-            {/* ================================================================= */}
-            <div className="pt-3 pb-1 border-t border-stone-100">
+              {/* 5. Products / RFQs */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("products")}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "products"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <Package className="w-4 h-4 shrink-0" />
+                <span className="text-xs truncate">Products / RFQs</span>
+              </button>
+
+              {/* 6. Customers */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("customers")}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "customers"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span className="text-xs truncate">Customers</span>
+              </button>
+            </div>
+
+            {/* Group 2: Trade Execution Rails Accordion */}
+            <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
                 onClick={() => setTradeRailsOpen(!tradeRailsOpen)}
-                className="w-full flex items-center justify-between px-3.5 py-1 text-xs font-mono uppercase tracking-wider text-stone-400 font-semibold hover:text-[#18280e] cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
@@ -374,99 +407,135 @@ export default function DashboardPage() {
               </button>
 
               {tradeRailsOpen && (
-                <div className="pl-3 pt-1 space-y-0.5 text-xs font-medium">
+                <div className="mt-1 space-y-0.5 border-l-2 border-[#d8e5ca]/60 ml-4 pl-2">
                   {/* Step 1 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("rfq_demand")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "rfq_demand" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "rfq_demand"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs">🌐</span>
-                      <span>1. Buyer RFQ Demand</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
+                    <span className="text-xs truncate">1. Buyer RFQ Demand</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "rfq_demand"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-[#ebf7d9] text-[#284905]"
+                      }`}
+                    >
                       3 Active
                     </span>
                   </button>
 
                   {/* Step 2 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("msme_vetting")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "msme_vetting" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "msme_vetting"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Building className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>2. MSME Vetting</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
+                    <span className="text-xs truncate">2. MSME Vetting</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "msme_vetting"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-stone-100 text-stone-600"
+                      }`}
+                    >
                       3 Hubs
                     </span>
                   </button>
 
                   {/* Step 3 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("commercial_ai")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "commercial_ai" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "commercial_ai"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Scale className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>3. Commercial PO (AI)</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
+                    <span className="text-xs truncate">3. Commercial PO (AI)</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "commercial_ai"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-stone-100 text-stone-600"
+                      }`}
+                    >
                       UCP 600
                     </span>
                   </button>
 
                   {/* Step 4 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("paypal_escrow")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "paypal_escrow" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "paypal_escrow"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>4. PayPal Escrow</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
+                    <span className="text-xs truncate">4. PayPal Escrow</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "paypal_escrow"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-[#ebf7d9] text-[#284905]"
+                      }`}
+                    >
                       30% Adv
                     </span>
                   </button>
 
                   {/* Step 5 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("quality_qima")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "quality_qima" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "quality_qima"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <ClipboardCheck className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>5. QIMA Inspection</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
+                    <span className="text-xs truncate">5. QIMA Inspection</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "quality_qima"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-stone-100 text-stone-600"
+                      }`}
+                    >
                       AQL 1.5
                     </span>
                   </button>
 
                   {/* Step 6 */}
                   <button
+                    type="button"
                     onClick={() => setActiveNav("customs_bl")}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "customs_bl" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "text-stone-600 hover:bg-[#f4faed]"
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                      activeNav === "customs_bl"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Ship className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>6. Customs &amp; BL</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
+                    <span className="text-xs truncate">6. Customs & BL</span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                        activeNav === "customs_bl"
+                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
+                          : "bg-stone-100 text-stone-600"
+                      }`}
+                    >
                       ICEGATE
                     </span>
                   </button>
@@ -474,12 +543,12 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Finances Section */}
-            <div className="pt-2 pb-1">
+            {/* Group 3: Finances Accordion */}
+            <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
                 onClick={() => setFinancesOpen(!financesOpen)}
-                className="w-full flex items-center justify-between px-3.5 py-1 text-xs font-mono uppercase tracking-wider text-stone-400 font-semibold hover:text-[#18280e] cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Receipt className="w-3.5 h-3.5" />
@@ -489,27 +558,36 @@ export default function DashboardPage() {
               </button>
 
               {financesOpen && (
-                <div className="pl-6 pt-1 space-y-1 text-xs font-medium text-stone-600">
+                <div className="mt-1 space-y-0.5 border-l-2 border-[#d8e5ca]/60 ml-4 pl-2">
                   <button
+                    type="button"
                     onClick={() => setActiveNav("invoices")}
-                    className={`w-full text-left py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "invoices" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "hover:bg-[#f4faed] hover:text-[#18280e]"
+                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                      activeNav === "invoices"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
                     Invoices
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveNav("transactions")}
-                    className={`w-full text-left py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "transactions" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "hover:bg-[#f4faed] hover:text-[#18280e]"
+                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                      activeNav === "transactions"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
                     Transactions
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveNav("reports")}
-                    className={`w-full text-left py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
-                      activeNav === "reports" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "hover:bg-[#f4faed] hover:text-[#18280e]"
+                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                      activeNav === "reports"
+                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
                     Reports
@@ -520,25 +598,31 @@ export default function DashboardPage() {
           </nav>
         </div>
 
-        {/* Bottom Section: Kokonut UI Card & PayPal Credentials */}
-        <div className="p-4 space-y-3 border-t border-stone-100">
+        {/* Bottom Section: Settings & Active Rails Card */}
+        <div className="p-3.5 space-y-3 border-t border-stone-100">
           <div className="space-y-1 text-xs font-medium text-stone-600">
             <button
+              type="button"
               onClick={() => setActiveNav("settings")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
-                activeNav === "settings" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "hover:bg-[#f4faed] hover:text-[#18280e]"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors cursor-pointer ${
+                activeNav === "settings"
+                  ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                  : "hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
               }`}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 shrink-0" />
               <span>Settings</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveNav("help")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
-                activeNav === "help" ? "bg-[#18280e] text-[#b2eb76] font-semibold" : "hover:bg-[#f4faed] hover:text-[#18280e]"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors cursor-pointer ${
+                activeNav === "help"
+                  ? "bg-[#18280e] text-[#b2eb76] font-semibold"
+                  : "hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
               }`}
             >
-              <HelpCircle className="w-4 h-4" />
+              <HelpCircle className="w-4 h-4 shrink-0" />
               <span>Help &amp; Support</span>
             </button>
           </div>
@@ -553,7 +637,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h4 className="text-xs font-bold font-sans text-white">PayPal Active Rails</h4>
-              <p className="text-[10px] text-stone-300 leading-tight mt-0.5 font-mono">
+              <p className="text-[10px] text-stone-300 leading-tight mt-0.5 font-mono truncate">
                 sb-knljl53833937@business
               </p>
             </div>
@@ -561,7 +645,7 @@ export default function DashboardPage() {
               type="button"
               onClick={triggerPayPalEscrow}
               disabled={paypalLoading}
-              className="w-full py-1.5 bg-[#b2eb76] hover:bg-[#c2f38d] text-[#18280e] font-bold text-xs rounded-lg transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+              className="w-full py-1.5 bg-[#b2eb76] hover:bg-[#c2f38d] text-[#18280e] font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
               {paypalLoading ? "Connecting..." : "Trigger Escrow ($25.7k)"}
             </button>
