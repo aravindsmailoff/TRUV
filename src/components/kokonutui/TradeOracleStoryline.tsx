@@ -195,7 +195,7 @@ const STORIES: TransactionStory[] = [
 ];
 
 export function TradeOracleStoryline() {
-  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [selectedStoryIndex] = useState(0);
   const [activeStep, setActiveStep] = useState<"find" | "agree" | "pay" | "deliver" | "prove" | "resolve">("agree");
   const [evidenceVerified, setEvidenceVerified] = useState(false);
 
@@ -227,34 +227,10 @@ export function TradeOracleStoryline() {
             </p>
           </div>
 
-          {/* Archetype Switcher: Goods (Foundry) vs Service (Software Agency) */}
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] shrink-0 font-mono text-xs shadow-2xs">
-            <button
-              onClick={() => {
-                setSelectedStoryIndex(0);
-                setActiveStep("agree");
-              }}
-              className={`px-3.5 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-                selectedStoryIndex === 0
-                  ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
-                  : "text-stone-600 hover:text-black"
-              }`}
-            >
-              🏭 Goods Export ($85.7k)
-            </button>
-            <button
-              onClick={() => {
-                setSelectedStoryIndex(1);
-                setActiveStep("agree");
-              }}
-              className={`px-3.5 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-                selectedStoryIndex === 1
-                  ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
-                  : "text-stone-600 hover:text-black"
-              }`}
-            >
-              💻 Service Export ($5k)
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold bg-[#ebf7d9] text-[#18280e] border border-[#d8e5ca]">
+              {story.badge} • {story.dealValueINR}
+            </span>
           </div>
         </div>
 

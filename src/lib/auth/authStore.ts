@@ -10,7 +10,7 @@ export interface RegisteredUser {
   email: string;
   password?: string;
   companyName: string;
-  role: "buyer" | "manufacturer" | "admin";
+  role: "buyer" | "manufacturer" | "admin" | "service";
   country: string;
   iecCode?: string;
   gstin?: string;
@@ -74,6 +74,20 @@ const SEED_USERS: RegisteredUser[] = [
     status: "whitelisted",
     registeredAt: "2026-11-06T09:15:00Z",
     whitelistedAt: "2026-11-06T11:45:00Z",
+    approvalEmailSent: true,
+  },
+  {
+    id: "usr_svc_01",
+    name: "Aravind Sharma (Lead Architect)",
+    email: "accounts@hyperscalelabs.io",
+    password: "password123",
+    companyName: "HyperScale Software Labs LLP",
+    role: "service",
+    country: "India",
+    gstin: "27AABCH1092K1Z8",
+    status: "whitelisted",
+    registeredAt: "2026-11-06T12:00:00Z",
+    whitelistedAt: "2026-11-06T12:30:00Z",
     approvalEmailSent: true,
   },
   {

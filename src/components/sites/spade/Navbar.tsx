@@ -196,7 +196,17 @@ export function Navbar() {
                   title="TradeOracle Foreign Buyer Sourcing & Procurement Portal"
                 >
                   <span>🌍 Buyer Portal</span>
-                  <span className="size-1.5 rounded-full bg-[#3f7308]" />
+                </Link>
+              </li>
+
+              {/* Freelancer & Service Provider Portal */}
+              <li>
+                <Link
+                  href="/service"
+                  className="inline-flex items-center gap-1.5 text-15px-btn text-blue-900 hover:text-blue-700 font-bold cursor-pointer transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200"
+                  title="TradeOracle Freelancer & IT Service Exporter Portal"
+                >
+                  <span>💻 Service Portal</span>
                 </Link>
               </li>
 

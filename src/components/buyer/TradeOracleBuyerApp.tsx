@@ -194,7 +194,7 @@ export function TradeOracleBuyerApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "create_paypal_payment",
-          tradeId: "trade_global_01",
+          tradeId: "trade_live_7719",
           isAdvance,
         }),
       });
@@ -306,7 +306,14 @@ export function TradeOracleBuyerApp() {
             href="/dashboard"
             className="text-xs font-mono font-bold text-[#18280e] bg-[#ebf7d9] hover:bg-[#d8e5ca] border border-[#d8e5ca] px-3 py-1.5 rounded-xl transition-colors hidden sm:flex items-center gap-1.5"
           >
-            <span>🏢 Indian Merchant View</span>
+            <span>🏢 Merchant View</span>
+          </Link>
+
+          <Link
+            href="/service"
+            className="text-xs font-mono font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl transition-colors hidden sm:flex items-center gap-1.5"
+          >
+            <span>💻 Service Portal</span>
           </Link>
 
           <button
@@ -1773,3 +1780,4 @@ export function TradeOracleBuyerApp() {
     </div>
   );
 }
+

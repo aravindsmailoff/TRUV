@@ -53,12 +53,16 @@ export default function SigninPage() {
       type: "success",
       text: res.user?.role === "buyer" 
         ? "Foreign Buyer Account verified! Redirecting to Foreign Buyer Portal..."
+        : res.user?.role === "service"
+        ? "Freelancer / Service Provider verified! Redirecting to Service Portal..."
         : "Whitelisted account verified! Redirecting to Platform...",
     });
 
     setTimeout(() => {
       if (res.user?.role === "buyer") {
         router.push("/buyer");
+      } else if (res.user?.role === "service" || email.includes("hyperscale")) {
+        router.push("/service");
       } else {
         router.push("/dashboard");
       }
@@ -230,6 +234,19 @@ export default function SigninPage() {
                 >
                   <span>🇮🇳 Whitelisted MSME: <strong>exports@mpfbrass...</strong></span>
                   <span className="text-[10px] text-[#3f7308] font-bold">✓ Approved</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("accounts@hyperscalelabs.io");
+                    setPassword("password123");
+                    handleLogin("accounts@hyperscalelabs.io", "password123");
+                  }}
+                  className="w-full text-left p-2 rounded bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-900 flex justify-between items-center transition-colors"
+                >
+                  <span>💻 Freelancer / Service: <strong>accounts@hyperscale...</strong></span>
+                  <span className="text-[10px] text-blue-700 font-bold">✓ Approved</span>
                 </button>
 
                 <button

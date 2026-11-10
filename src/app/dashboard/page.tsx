@@ -27,6 +27,7 @@ import {
   Check,
   LogOut,
   Globe,
+  Code2,
 } from "lucide-react";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
@@ -220,7 +221,7 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "create_paypal_payment",
-          tradeId: "trade_global_01",
+          tradeId: "trade_live_7719",
           isAdvance: true,
         }),
       });
@@ -233,7 +234,7 @@ export default function DashboardPage() {
           id: data.paymentOrder.id,
           status: data.paymentOrder.status,
           approveUrl: approveLink,
-          amount: "$25,725.00 USD (30% Advance Escrow)",
+          amount: "$24,990.00 USD (30% Advance Escrow)",
         });
       }
     } catch {
@@ -271,6 +272,54 @@ export default function DashboardPage() {
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold border border-[#d8e5ca]/70">
               PAYPAL
             </span>
+          </div>
+
+          {/* Quick Portals Switcher */}
+          <div className="p-3 border-b border-stone-100 bg-[#fbfdf9]">
+            <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 font-bold px-2 block mb-1">
+              Switch Workspace Portal
+            </span>
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => setActiveNav("dashboard")}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  activeNav === "dashboard"
+                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Store className="w-3.5 h-3.5" />
+                  <span>Indian Manufacturer</span>
+                </div>
+                {activeNav === "dashboard" ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76]" />
+                ) : (
+                  <span className="text-[9px] font-mono text-stone-400">PHYSICAL</span>
+                )}
+              </button>
+              <Link
+                href="/buyer"
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Globe className="w-3.5 h-3.5 text-[#3f7308]" />
+                  <span>Foreign Buyer Portal</span>
+                </div>
+                <span className="text-[9px] font-mono text-stone-400">GLOBAL</span>
+              </Link>
+              <Link
+                href="/service"
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Freelancer Service Portal</span>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold">TECH</span>
+              </Link>
+            </div>
           </div>
 
           {/* Navigation Items */}
@@ -732,63 +781,36 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Direct Switcher: Merchant View vs Foreign Buyer Portal */}
-            <div className="flex items-center gap-1 p-1 bg-[#f4faed] rounded-xl border border-[#d8e5ca] shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setActiveNav("dashboard")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                  activeNav === "dashboard"
-                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
-                    : "text-stone-600 hover:text-black"
-                }`}
-              >
-                🏢 Merchant View
-              </button>
-              <Link
-                href="/buyer"
-                className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all bg-white hover:bg-stone-100 text-[#18280e] border border-stone-200 flex items-center gap-1"
-              >
-                <span>🌍 Open Full Buyer Portal →</span>
-              </Link>
-            </div>
-
-            {/* View Switcher: Template vs Journey Storyline */}
-            <KokonutButton
-              variant={activeNav === "storyline" ? "primary" : "secondary"}
-              size="sm"
-              onClick={() => setActiveNav(activeNav === "storyline" ? "dashboard" : "storyline")}
-            >
-              <Layers className="w-3.5 h-3.5 text-[#3f7308]" />
-              <span>{activeNav === "storyline" ? "Dashboard View" : "Transaction Story"}</span>
-            </KokonutButton>
-
-            {/* Date Range Selector */}
-            <div className="hidden md:flex items-center gap-2 bg-[#f4faed] border border-[#d8e5ca] px-3 py-1.5 rounded-xl text-xs font-mono text-stone-700">
+            {/* Date Range Selector matching reference template */}
+            <div className="hidden md:flex items-center gap-2 bg-[#f4faed] border border-[#d8e5ca] px-3.5 py-1.5 rounded-xl text-xs font-mono text-stone-700">
               <Calendar className="w-3.5 h-3.5 text-stone-500" />
               <span>Jan 1, 2026 - Feb 1, 2026</span>
               <span className="text-stone-300">|</span>
               <span className="font-semibold text-[#18280e]">Last 30 days ∨</span>
             </div>
 
-            {/* Export Button */}
-            <KokonutButton
-              variant="primary"
-              size="sm"
+            {/* Add Widget Button */}
+            <button
+              type="button"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-xs font-mono font-semibold text-stone-700 transition-colors shadow-2xs cursor-pointer"
+              onClick={() => alert("Customize Dashboard Widgets: Added Real-time Telemetry & Escrow Monitor")}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500" />
+              <span>Add widget</span>
+            </button>
+
+            {/* Export Button matching reference */}
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-mono font-bold transition-colors shadow-xs cursor-pointer"
               onClick={() => alert("Exporting verified commercial trade ledger CSV...")}
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export</span>
-            </KokonutButton>
+            </button>
 
-            {/* Back to Home & Direct Always-Visible Sign Out */}
-            <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
-              <Link
-                href="/"
-                className="text-xs font-mono text-stone-500 hover:text-black px-2 py-1 transition-colors"
-              >
-                Home
-              </Link>
+            {/* User Profile & Direct Sign Out */}
+            <div className="flex items-center gap-2 pl-3 border-l border-stone-200">
               {currentUser && (
                 <span className="text-[11px] font-mono text-stone-400 hidden xl:inline px-1">
                   {currentUser.email}
