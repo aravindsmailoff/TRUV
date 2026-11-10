@@ -178,3 +178,4 @@ export class ElasticTradeSearchEngine {
 }
 
 export const elasticSearchEngine = new ElasticTradeSearchEngine();
+

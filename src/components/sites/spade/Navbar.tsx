@@ -188,11 +188,15 @@ export function Navbar() {
                 </Link>
               </li>
 
-              {/* Manufacturer Dashboard */}
+              {/* Sponsor Infrastructure & Trade Console */}
               <li>
-                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-15px-btn text-[#3f7308] hover:text-[#18280e] font-semibold cursor-pointer transition-colors bg-[#ebf7d9] px-2.5 py-1 rounded-md">
-                  <span>Dashboard</span>
-                  <span className="size-1.5 rounded-full bg-[#3f7308] animate-pulse" />
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-1.5 text-15px-btn text-[#18280e] hover:text-[#3f7308] font-bold cursor-pointer transition-colors bg-[#b2eb76]/40 hover:bg-[#b2eb76] px-3 py-1.5 rounded-lg border border-[#3f7308]/30"
+                  title="Live PayPal, Elastic, Zapier & Astropods Execution Rails"
+                >
+                  <span>Sponsor Rails (PayPal &amp; Elastic)</span>
+                  <span className="size-2 rounded-full bg-[#18280e] animate-pulse" />
                 </Link>
               </li>
 
@@ -322,6 +326,13 @@ export function Navbar() {
           </Link>
           <Link href="/customers" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium py-1">
             Customers
+          </Link>
+          <Link
+            href="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-sm font-bold text-[#18280e] bg-[#b2eb76]/40 px-3 py-1.5 rounded-md"
+          >
+            Sponsor Rails (PayPal &amp; Elastic)
           </Link>
           <Link href="https://docs.spade.com/" target="_blank" className="block text-sm font-medium py-1">
             Docs
