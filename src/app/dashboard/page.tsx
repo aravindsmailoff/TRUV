@@ -732,7 +732,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Direct Switcher: Merchant View vs Foreign Buyer AI */}
+            {/* Direct Switcher: Merchant View vs Foreign Buyer Portal */}
             <div className="flex items-center gap-1 p-1 bg-[#f4faed] rounded-xl border border-[#d8e5ca] shadow-2xs">
               <button
                 type="button"
@@ -745,17 +745,12 @@ export default function DashboardPage() {
               >
                 🏢 Merchant View
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveNav("buyer_portal")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                  activeNav === "buyer_portal"
-                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
-                    : "text-stone-600 hover:text-black"
-                }`}
+              <Link
+                href="/buyer"
+                className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all bg-white hover:bg-stone-100 text-[#18280e] border border-stone-200 flex items-center gap-1"
               >
-                🌍 Foreign Buyer View
-              </button>
+                <span>🌍 Open Full Buyer Portal →</span>
+              </Link>
             </div>
 
             {/* View Switcher: Template vs Journey Storyline */}

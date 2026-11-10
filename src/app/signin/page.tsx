@@ -51,11 +51,17 @@ export default function SigninPage() {
 
     setStatusMsg({
       type: "success",
-      text: "Whitelisted account verified! Redirecting to TRUV Platform...",
+      text: res.user?.role === "buyer" 
+        ? "Foreign Buyer Account verified! Redirecting to Foreign Buyer Portal..."
+        : "Whitelisted account verified! Redirecting to Platform...",
     });
 
     setTimeout(() => {
-      router.push("/dashboard");
+      if (res.user?.role === "buyer") {
+        router.push("/buyer");
+      } else {
+        router.push("/dashboard");
+      }
     }, 1000);
   };
 

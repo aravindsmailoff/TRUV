@@ -188,6 +188,18 @@ export function Navbar() {
                 </Link>
               </li>
 
+              {/* Foreign Buyer Portal Link */}
+              <li>
+                <Link
+                  href="/buyer"
+                  className="inline-flex items-center gap-1.5 text-15px-btn text-[#18280e] hover:text-[#3f7308] font-bold cursor-pointer transition-colors bg-[#ebf7d9] hover:bg-[#d8e5ca] px-3 py-1.5 rounded-lg border border-[#3f7308]/20"
+                  title="TradeOracle Foreign Buyer Sourcing & Procurement Portal"
+                >
+                  <span>🌍 Buyer Portal</span>
+                  <span className="size-1.5 rounded-full bg-[#3f7308]" />
+                </Link>
+              </li>
+
               {/* Sponsor Infrastructure & Trade Console */}
               <li>
                 <Link
@@ -195,7 +207,7 @@ export function Navbar() {
                   className="inline-flex items-center gap-1.5 text-15px-btn text-[#18280e] hover:text-[#3f7308] font-bold cursor-pointer transition-colors bg-[#b2eb76]/40 hover:bg-[#b2eb76] px-3 py-1.5 rounded-lg border border-[#3f7308]/30"
                   title="Live PayPal, Elastic, Zapier & Astropods Execution Rails"
                 >
-                  <span>Sponsor Rails (PayPal &amp; Elastic)</span>
+                  <span>Merchant Rails</span>
                   <span className="size-2 rounded-full bg-[#18280e] animate-pulse" />
                 </Link>
               </li>
