@@ -8,11 +8,8 @@ import {
   ShoppingBag,
   Package,
   Users,
-  FileText,
   Store,
   Receipt,
-  BarChart3,
-  Percent,
   Settings,
   HelpCircle,
   Calendar,
@@ -27,11 +24,19 @@ import {
   ChevronRight,
   ShieldCheck,
   Layers,
+  Scale,
   Ship,
   ClipboardCheck,
+  Building,
+  Check,
 } from "lucide-react";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
+import { ClickSpark } from "@/components/reactbits/ClickSpark";
+import { SlideToConfirm } from "@/components/kokonutui/SlideToConfirm";
+import { KokonutButton } from "@/components/kokonutui/KokonutButton";
+import { HoldToConfirm } from "@/components/kokonutui/HoldToConfirm";
+import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
 
 // =========================================================================
 // DATA MODELS & LAYMAN ORDERS (For Indian Merchants & Foundries)
@@ -163,6 +168,7 @@ export default function DashboardPage() {
   // Active view switcher: Main navigation + Trade Engine Side Menus
   const [activeNav, setActiveNav] = useState<
     | "dashboard"
+    | "storyline"
     | "layman_store"
     | "orders"
     | "products"
@@ -186,6 +192,7 @@ export default function DashboardPage() {
   const [financesOpen, setFinancesOpen] = useState(true);
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
   const [selectedLaymanOrder, setSelectedLaymanOrder] = useState<LaymanTradeOrder>(LAYMAN_ORDERS[0]);
+  const [lockedOrderIds, setLockedOrderIds] = useState<Record<string, boolean>>({});
 
   // PayPal Live Sandbox Execution State inside the dashboard
   const [paypalLoading, setPaypalLoading] = useState(false);
@@ -228,7 +235,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4faed] text-[#18280e] font-sans selection:bg-[#b2eb76] selection:text-[#18280e] flex">
+    <div className="min-h-screen bg-[#f4faed] text-[#18280e] font-sans selection:bg-[#b2eb76] selection:text-[#18280e] flex relative">
+      {/* React Bits ClickSpark Particle Glow Canvas */}
+      <ClickSpark sparkColor="#b2eb76" sparkCount={9} sparkRadius={26} duration={400} />
+
       {/* ========================================================================= */}
       {/* 1. LEFT SIDEBAR (Original Clean Spade Theme + Side Menu Stages)          */}
       {/* ========================================================================= */}
@@ -238,10 +248,10 @@ export default function DashboardPage() {
           <div className="h-16 px-6 flex items-center justify-between border-b border-stone-100">
             <Link href="/" className="flex items-center gap-2 group">
               <span className="font-extrabold text-xl tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors">
-                TRUV<span className="text-[#3f7308]">.</span>
+                TradeOracle<span className="text-[#3f7308]">.</span>
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
-                OPERATOR
+                PAYPAL
               </span>
             </Link>
           </div>
@@ -264,25 +274,43 @@ export default function DashboardPage() {
               {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76]" />}
             </button>
 
-            {/* 2. Foreigner Orders (Layman E-Commerce View for Indian Merchants) */}
+            {/* 2. Transaction Storyline (Find → Agree → Pay → Deliver → Prove → Resolve) */}
+            <button
+              onClick={() => setActiveNav("storyline")}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
+                activeNav === "storyline"
+                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                  : "text-[#18280e] bg-[#ebf7d9]/70 hover:bg-[#ebf7d9] font-bold"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Layers className="w-4 h-4 shrink-0 text-[#3f7308]" />
+                <span className="text-sm">Transaction Journey</span>
+              </div>
+              <span className="px-1.5 py-0.5 rounded-md bg-[#18280e] text-[#b2eb76] font-mono text-[9px] font-bold">
+                STORY
+              </span>
+            </button>
+
+            {/* 3. Foreigner Orders (Layman E-Commerce View for Indian Merchants) */}
             <button
               onClick={() => setActiveNav("layman_store")}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                 activeNav === "layman_store"
                   ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-[#18280e] bg-[#ebf7d9]/80 hover:bg-[#ebf7d9] font-bold"
+                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
               }`}
             >
               <div className="flex items-center gap-3">
                 <Store className="w-4 h-4 shrink-0 text-[#3f7308]" />
                 <span className="text-sm">Foreigner Orders</span>
               </div>
-              <span className="px-1.5 py-0.5 rounded-md bg-[#18280e] text-[#b2eb76] font-mono text-[10px] font-bold">
-                STORE
+              <span className="px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#3f7308] font-bold font-mono text-[10px]">
+                MERCHANT
               </span>
             </button>
 
-            {/* 3. Orders (with badge count 46) */}
+            {/* 4. Orders (with badge count 46) */}
             <button
               onClick={() => setActiveNav("orders")}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
@@ -300,7 +328,7 @@ export default function DashboardPage() {
               </span>
             </button>
 
-            {/* 4. Products / RFQs */}
+            {/* 5. Products / RFQs */}
             <button
               onClick={() => setActiveNav("products")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
@@ -313,7 +341,7 @@ export default function DashboardPage() {
               <span className="text-sm">Products / RFQs</span>
             </button>
 
-            {/* 5. Customers */}
+            {/* 6. Customers */}
             <button
               onClick={() => setActiveNav("customers")}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
@@ -326,21 +354,8 @@ export default function DashboardPage() {
               <span className="text-sm">Customers</span>
             </button>
 
-            {/* 6. Content */}
-            <button
-              onClick={() => setActiveNav("content")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "content"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <FileText className="w-4 h-4 shrink-0" />
-              <span className="text-sm">Content</span>
-            </button>
-
             {/* ================================================================= */}
-            {/* TRADE ENGINE STAGES (Moved from top runner to side menu as requested) */}
+            {/* TRADE ENGINE STAGES (Clean Sidebar Rail Stages)                    */}
             {/* ================================================================= */}
             <div className="pt-3 pb-1 border-t border-stone-100">
               <button
@@ -349,7 +364,7 @@ export default function DashboardPage() {
                 className="w-full flex items-center justify-between px-3.5 py-1 text-xs font-mono uppercase tracking-wider text-stone-400 font-semibold hover:text-[#18280e] cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <Layers className="w-3.5 h-3.5 text-[#3f7308]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
                   <span>Trade Engine Rails</span>
                 </div>
                 {tradeRailsOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
@@ -381,7 +396,7 @@ export default function DashboardPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-xs">🏢</span>
+                      <Building className="w-3.5 h-3.5 text-[#3f7308]" />
                       <span>2. MSME Vetting</span>
                     </div>
                     <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
@@ -397,7 +412,7 @@ export default function DashboardPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-xs">⚖</span>
+                      <Scale className="w-3.5 h-3.5 text-[#3f7308]" />
                       <span>3. Commercial PO (AI)</span>
                     </div>
                     <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 font-bold">
@@ -499,36 +514,10 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-
-            {/* Analytics */}
-            <button
-              onClick={() => setActiveNav("analytics")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "analytics"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 shrink-0" />
-              <span className="text-sm">Analytics</span>
-            </button>
-
-            {/* Discounts */}
-            <button
-              onClick={() => setActiveNav("discounts")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeNav === "discounts"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#f4faed] hover:text-[#18280e]"
-              }`}
-            >
-              <Percent className="w-4 h-4 shrink-0" />
-              <span className="text-sm">Discounts</span>
-            </button>
           </nav>
         </div>
 
-        {/* Bottom Section: Kokonut UI Inspired Verified Card & Settings */}
+        {/* Bottom Section: Kokonut UI Card & PayPal Credentials */}
         <div className="p-4 space-y-3 border-t border-stone-100">
           <div className="space-y-1 text-xs font-medium text-stone-600">
             <button
@@ -584,26 +573,24 @@ export default function DashboardPage() {
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-stone-200/80 px-8 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-[#18280e] tracking-tight capitalize">
+            <h1 className="text-xl font-bold text-[#18280e] tracking-tight capitalize font-sans">
               {activeNav === "dashboard" && "Dashboard"}
+              {activeNav === "storyline" && "TradeOracle Transaction Storyline"}
               {activeNav === "layman_store" && "Foreigner Orders (Merchant View)"}
               {activeNav === "orders" && "Active Orders Queue"}
               {activeNav === "products" && "Products & International RFQs"}
               {activeNav === "customers" && "Customers & Global Importers"}
-              {activeNav === "content" && "Content & Documents"}
               {activeNav === "invoices" && "Commercial Export Invoices"}
               {activeNav === "transactions" && "PayPal Settlement Ledger"}
               {activeNav === "reports" && "Financial Export Reports"}
-              {activeNav === "analytics" && "Analytics & Conversion"}
-              {activeNav === "discounts" && "Discounts & Tiered Pricing"}
-              {activeNav === "settings" && "Platform Settings"}
-              {activeNav === "help" && "Help & Support"}
               {activeNav === "rfq_demand" && "1. Buyer RFQ Demand (Active Orders)"}
               {activeNav === "msme_vetting" && "2. MSME Vetting & Industrial Hubs"}
               {activeNav === "commercial_ai" && "3. Commercial Negotiation (AI) UCP 600"}
               {activeNav === "paypal_escrow" && "4. PayPal Milestone Escrow"}
               {activeNav === "quality_qima" && "5. QIMA Pre-Shipment Inspection"}
               {activeNav === "customs_bl" && "6. Customs LEO & Bill of Lading"}
+              {activeNav === "settings" && "Platform Settings"}
+              {activeNav === "help" && "Help & Support"}
             </h1>
             <span className="text-xs font-mono text-stone-400 hidden sm:inline">
               {"// Trade Execution Hub"}
@@ -611,19 +598,16 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Quick Toggle for Layman E-Commerce Store */}
-            <button
-              type="button"
-              onClick={() => setActiveNav(activeNav === "layman_store" ? "dashboard" : "layman_store")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeNav === "layman_store"
-                  ? "bg-[#18280e] text-[#b2eb76]"
-                  : "bg-[#ebf7d9] text-[#18280e] hover:bg-[#d8e5ca]"
-              }`}
+            {/* View Switcher: Template vs Journey Storyline */}
+            <KokonutButton
+              variant={activeNav === "storyline" ? "primary" : "secondary"}
+              size="sm"
+              withMagnet
+              onClick={() => setActiveNav(activeNav === "storyline" ? "dashboard" : "storyline")}
             >
-              <Store className="w-3.5 h-3.5 text-[#3f7308]" />
-              <span>{activeNav === "layman_store" ? "Template Dashboard" : "Merchant Order Cards"}</span>
-            </button>
+              <Layers className="w-3.5 h-3.5 text-[#3f7308]" />
+              <span>{activeNav === "storyline" ? "Dashboard View" : "Transaction Story"}</span>
+            </KokonutButton>
 
             {/* Date Range Selector */}
             <div className="hidden md:flex items-center gap-2 bg-[#f4faed] border border-[#d8e5ca] px-3 py-1.5 rounded-xl text-xs font-mono text-stone-700">
@@ -633,15 +617,16 @@ export default function DashboardPage() {
               <span className="font-semibold text-[#18280e]">Last 30 days ∨</span>
             </div>
 
-            {/* Export Button */}
-            <button
-              type="button"
+            {/* Export Button with Magnet */}
+            <KokonutButton
+              variant="primary"
+              size="sm"
+              withMagnet
               onClick={() => alert("Exporting verified commercial trade ledger CSV...")}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export</span>
-            </button>
+            </KokonutButton>
 
             {/* Back to Home & Logout */}
             <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
@@ -670,13 +655,18 @@ export default function DashboardPage() {
         {/* Dashboard Main Grid Body */}
         <main className="p-6 md:p-8 space-y-6 max-w-[88rem] w-full mx-auto">
           {/* ========================================================================= */}
+          {/* VIEW 0: TRANSACTION STORYLINE (The Heart of the Project)                 */}
+          {/* ========================================================================= */}
+          {activeNav === "storyline" && <TradeOracleStoryline />}
+
+          {/* ========================================================================= */}
           {/* VIEW A: MAIN ANALYTICS DASHBOARD (Exact Match to Previous Template)       */}
           {/* ========================================================================= */}
           {activeNav === "dashboard" && (
             <>
               {/* TOP 4 METRIC CARDS (With Kokonut UI / React Bits Spotlight Glow) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Metric 1: Page Views */}
+                {/* Metric 1 */}
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
                   <div className="flex justify-between items-center text-xs font-medium text-stone-500">
                     <span>Page Views</span>
@@ -698,7 +688,7 @@ export default function DashboardPage() {
                   </span>
                 </SpotlightCard>
 
-                {/* Metric 2: Visitors */}
+                {/* Metric 2 */}
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
                   <div className="flex justify-between items-center text-xs font-medium text-stone-500">
                     <span>Visitors</span>
@@ -720,7 +710,7 @@ export default function DashboardPage() {
                   </span>
                 </SpotlightCard>
 
-                {/* Metric 3: Click */}
+                {/* Metric 3 */}
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
                   <div className="flex justify-between items-center text-xs font-medium text-stone-500">
                     <span>Click</span>
@@ -742,7 +732,7 @@ export default function DashboardPage() {
                   </span>
                 </SpotlightCard>
 
-                {/* Metric 4: Orders */}
+                {/* Metric 4 */}
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
                   <div className="flex justify-between items-center text-xs font-medium text-stone-500">
                     <span>Orders</span>
@@ -771,7 +761,9 @@ export default function DashboardPage() {
                 <SpotlightCard className="lg:col-span-2 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs space-y-6">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-sm font-semibold text-stone-500">Total Profit</h3>
+                      <h3 className="text-sm font-semibold text-stone-500 font-mono uppercase tracking-wider">
+                        Total Profit
+                      </h3>
                       <div className="flex items-baseline gap-3 mt-1">
                         <span className="text-3xl font-extrabold font-mono text-[#18280e]">
                           $446.7K
@@ -782,8 +774,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="text-xs font-mono text-stone-400 flex items-center gap-1">
-                      <span>PayPal Orders v2 Verified</span>
+                    <div className="text-xs font-mono text-stone-400 flex items-center gap-1.5 bg-[#f4faed] px-3 py-1 rounded-full border border-[#d8e5ca]">
+                      <span className="size-2 rounded-full bg-[#3f7308] animate-pulse" />
+                      <span className="text-[#18280e] font-bold">PayPal Orders v2 Verified</span>
                     </div>
                   </div>
 
@@ -830,7 +823,7 @@ export default function DashboardPage() {
 
                   {/* Customer Segment Breakdown */}
                   <div className="pt-2 border-t border-stone-100">
-                    <span className="text-xs font-semibold text-stone-500 block mb-2 font-mono uppercase">Customers</span>
+                    <span className="text-xs font-semibold text-stone-500 block mb-2 font-mono uppercase">Customers Distribution</span>
                     <div className="grid grid-cols-3 gap-3 font-mono text-xs">
                       <div className="p-3 rounded-xl bg-[#f4faed] border-l-4 border-l-[#18280e]">
                         <span className="text-stone-400 block text-[10px] uppercase font-bold">Retailers</span>
@@ -928,10 +921,10 @@ export default function DashboardPage() {
                         On track for 80% target
                       </span>
                       <button
-                        onClick={() => setActiveNav("layman_store")}
+                        onClick={() => setActiveNav("storyline")}
                         className="mt-2 text-xs font-mono font-semibold text-[#3f7308] hover:underline cursor-pointer"
                       >
-                        Show details
+                        Inspect Storyline &amp; Evidence →
                       </button>
                     </div>
                   </SpotlightCard>
@@ -1020,17 +1013,19 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="space-y-2 pt-2 border-t border-stone-100">
-                    <button
-                      type="button"
+                    <KokonutButton
+                      variant="primary"
+                      size="md"
+                      withMagnet
                       onClick={triggerPayPalEscrow}
                       disabled={paypalLoading}
-                      className="w-full py-2.5 bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+                      className="w-full"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>
                         {paypalLoading ? "Connecting to PayPal..." : "Test PayPal Escrow ($25,725)"}
                       </span>
-                    </button>
+                    </KokonutButton>
 
                     {paypalResult && (
                       <div className="p-2.5 rounded-lg bg-[#ebf7d9] text-[#18280e] text-[11px] font-mono space-y-1">
@@ -1053,10 +1048,10 @@ export default function DashboardPage() {
 
                     <button
                       type="button"
-                      onClick={() => setActiveNav("paypal_escrow")}
+                      onClick={() => setActiveNav("storyline")}
                       className="w-full py-2 text-stone-600 hover:text-[#18280e] text-xs font-mono font-medium text-center block cursor-pointer"
                     >
-                      Inspect PayPal Escrow Stage →
+                      View Connected Transaction Story →
                     </button>
                   </div>
                 </SpotlightCard>
@@ -1065,27 +1060,27 @@ export default function DashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* VIEW B: MERCHANT E-COMMERCE ORDER CARDS (Layman Friendly for Foundries)   */}
+          {/* VIEW B: MERCHANT E-COMMERCE ORDER CARDS (With Kokonut UI SlideToConfirm) */}
           {/* ========================================================================= */}
           {activeNav === "layman_store" && (
             <div className="space-y-6 animate-in fade-in">
-              <div className="p-6 rounded-2xl bg-white border border-stone-200/90 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#3f7308] uppercase mb-1">
                     <span>Indian Manufacturer / Merchant View</span>
                     <span>•</span>
                     <span>Plain Layman Language</span>
                   </div>
-                  <h2 className="text-2xl font-bold text-[#18280e] tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#18280e] tracking-tight font-sans">
                     Incoming International Buyer Orders &amp; Demands
                   </h2>
-                  <p className="text-xs text-stone-600 mt-1 max-w-2xl leading-relaxed">
+                  <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
                     We translate complicated foreign engineering specifications and trade terms into plain, simple language so you know exactly what the foreigner wants, how much they will pay in Rupees, and when your PayPal advance is safely in escrow.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs font-mono px-3 py-1.5 rounded-xl bg-[#ebf7d9] text-[#18280e] font-bold border border-[#d8e5ca]">
+                  <span className="text-xs font-mono px-3.5 py-1.5 rounded-full bg-[#ebf7d9] text-[#18280e] font-bold border border-[#d8e5ca]">
                     3 Verified Foreign RFQs
                   </span>
                 </div>
@@ -1095,30 +1090,34 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {LAYMAN_ORDERS.map((order) => {
                   const isSelected = selectedLaymanOrder.id === order.id;
+                  const isLocked = lockedOrderIds[order.id];
+
                   return (
                     <SpotlightCard
                       key={order.id}
-                      className={`bg-white rounded-2xl border transition-all duration-200 p-5 flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
+                      className={`bg-white rounded-3xl border transition-all duration-300 p-6 flex flex-col justify-between space-y-5 hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
                         isSelected
                           ? "border-[#3f7308] ring-2 ring-[#b2eb76]/40 shadow-md"
                           : "border-stone-200/80 shadow-xs"
                       }`}
                       onClick={() => setSelectedLaymanOrder(order)}
                     >
-                      {/* Top Buyer Identity Banner */}
+                      {/* Top Buyer Identity Banner with Real Flags */}
                       <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-100">
                         <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xl">{order.foreignBuyer.flag}</span>
-                            <span className="font-bold text-sm text-[#18280e] leading-snug">
-                              {order.foreignBuyer.company}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{order.foreignBuyer.flag}</span>
+                            <div>
+                              <span className="font-bold text-sm text-[#18280e] leading-snug block">
+                                {order.foreignBuyer.company}
+                              </span>
+                              <span className="text-[11px] text-stone-500 font-mono block">
+                                {order.foreignBuyer.city}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-[11px] text-stone-500 font-mono block mt-0.5">
-                            {order.foreignBuyer.city} • Contact: {order.foreignBuyer.contactPerson}
-                          </span>
                         </div>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-700 font-bold shrink-0">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 font-bold shrink-0">
                           {order.orderNumber}
                         </span>
                       </div>
@@ -1128,16 +1127,16 @@ export default function DashboardPage() {
                         <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block mb-1">
                           Product Requested
                         </span>
-                        <h3 className="font-bold text-base text-[#18280e] leading-snug">
+                        <h3 className="font-bold text-base text-[#18280e] leading-snug font-sans">
                           {order.productName}
                         </h3>
-                        <span className="inline-block mt-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-[#ebf7d9] text-[#3f7308]">
+                        <span className="inline-block mt-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-[#ebf7d9] text-[#3f7308]">
                           {order.category}
                         </span>
                       </div>
 
                       {/* Plain Layman Explanation Box */}
-                      <div className="p-3.5 rounded-xl bg-[#f8fbf5] border border-[#d8e5ca]/80 text-xs text-stone-800 leading-relaxed space-y-1">
+                      <div className="p-4 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca]/80 text-xs text-stone-800 leading-relaxed space-y-1">
                         <span className="text-[10px] font-mono font-bold uppercase text-[#3f7308] block">
                           💡 What the Foreigner is Asking (In Simple Words):
                         </span>
@@ -1146,17 +1145,17 @@ export default function DashboardPage() {
 
                       {/* Commercial Numbers (USD + Plain INR Lakhs) */}
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 font-mono text-xs">
-                        <div className="p-2.5 rounded-lg bg-stone-50">
-                          <span className="text-[10px] text-stone-400 block uppercase">Order Size</span>
-                          <span className="font-bold text-[#18280e]">
+                        <div className="p-3 rounded-xl bg-stone-50">
+                          <span className="text-[10px] text-stone-400 block uppercase">Order Quantity</span>
+                          <span className="font-bold text-[#18280e] block">
                             {order.quantityUnits.toLocaleString()} units
                           </span>
-                          <span className="text-[10px] text-stone-500 block">@ ${order.unitPriceUSD}/pc</span>
+                          <span className="text-[10px] text-stone-500">@ ${order.unitPriceUSD}/pc</span>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-[#ebf7d9] text-right">
+                        <div className="p-3 rounded-xl bg-[#ebf7d9] text-right">
                           <span className="text-[10px] text-stone-500 block uppercase">Total Deal Value</span>
-                          <span className="font-bold text-[#18280e] text-sm">
+                          <span className="font-bold text-[#18280e] text-sm block">
                             ${order.totalDealUSD.toLocaleString()}
                           </span>
                           <span className="text-[11px] font-bold text-[#3f7308] block">
@@ -1166,52 +1165,59 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Payment Terms & PayPal Security */}
-                      <div className="text-[11px] text-stone-600 bg-stone-50 p-3 rounded-xl border border-stone-100 space-y-1">
+                      <div className="text-[11px] text-stone-600 bg-stone-50 p-3.5 rounded-2xl border border-stone-100 space-y-1">
                         <div className="flex items-center gap-1.5 font-bold text-[#18280e]">
                           <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
                           <span>PayPal Escrow Protection</span>
                         </div>
-                        <p className="leading-snug text-stone-600">
+                        <p className="leading-snug text-stone-600 font-mono text-[10px]">
                           {order.paymentMilestones.terms}
                         </p>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="pt-2 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedLaymanOrder(order);
-                            alert(`Order #${order.orderNumber} accepted! Proforma Invoice generated. 30% advance escrow requested via PayPal.`);
-                          }}
-                          className="flex-1 py-2.5 bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs rounded-xl text-center transition-colors cursor-pointer"
-                        >
-                          Accept Order &amp; Lock Deal
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedLaymanOrder(order);
-                          }}
-                          className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-mono rounded-xl transition-colors cursor-pointer"
-                        >
-                          Details →
-                        </button>
+                      {/* Kokonut UI SlideToConfirm Button (Replacing the Ugly Buttons) */}
+                      <div className="pt-2 space-y-2">
+                        {isLocked ? (
+                          <div className="h-11 rounded-xl bg-[#18280e] text-[#b2eb76] font-mono text-xs font-bold flex items-center justify-center gap-2 shadow-xs">
+                            <Check className="w-4 h-4" />
+                            <span>Deal Locked • Proforma Invoice Active</span>
+                          </div>
+                        ) : (
+                          <SlideToConfirm
+                            text="Slide to Lock Deal &amp; Escrow"
+                            confirmedText="Deal Locked • PayPal Protected"
+                            onConfirm={() => {
+                              setLockedOrderIds((prev) => ({ ...prev, [order.id]: true }));
+                              setSelectedLaymanOrder(order);
+                            }}
+                          />
+                        )}
+
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedLaymanOrder(order);
+                            }}
+                            className="text-[11px] font-mono text-[#3f7308] hover:underline font-bold"
+                          >
+                            Inspect Full Statutory Details →
+                          </button>
+                        </div>
                       </div>
                     </SpotlightCard>
                   );
                 })}
               </div>
 
-              {/* Selected Order Detailed Drawer */}
-              <div className="p-6 rounded-2xl bg-white border border-stone-200/90 shadow-sm space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-stone-100">
+              {/* Selected Order Detailed Drawer with Kokonut UI HoldToConfirm */}
+              <SpotlightCard className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-stone-100">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">{selectedLaymanOrder.foreignBuyer.flag}</span>
+                    <span className="text-4xl">{selectedLaymanOrder.foreignBuyer.flag}</span>
                     <div>
-                      <h3 className="text-base font-bold text-[#18280e]">
+                      <h3 className="text-lg font-bold text-[#18280e] font-sans">
                         Selected Order: {selectedLaymanOrder.productName} ({selectedLaymanOrder.orderNumber})
                       </h3>
                       <span className="text-xs text-stone-500 font-mono">
@@ -1227,38 +1233,49 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
-                  <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1">
                     <span className="text-stone-400 block text-[10px] uppercase font-bold">Port Destination</span>
-                    <span className="font-bold text-[#18280e]">{selectedLaymanOrder.deliveryPort}</span>
+                    <strong className="text-[#18280e] block">{selectedLaymanOrder.deliveryPort}</strong>
                     <span className="text-[11px] text-stone-500 block">FOB Mundra Port, Gujarat</span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1">
                     <span className="text-stone-400 block text-[10px] uppercase font-bold">Inspection Agency</span>
-                    <span className="font-bold text-[#18280e]">{selectedLaymanOrder.inspectionAgency}</span>
-                    <span className="text-[11px] text-stone-500 block">Audited prior to shipment</span>
+                    <strong className="text-[#18280e] block">{selectedLaymanOrder.inspectionAgency}</strong>
+                    <span className="text-[11px] text-stone-500 block">Audited prior to ship loading</span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-1">
-                    <span className="text-stone-500 block text-[10px] uppercase font-bold">30% Advance Escrow</span>
-                    <span className="font-bold text-[#18280e] text-sm">
+                  <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-1">
+                    <span className="text-stone-600 block text-[10px] uppercase font-bold">30% Advance Escrow</span>
+                    <strong className="text-[#18280e] text-sm block">
                       ${selectedLaymanOrder.paymentMilestones.advanceUSD.toLocaleString()} USD
-                    </span>
+                    </strong>
                     <span className="text-[11px] font-bold text-[#3f7308] block">
                       ≈ ₹{selectedLaymanOrder.paymentMilestones.advanceInrLakhs} Lakhs into PayPal
                     </span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1">
                     <span className="text-stone-400 block text-[10px] uppercase font-bold">70% Final Balance</span>
-                    <span className="font-bold text-[#18280e] text-sm">
+                    <strong className="text-[#18280e] text-sm block">
                       ${selectedLaymanOrder.paymentMilestones.balanceUSD.toLocaleString()} USD
-                    </span>
+                    </strong>
                     <span className="text-[11px] text-stone-500 block">Released against Bill of Lading</span>
                   </div>
                 </div>
-              </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <span className="text-xs font-mono text-stone-500">
+                    Statutory Verification: DGFT IEC, GSTIN, and ICEGATE clearance active.
+                  </span>
+                  <HoldToConfirm
+                    onConfirm={() => alert(`Statutory verification certificate generated for order #${selectedLaymanOrder.orderNumber}`)}
+                    label="Hold to Verify Statutory Evidence Pack"
+                    confirmedLabel="✓ Evidence Pack Audited & Locked"
+                  />
+                </div>
+              </SpotlightCard>
             </div>
           )}
 
@@ -1268,27 +1285,29 @@ export default function DashboardPage() {
 
           {/* 1. Buyer RFQ Demand */}
           {activeNav === "rfq_demand" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <div className="flex justify-between items-center pb-3 border-b border-stone-100">
                 <div>
                   <h2 className="text-base font-bold text-[#18280e]">1. Buyer RFQ Demand (3 Active Corridors)</h2>
                   <span className="text-stone-500">Foreign buyer requests with verified purchasing budgets</span>
                 </div>
-                <button
+                <KokonutButton
+                  variant="secondary"
+                  size="sm"
+                  withMagnet
                   onClick={() => setActiveNav("layman_store")}
-                  className="px-3 py-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e] font-bold hover:bg-[#d8e5ca]"
                 >
                   View Merchant Cards →
-                </button>
+                </KokonutButton>
               </div>
 
               <div className="space-y-3">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-xl bg-[#fbfdf9] border border-stone-200 flex justify-between items-center">
+                  <div key={ord.id} className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 flex justify-between items-center">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{ord.foreignBuyer.flag}</span>
-                        <strong className="text-[#18280e]">{ord.productName}</strong>
+                        <span className="text-xl">{ord.foreignBuyer.flag}</span>
+                        <strong className="text-[#18280e] text-sm">{ord.productName}</strong>
                         <span className="text-stone-400">({ord.orderNumber})</span>
                       </div>
                       <span className="text-stone-500 block text-[11px] mt-1">
@@ -1307,12 +1326,12 @@ export default function DashboardPage() {
 
           {/* 2. MSME Vetting */}
           {activeNav === "msme_vetting" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
                 2. MSME Vetting &amp; Industrial Clusters
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
                   <span className="text-[10px] text-[#3f7308] uppercase font-bold">Brass &amp; Hardware Hub</span>
                   <h4 className="font-bold text-sm text-[#18280e]">Moradabad Cluster</h4>
                   <p className="text-stone-600 text-xs">DGFT IEC: 0508012491 • 140 Foundries Validated</p>
@@ -1320,7 +1339,7 @@ export default function DashboardPage() {
                     ✓ ISO 9001:2015 Audited
                   </span>
                 </div>
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
                   <span className="text-[10px] text-[#3f7308] uppercase font-bold">Forgings &amp; Valves Hub</span>
                   <h4 className="font-bold text-sm text-[#18280e]">Rajkot GIDC Cluster</h4>
                   <p className="text-stone-600 text-xs">DGFT IEC: 0812049182 • 85k Units/mo Capacity</p>
@@ -1328,7 +1347,7 @@ export default function DashboardPage() {
                     ✓ IATF 16949 Certified
                   </span>
                 </div>
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
                   <span className="text-[10px] text-[#3f7308] uppercase font-bold">Textiles &amp; Knits Hub</span>
                   <h4 className="font-bold text-sm text-[#18280e]">Tirupur Cluster</h4>
                   <p className="text-stone-600 text-xs">DGFT IEC: 3204918201 • OEKO-TEX Standard 100</p>
@@ -1342,11 +1361,11 @@ export default function DashboardPage() {
 
           {/* 3. Commercial Negotiation AI */}
           {activeNav === "commercial_ai" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
                 3. Commercial Negotiation (AI) &amp; UCP 600 Harmonization
               </h2>
-              <div className="p-4 rounded-xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-2 text-stone-700">
+              <div className="p-5 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-2 text-stone-700">
                 <span className="font-bold text-[#18280e] block">Automated Purchase Order vs Invoice Comparison:</span>
                 <p className="leading-relaxed">
                   Our trade engine cross-references the foreign buyer&apos;s Purchase Order against the Indian exporter&apos;s Proforma Invoice, verifying Incoterms 2020 (FOB Mundra), ASTM alloy specifications, and milestone disbursement triggers to eliminate payment disputes before production begins.
@@ -1357,23 +1376,24 @@ export default function DashboardPage() {
 
           {/* 4. PayPal Milestone Escrow */}
           {activeNav === "paypal_escrow" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <div className="flex justify-between items-center pb-3 border-b border-stone-100">
                 <div>
                   <h2 className="text-base font-bold text-[#18280e]">4. PayPal Milestone Escrow Execution</h2>
                   <span className="text-stone-500">Live Orders v2 API settlement console</span>
                 </div>
-                <button
-                  type="button"
+                <KokonutButton
+                  variant="primary"
+                  size="sm"
+                  withMagnet
                   onClick={triggerPayPalEscrow}
                   disabled={paypalLoading}
-                  className="px-4 py-2 bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] rounded-xl font-bold cursor-pointer transition-colors"
                 >
                   {paypalLoading ? "Connecting to PayPal..." : "+ Create Test Escrow Order ($25,725)"}
-                </button>
+                </KokonutButton>
               </div>
 
-              <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
                 <span className="text-stone-400 uppercase font-bold text-[10px] block">Connected PayPal Sandbox Account</span>
                 <span className="font-bold text-sm text-[#18280e] block">sb-knljl53833937@business.example.com</span>
                 <span className="text-stone-500 block text-[11px]">
@@ -1382,7 +1402,7 @@ export default function DashboardPage() {
               </div>
 
               {paypalResult && (
-                <div className="p-4 rounded-xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-2">
+                <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-2">
                   <span className="font-bold text-[#18280e] block">✓ PayPal Order Created Successfully</span>
                   <div className="flex justify-between text-xs font-mono">
                     <span>Order ID: <strong>{paypalResult.id}</strong></span>
@@ -1393,7 +1413,7 @@ export default function DashboardPage() {
                       href={paypalResult.approveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-[#18280e] text-[#b2eb76] rounded-lg font-bold text-xs mt-2"
+                      className="inline-block px-4 py-2 bg-[#18280e] text-[#b2eb76] rounded-xl font-bold text-xs mt-2"
                     >
                       Complete Sandbox Payment in PayPal Checkout →
                     </a>
@@ -1405,12 +1425,12 @@ export default function DashboardPage() {
 
           {/* 5. QIMA Quality Inspection */}
           {activeNav === "quality_qima" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
                 5. Quality &amp; QIMA Pre-Shipment Inspection
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
                     PASSED • AQL 1.5 AUDITED
                   </span>
@@ -1419,7 +1439,7 @@ export default function DashboardPage() {
                     Tested 125 sample locksets for 240-hr ASTM B117 salt spray resistance and cycle durability. Zero critical defects found.
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
                     PASSED • HYDRO-STATIC 25 BAR
                   </span>
@@ -1434,11 +1454,11 @@ export default function DashboardPage() {
 
           {/* 6. Customs LEO & Bill of Lading */}
           {activeNav === "customs_bl" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
                 6. Customs LEO &amp; Bill of Lading (ICEGATE Electronic Gate-In)
               </h2>
-              <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex justify-between items-center">
                   <strong className="text-sm text-[#18280e]">Shipping Bill #SB-INMUN1-2026-981024</strong>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
@@ -1452,22 +1472,23 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Fallback for other standard tabs (Orders, Products, Customers, Invoices, Settings) */}
+          {/* Fallback standard tabs */}
           {activeNav === "orders" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <div className="flex justify-between items-center pb-3 border-b border-stone-100">
                 <h2 className="text-base font-bold text-[#18280e]">Commercial Export Orders (46 Active)</h2>
-                <button
-                  type="button"
+                <KokonutButton
+                  variant="secondary"
+                  size="sm"
+                  withMagnet
                   onClick={() => setActiveNav("layman_store")}
-                  className="px-3 py-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e] font-bold hover:bg-[#d8e5ca]"
                 >
                   Switch to Merchant Plain View →
-                </button>
+                </KokonutButton>
               </div>
               <div className="divide-y divide-stone-100">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="py-3 flex justify-between items-center">
+                  <div key={ord.id} className="py-3.5 flex justify-between items-center">
                     <div>
                       <span className="font-bold text-[#18280e]">{ord.orderNumber} • {ord.productName}</span>
                       <span className="text-stone-500 block text-[11px]">Buyer: {ord.foreignBuyer.company} • Port: {ord.deliveryPort}</span>
@@ -1483,11 +1504,11 @@ export default function DashboardPage() {
           )}
 
           {activeNav === "products" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">International RFQ Catalog</h2>
               <div className="space-y-3">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-xl bg-stone-50 border border-stone-200 flex justify-between items-center">
+                  <div key={ord.id} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex justify-between items-center">
                     <div>
                       <h4 className="font-bold text-sm text-[#18280e]">{ord.productName}</h4>
                       <p className="text-stone-600 text-xs mt-0.5">{ord.laymanExplanation}</p>
@@ -1500,12 +1521,12 @@ export default function DashboardPage() {
           )}
 
           {activeNav === "customers" && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">Verified Global Importers</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-lg">{ord.foreignBuyer.flag}</span>
+                  <div key={ord.id} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
+                    <span className="text-xl">{ord.foreignBuyer.flag}</span>
                     <h4 className="font-bold text-sm text-[#18280e]">{ord.foreignBuyer.company}</h4>
                     <p className="text-stone-600 text-xs">{ord.foreignBuyer.city} • Contact: {ord.foreignBuyer.contactPerson}</p>
                     <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">
@@ -1518,12 +1539,12 @@ export default function DashboardPage() {
           )}
 
           {(activeNav === "invoices" || activeNav === "transactions" || activeNav === "reports") && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100 capitalize">
                 {activeNav} &amp; PayPal Settlement Ledger
               </h2>
               <div className="divide-y divide-stone-100">
-                <div className="py-3 flex justify-between items-center">
+                <div className="py-3.5 flex justify-between items-center">
                   <div>
                     <span className="font-bold text-[#18280e]">INV-2026-9921-ADV (30% Production Advance)</span>
                     <span className="text-stone-500 block text-[11px]">Buyer: Pacific Architectural Hardware • PayPal Capture ID: CAP-2JM21803AA</span>
@@ -1538,7 +1559,7 @@ export default function DashboardPage() {
           )}
 
           {(activeNav === "settings" || activeNav === "help" || activeNav === "analytics" || activeNav === "discounts" || activeNav === "content") && (
-            <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-sm space-y-4 font-mono text-xs animate-in fade-in">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
               <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100 capitalize">{activeNav}</h2>
               <p className="text-stone-600">
                 Configure and review {activeNav} settings for your verified international trade and PayPal merchant profile.
