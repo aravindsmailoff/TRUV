@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -50,6 +50,16 @@ import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authSto
 export function TradeOracleBuyerApp() {
   const router = useRouter();
   const currentUser = getCurrentSessionUser();
+
+  useEffect(() => {
+    if (!currentUser) {
+      router.push("/signin?role=buyer");
+    } else if (currentUser.role === "manufacturer") {
+      router.push("/dashboard");
+    } else if (currentUser.role === "service") {
+      router.push("/service");
+    }
+  }, [currentUser, router]);
 
   // Navigation Tabs matching prompt:
   // 1. Dashboard, 2. Find Suppliers, 3. My RFQs, 4. My Orders, 5. Payments, 6. Documents, 7. Messages, 8. Settings
@@ -302,20 +312,6 @@ export function TradeOracleBuyerApp() {
 
         {/* Right: Notifications, Help, User Profile & Sign Out */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="text-xs font-mono font-bold text-[#18280e] bg-[#ebf7d9] hover:bg-[#d8e5ca] border border-[#d8e5ca] px-3 py-1.5 rounded-xl transition-colors hidden sm:flex items-center gap-1.5"
-          >
-            <span>🏢 Merchant View</span>
-          </Link>
-
-          <Link
-            href="/service"
-            className="text-xs font-mono font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl transition-colors hidden sm:flex items-center gap-1.5"
-          >
-            <span>💻 Service Portal</span>
-          </Link>
-
           <button
             type="button"
             className="p-2 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors relative"

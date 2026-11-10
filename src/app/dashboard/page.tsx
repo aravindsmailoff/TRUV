@@ -194,10 +194,14 @@ export default function DashboardPage() {
   >(currentUser?.role === "buyer" ? "buyer_portal" : "dashboard");
 
   useEffect(() => {
-    if (currentUser?.role === "buyer") {
-      setActiveNav("buyer_portal");
+    if (!currentUser) {
+      router.push("/signin?role=manufacturer");
+    } else if (currentUser.role === "buyer") {
+      router.push("/buyer");
+    } else if (currentUser.role === "service") {
+      router.push("/service");
     }
-  }, [currentUser]);
+  }, [currentUser, router]);
 
   const [financesOpen, setFinancesOpen] = useState(true);
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
@@ -274,52 +278,17 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Quick Portals Switcher */}
-          <div className="p-3 border-b border-stone-100 bg-[#fbfdf9]">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 font-bold px-2 block mb-1">
-              Switch Workspace Portal
-            </span>
-            <div className="space-y-1">
-              <button
-                type="button"
-                onClick={() => setActiveNav("dashboard")}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeNav === "dashboard"
-                    ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
-                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Store className="w-3.5 h-3.5" />
-                  <span>Indian Manufacturer</span>
-                </div>
-                {activeNav === "dashboard" ? (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76]" />
-                ) : (
-                  <span className="text-[9px] font-mono text-stone-400">PHYSICAL</span>
-                )}
-              </button>
-              <Link
-                href="/buyer"
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Globe className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Foreign Buyer Portal</span>
-                </div>
-                <span className="text-[9px] font-mono text-stone-400">GLOBAL</span>
-              </Link>
-              <Link
-                href="/service"
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Code2 className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Freelancer Service Portal</span>
-                </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold">TECH</span>
-              </Link>
+          {/* Manufacturer Identity Banner */}
+          <div className="px-5 py-3 border-b border-stone-100 bg-[#fbfdf9]">
+            <div className="flex items-center gap-2">
+              <div className="size-2 rounded-full bg-[#3f7308] animate-pulse" />
+              <span className="text-[11px] font-mono font-bold text-[#18280e]">
+                Indian Manufacturer Workspace
+              </span>
             </div>
+            <span className="text-[10px] font-mono text-stone-500 block mt-0.5">
+              Factory: Moradabad Precision Foundry LLP
+            </span>
           </div>
 
           {/* Navigation Items */}
@@ -347,7 +316,32 @@ export default function DashboardPage() {
                 {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76] shrink-0" />}
               </button>
 
-              {/* 2. Transaction Storyline */}
+              {/* 2. Layman Merchant Orders View */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("layman_store")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "layman_store"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Store className={`w-4 h-4 shrink-0 ${activeNav === "layman_store" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
+                  <span className="text-xs truncate">Merchant Layman Orders</span>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    activeNav === "layman_store"
+                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
+                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
+                  }`}
+                >
+                  MERCHANT
+                </span>
+              </button>
+
+              {/* 3. Transaction Journey */}
               <button
                 type="button"
                 onClick={() => setActiveNav("storyline")}
@@ -372,57 +366,7 @@ export default function DashboardPage() {
                 </span>
               </button>
 
-              {/* 3. Foreign Buyer AI Sourcing Portal */}
-              <button
-                type="button"
-                onClick={() => setActiveNav("buyer_portal")}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
-                  activeNav === "buyer_portal"
-                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Globe className={`w-4 h-4 shrink-0 ${activeNav === "buyer_portal" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
-                  <span className="text-xs truncate">Foreign Buyer AI</span>
-                </div>
-                <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
-                    activeNav === "buyer_portal"
-                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
-                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
-                  }`}
-                >
-                  BUYER AI
-                </span>
-              </button>
-
-              {/* 4. Foreigner Orders (Layman E-Commerce View for Indian Merchant) */}
-              <button
-                type="button"
-                onClick={() => setActiveNav("layman_store")}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
-                  activeNav === "layman_store"
-                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                    : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Store className={`w-4 h-4 shrink-0 ${activeNav === "layman_store" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
-                  <span className="text-xs truncate">Merchant Orders</span>
-                </div>
-                <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
-                    activeNav === "layman_store"
-                      ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
-                      : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
-                  }`}
-                >
-                  MERCHANT
-                </span>
-              </button>
-
-              {/* 4. Orders */}
+              {/* 4. Orders Queue */}
               <button
                 type="button"
                 onClick={() => setActiveNav("orders")}
@@ -458,7 +402,7 @@ export default function DashboardPage() {
                 }`}
               >
                 <Package className="w-4 h-4 shrink-0" />
-                <span className="text-xs truncate">Products / RFQs</span>
+                <span className="text-xs truncate">Products &amp; Catalog</span>
               </button>
 
               {/* 6. Customers */}
@@ -472,7 +416,7 @@ export default function DashboardPage() {
                 }`}
               >
                 <Users className="w-4 h-4 shrink-0" />
-                <span className="text-xs truncate">Customers</span>
+                <span className="text-xs truncate">Global Importers</span>
               </button>
             </div>
 

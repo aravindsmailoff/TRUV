@@ -214,3 +214,4 @@ export const INITIAL_SERVICE_PROJECTS: ServiceProject[] = [
     ],
   },
 ];
+

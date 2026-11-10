@@ -31,10 +31,21 @@ import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ClickSpark } from "@/components/reactbits/ClickSpark";
 import { CountUp } from "@/components/reactbits/CountUp";
 import { KokonutButton } from "@/components/kokonutui/KokonutButton";
-import { setCurrentSessionUser } from "@/lib/auth/authStore";
+import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 
 export function FreelancerServicePortal() {
   const router = useRouter();
+  const currentUser = getCurrentSessionUser();
+
+  React.useEffect(() => {
+    if (!currentUser) {
+      router.push("/signin?role=service");
+    } else if (currentUser.role === "buyer") {
+      router.push("/buyer");
+    } else if (currentUser.role === "manufacturer") {
+      router.push("/dashboard");
+    }
+  }, [currentUser, router]);
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "contracts" | "milestones" | "payouts" | "disputes" | "rfqs" | "sandbox_guide" | "settings"
   >("dashboard");
@@ -154,40 +165,17 @@ export function FreelancerServicePortal() {
             </span>
           </div>
 
-          {/* Quick Portals Switcher */}
-          <div className="p-3 border-b border-stone-100 bg-[#fbfdf9]">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 font-bold px-2 block mb-1">
-              Switch Workspace Portal
-            </span>
-            <div className="space-y-1">
-              <Link
-                href="/dashboard"
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-3.5 h-3.5 text-stone-500" />
-                  <span>Indian Manufacturer</span>
-                </div>
-                <span className="text-[9px] font-mono text-stone-400">PHYSICAL</span>
-              </Link>
-              <Link
-                href="/buyer"
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e] text-xs font-medium transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Globe className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Foreign Buyer Portal</span>
-                </div>
-                <span className="text-[9px] font-mono text-stone-400">GLOBAL</span>
-              </Link>
-              <div className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-[#18280e] text-[#b2eb76] font-semibold text-xs shadow-xs">
-                <div className="flex items-center gap-2">
-                  <Code2 className="w-3.5 h-3.5" />
-                  <span>Freelancer Service Portal</span>
-                </div>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76]" />
-              </div>
+          {/* Freelancer Identity Banner */}
+          <div className="px-5 py-3 border-b border-stone-100 bg-[#fbfdf9]">
+            <div className="flex items-center gap-2">
+              <div className="size-2 rounded-full bg-blue-600 animate-pulse" />
+              <span className="text-[11px] font-mono font-bold text-[#18280e]">
+                Freelancer &amp; Agency Workspace
+              </span>
             </div>
+            <span className="text-[10px] font-mono text-stone-500 block mt-0.5">
+              Agency: HyperScale Software Labs LLP
+            </span>
           </div>
 
           {/* Navigation Items */}

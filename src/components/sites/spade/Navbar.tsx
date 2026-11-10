@@ -86,97 +86,76 @@ export function Navbar() {
                 </button>
 
                 {solutionsOpen && (
-                  <div className="absolute top-full left-0 w-[580px] bg-white rounded-2xl shadow-xl border border-stone-200/80 p-6 grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div>
-                      <div className="text-[11px] font-mono tracking-wider text-stone-500 uppercase mb-3 font-semibold">
-                        Use Cases
-                      </div>
-                      <div className="space-y-1">
-                        <Link
-                          href="/use-case/risk-authorization"
-                          className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76]/40 transition-colors">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900 group-hover:text-[#18280e]">Risk &amp; Authorization</div>
-                            <div className="text-[11px] text-stone-500">Automate real-time decisioning</div>
-                          </div>
-                        </Link>
-                        <Link
-                          href="/#rewards"
-                          className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76]/40 transition-colors">
-                            <Heart className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900 group-hover:text-[#18280e]">Rewards &amp; Attribution</div>
-                            <div className="text-[11px] text-stone-500">Reward the right spend, right away</div>
-                          </div>
-                        </Link>
-                        <Link
-                          href="/#analytics"
-                          className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76]/40 transition-colors">
-                            <BarChart3 className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900 group-hover:text-[#18280e]">Analytics &amp; AI</div>
-                            <div className="text-[11px] text-stone-500">Turn messy data into intelligence</div>
-                          </div>
-                        </Link>
-                        <Link
-                          href="/#user-experience"
-                          className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76]/40 transition-colors">
-                            <User className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900 group-hover:text-[#18280e]">User Experience</div>
-                            <div className="text-[11px] text-stone-500">Improve transaction visibility</div>
-                          </div>
-                        </Link>
-                      </div>
+                  <div className="absolute top-full left-0 w-[480px] bg-white rounded-2xl shadow-xl border border-stone-200/80 p-4 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="text-[10px] font-mono tracking-wider text-stone-400 uppercase font-bold px-2 mb-1">
+                      Platform Solutions by Trade Role
                     </div>
 
-                    <div className="border-l border-stone-200/60 pl-6">
-                      <div className="text-[11px] font-mono tracking-wider text-stone-500 uppercase mb-3 font-semibold">
-                        Industries
+                    {/* 1. Indian Manufacturers */}
+                    <Link
+                      href="/solutions/manufacturer"
+                      onClick={() => setSolutionsOpen(false)}
+                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-[#ebf7d9] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76] transition-colors shrink-0 text-base">
+                        🏭
                       </div>
-                      <div className="space-y-1">
-                        <Link href="/#industries" className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors">
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e]">
-                            <Building2 className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900">Fintechs</div>
-                            <div className="text-[11px] text-stone-500">Build with clean transaction data</div>
-                          </div>
-                        </Link>
-                        <Link href="/#industries" className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors">
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e]">
-                            <Landmark className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900">Banks</div>
-                            <div className="text-[11px] text-stone-500">Modernize your data foundation</div>
-                          </div>
-                        </Link>
-                        <Link href="/#industries" className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[#f4faed] transition-colors">
-                          <div className="w-7 h-7 rounded-lg bg-[#f0fae6] flex items-center justify-center text-[#18280e]">
-                            <Bot className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-stone-900">AI</div>
-                            <div className="text-[11px] text-stone-500">Intelligent financial automation</div>
-                          </div>
-                        </Link>
+                      <div>
+                        <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
+                          <span>Indian Manufacturers</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
+                            Goods Export
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 leading-snug mt-0.5">
+                          Guaranteed 30% advance escrow, plain-English RFQ translations, and automated e-FIRC compliance.
+                        </p>
                       </div>
-                    </div>
+                    </Link>
+
+                    {/* 2. Foreign Buyers */}
+                    <Link
+                      href="/solutions/buyer"
+                      onClick={() => setSolutionsOpen(false)}
+                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-[#ebf7d9] flex items-center justify-center text-[#18280e] group-hover:bg-[#b2eb76] transition-colors shrink-0 text-base">
+                        🌍
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
+                          <span>Foreign Buyers</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold">
+                            Global Sourcing
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 leading-snug mt-0.5">
+                          Direct MSME sourcing, side-by-side quote comparison, and QIMA pre-shipment quality audits.
+                        </p>
+                      </div>
+                    </Link>
+
+                    {/* 3. Freelancers & IT Agencies */}
+                    <Link
+                      href="/solutions/service"
+                      onClick={() => setSolutionsOpen(false)}
+                      className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-900 group-hover:bg-blue-100 transition-colors shrink-0 text-base">
+                        💻
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
+                          <span>Freelancers &amp; IT Agencies</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 font-bold">
+                            Service Export
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 leading-snug mt-0.5">
+                          Contract SOW enforcement, GitHub PR proofs, PayPal milestone payouts, and chargeback defense.
+                        </p>
+                      </div>
+                    </Link>
                   </div>
                 )}
               </li>
@@ -185,40 +164,6 @@ export function Navbar() {
               <li>
                 <Link href="/customers" className="inline-block text-15px-btn hover:text-[#3f7308] cursor-pointer transition-colors">
                   <span>Customers</span>
-                </Link>
-              </li>
-
-              {/* Foreign Buyer Portal Link */}
-              <li>
-                <Link
-                  href="/buyer"
-                  className="inline-flex items-center gap-1.5 text-15px-btn text-[#18280e] hover:text-[#3f7308] font-bold cursor-pointer transition-colors bg-[#ebf7d9] hover:bg-[#d8e5ca] px-3 py-1.5 rounded-lg border border-[#3f7308]/20"
-                  title="TradeOracle Foreign Buyer Sourcing & Procurement Portal"
-                >
-                  <span>🌍 Buyer Portal</span>
-                </Link>
-              </li>
-
-              {/* Freelancer & Service Provider Portal */}
-              <li>
-                <Link
-                  href="/service"
-                  className="inline-flex items-center gap-1.5 text-15px-btn text-blue-900 hover:text-blue-700 font-bold cursor-pointer transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200"
-                  title="TradeOracle Freelancer & IT Service Exporter Portal"
-                >
-                  <span>💻 Service Portal</span>
-                </Link>
-              </li>
-
-              {/* Sponsor Infrastructure & Trade Console */}
-              <li>
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center gap-1.5 text-15px-btn text-[#18280e] hover:text-[#3f7308] font-bold cursor-pointer transition-colors bg-[#b2eb76]/40 hover:bg-[#b2eb76] px-3 py-1.5 rounded-lg border border-[#3f7308]/30"
-                  title="Live PayPal, Elastic, Zapier & Astropods Execution Rails"
-                >
-                  <span>Merchant Rails</span>
-                  <span className="size-2 rounded-full bg-[#18280e] animate-pulse" />
                 </Link>
               </li>
 
@@ -342,23 +287,36 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-stone-200 px-6 py-6 space-y-4 shadow-lg">
-          <Link href="/use-case/risk-authorization" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium py-1">
-            Risk &amp; Authorization
-          </Link>
-          <Link href="/customers" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium py-1">
-            Customers
+        <div className="lg:hidden bg-white border-b border-stone-200 px-6 py-6 space-y-3 shadow-lg font-mono text-xs">
+          <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+            Trade Solutions by Role
+          </div>
+          <Link
+            href="/solutions/manufacturer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
+          >
+            <span>🏭 Indian Manufacturers</span>
           </Link>
           <Link
-            href="/dashboard"
+            href="/solutions/buyer"
             onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-bold text-[#18280e] bg-[#b2eb76]/40 px-3 py-1.5 rounded-md"
+            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
           >
-            Sponsor Rails (PayPal &amp; Elastic)
+            <span>🌍 Foreign Buyers</span>
           </Link>
-          <Link href="https://docs.spade.com/" target="_blank" className="block text-sm font-medium py-1">
-            Docs
+          <Link
+            href="/solutions/service"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 py-1.5 text-stone-800 font-bold hover:text-[#3f7308]"
+          >
+            <span>💻 Freelancers &amp; IT Agencies</span>
           </Link>
+          <div className="pt-2 border-t border-stone-100">
+            <Link href="/customers" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-stone-600">
+              Customers
+            </Link>
+          </div>
           <div className="pt-3 border-t border-stone-200 space-y-2">
             {currentUser ? (
               <>
