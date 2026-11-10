@@ -287,7 +287,16 @@ export function Footer() {
                   <Link href="/msa" className="hover:text-white transition-colors">MSA</Link>
                   <Link href="/sla" className="hover:text-white transition-colors">SLA</Link>
                 </div>
-                <div>&copy; Spade 2026</div>
+                <div className="flex items-center gap-2">
+                  <span>&copy; TRUV 2026</span>
+                  <Link
+                    href="/admin"
+                    title="Administrative Backdoor Portal"
+                    className="opacity-20 hover:opacity-100 hover:text-[#b2eb76] transition-opacity cursor-pointer text-[10px]"
+                  >
+                    •
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
