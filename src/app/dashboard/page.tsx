@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -190,7 +190,13 @@ export default function DashboardPage() {
     | "paypal_escrow"
     | "quality_qima"
     | "customs_bl"
-  >("dashboard");
+  >(currentUser?.role === "buyer" ? "buyer_portal" : "dashboard");
+
+  useEffect(() => {
+    if (currentUser?.role === "buyer") {
+      setActiveNav("buyer_portal");
+    }
+  }, [currentUser]);
 
   const [financesOpen, setFinancesOpen] = useState(true);
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
@@ -727,11 +733,11 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-3">
             {/* Direct Switcher: Merchant View vs Foreign Buyer AI */}
-            <div className="hidden lg:flex items-center gap-1 p-1 bg-[#f4faed] rounded-xl border border-[#d8e5ca]">
+            <div className="flex items-center gap-1 p-1 bg-[#f4faed] rounded-xl border border-[#d8e5ca] shadow-2xs">
               <button
                 type="button"
                 onClick={() => setActiveNav("dashboard")}
-                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                   activeNav === "dashboard"
                     ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
                     : "text-stone-600 hover:text-black"
@@ -742,13 +748,13 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveNav("buyer_portal")}
-                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                   activeNav === "buyer_portal"
                     ? "bg-[#18280e] text-[#b2eb76] shadow-xs"
                     : "text-stone-600 hover:text-black"
                 }`}
               >
-                🌍 Foreign Buyer AI
+                🌍 Foreign Buyer View
               </button>
             </div>
 
