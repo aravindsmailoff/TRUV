@@ -1,13 +1,11 @@
 "use client";
 
 import React from "react";
-import { Magnet } from "@/components/reactbits/Magnet";
 
 interface KokonutButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
-  withMagnet?: boolean;
   className?: string;
 }
 
@@ -15,7 +13,6 @@ export function KokonutButton({
   children,
   variant = "primary",
   size = "md",
-  withMagnet = false,
   className = "",
   disabled,
   ...props
@@ -37,7 +34,7 @@ export function KokonutButton({
       "bg-transparent hover:bg-[#ebf7d9]/60 text-stone-700 hover:text-[#18280e] font-medium transition-all",
   };
 
-  const buttonElement = (
+  return (
     <button
       disabled={disabled}
       className={`relative inline-flex items-center justify-center font-mono select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
@@ -46,14 +43,4 @@ export function KokonutButton({
       {children}
     </button>
   );
-
-  if (withMagnet && !disabled) {
-    return (
-      <Magnet padding={15} magnetStrength={2}>
-        {buttonElement}
-      </Magnet>
-    );
-  }
-
-  return buttonElement;
 }

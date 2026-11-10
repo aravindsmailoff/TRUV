@@ -603,7 +603,6 @@ export function TradeOracleStoryline() {
                 <KokonutButton
                   variant="primary"
                   size="sm"
-                  withMagnet
                   onClick={() => alert("Downloading TradeOracle CA-accessible transaction pack (.ZIP)...")}
                 >
                   Download CA Pack (.ZIP)

@@ -33,9 +33,12 @@ import {
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ClickSpark } from "@/components/reactbits/ClickSpark";
+import { CountUp } from "@/components/reactbits/CountUp";
 import { SlideToConfirm } from "@/components/kokonutui/SlideToConfirm";
 import { KokonutButton } from "@/components/kokonutui/KokonutButton";
 import { HoldToConfirm } from "@/components/kokonutui/HoldToConfirm";
+import { ActiveDayChart } from "@/components/kokonutui/ActiveDayChart";
+import { TotalProfitChart } from "@/components/kokonutui/TotalProfitChart";
 import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
 
 // =========================================================================
@@ -602,7 +605,6 @@ export default function DashboardPage() {
             <KokonutButton
               variant={activeNav === "storyline" ? "primary" : "secondary"}
               size="sm"
-              withMagnet
               onClick={() => setActiveNav(activeNav === "storyline" ? "dashboard" : "storyline")}
             >
               <Layers className="w-3.5 h-3.5 text-[#3f7308]" />
@@ -617,11 +619,10 @@ export default function DashboardPage() {
               <span className="font-semibold text-[#18280e]">Last 30 days ∨</span>
             </div>
 
-            {/* Export Button with Magnet */}
+            {/* Export Button */}
             <KokonutButton
               variant="primary"
               size="sm"
-              withMagnet
               onClick={() => alert("Exporting verified commercial trade ledger CSV...")}
             >
               <Download className="w-3.5 h-3.5" />
@@ -676,7 +677,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      16.431
+                      <CountUp to={16.431} decimals={3} />
                     </span>
                     <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -698,7 +699,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      6.225
+                      <CountUp to={6.225} decimals={3} />
                     </span>
                     <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -720,7 +721,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      2.832
+                      <CountUp to={2.832} decimals={3} />
                     </span>
                     <span className="inline-flex items-center text-xs font-bold text-rose-600 font-mono">
                       <ArrowDownRight className="w-3.5 h-3.5" />
@@ -742,7 +743,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      1.224
+                      <CountUp to={1.224} decimals={3} />
                     </span>
                     <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -758,132 +759,15 @@ export default function DashboardPage() {
               {/* ROW 2: TOTAL PROFIT CHART + MOST DAY ACTIVE + REPEAT RATE */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Total Profit Area Chart */}
-                <SpotlightCard className="lg:col-span-2 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs space-y-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-semibold text-stone-500 font-mono uppercase tracking-wider">
-                        Total Profit
-                      </h3>
-                      <div className="flex items-baseline gap-3 mt-1">
-                        <span className="text-3xl font-extrabold font-mono text-[#18280e]">
-                          $446.7K
-                        </span>
-                        <span className="text-xs font-bold text-emerald-700 font-mono">
-                          ▲ 24.4% vs. last period
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-xs font-mono text-stone-400 flex items-center gap-1.5 bg-[#f4faed] px-3 py-1 rounded-full border border-[#d8e5ca]">
-                      <span className="size-2 rounded-full bg-[#3f7308] animate-pulse" />
-                      <span className="text-[#18280e] font-bold">PayPal Orders v2 Verified</span>
-                    </div>
-                  </div>
-
-                  {/* SVG Spline Area Chart */}
-                  <div className="relative w-full h-48 select-none">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 600 180" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="profitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#b2eb76" stopOpacity="0.45" />
-                          <stop offset="100%" stopColor="#b2eb76" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
-
-                      <line x1="0" y1="20" x2="600" y2="20" stroke="#f1f5e9" strokeWidth="1" strokeDasharray="4 4" />
-                      <line x1="0" y1="70" x2="600" y2="70" stroke="#f1f5e9" strokeWidth="1" strokeDasharray="4 4" />
-                      <line x1="0" y1="120" x2="600" y2="120" stroke="#f1f5e9" strokeWidth="1" strokeDasharray="4 4" />
-                      <line x1="0" y1="170" x2="600" y2="170" stroke="#e6ebd9" strokeWidth="1" />
-
-                      <path
-                        d="M 0 140 Q 60 145 120 120 T 240 70 T 360 85 T 480 30 T 600 45 L 600 170 L 0 170 Z"
-                        fill="url(#profitGrad)"
-                      />
-                      <path
-                        d="M 0 140 Q 60 145 120 120 T 240 70 T 360 85 T 480 30 T 600 45"
-                        fill="none"
-                        stroke="#18280e"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-
-                      <circle cx="120" cy="120" r="4" fill="#ffffff" stroke="#18280e" strokeWidth="2.5" />
-                      <circle cx="240" cy="70" r="4" fill="#ffffff" stroke="#18280e" strokeWidth="2.5" />
-                      <circle cx="480" cy="30" r="5" fill="#b2eb76" stroke="#18280e" strokeWidth="2.5" />
-                    </svg>
-                  </div>
-
-                  <div className="flex justify-between text-xs font-mono text-stone-400 pt-1 border-t border-stone-100">
-                    <span>1 Jan</span>
-                    <span>8 Jan</span>
-                    <span>15 Jan</span>
-                    <span>22 Jan</span>
-                    <span>29 Jan</span>
-                  </div>
-
-                  {/* Customer Segment Breakdown */}
-                  <div className="pt-2 border-t border-stone-100">
-                    <span className="text-xs font-semibold text-stone-500 block mb-2 font-mono uppercase">Customers Distribution</span>
-                    <div className="grid grid-cols-3 gap-3 font-mono text-xs">
-                      <div className="p-3 rounded-xl bg-[#f4faed] border-l-4 border-l-[#18280e]">
-                        <span className="text-stone-400 block text-[10px] uppercase font-bold">Retailers</span>
-                        <span className="text-base font-bold text-[#18280e]">2.884</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-[#f4faed] border-l-4 border-l-[#3f7308]">
-                        <span className="text-stone-400 block text-[10px] uppercase font-bold">Distributors</span>
-                        <span className="text-base font-bold text-[#18280e]">1.432</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-[#f4faed] border-l-4 border-l-amber-600">
-                        <span className="text-stone-400 block text-[10px] uppercase font-bold">Wholesalers</span>
-                        <span className="text-base font-bold text-[#18280e]">562</span>
-                      </div>
-                    </div>
-                  </div>
+                <SpotlightCard className="lg:col-span-2 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs">
+                  <TotalProfitChart />
                 </SpotlightCard>
 
                 {/* Right Column: Most Day Active + Repeat Rate */}
                 <div className="space-y-6">
                   {/* Most Day Active Bar Chart */}
-                  <SpotlightCard className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs space-y-4">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-semibold text-stone-700">Most Day Active</span>
-                      <span className="text-stone-400">•••</span>
-                    </div>
-
-                    <div className="flex items-end justify-between h-36 pt-4 pb-1">
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-16" />
-                        <span className="text-[10px] font-mono text-stone-400">Sun</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-24" />
-                        <span className="text-[10px] font-mono text-stone-400">Mon</span>
-                      </div>
-                      {/* Highlighted Tuesday */}
-                      <div className="flex flex-col items-center gap-1.5 flex-1 relative">
-                        <span className="absolute -top-6 text-[10px] font-mono font-bold text-[#18280e] bg-[#ebf7d9] px-1.5 py-0.5 rounded shadow-2xs">
-                          8.162
-                        </span>
-                        <div className="w-5 bg-[#18280e] rounded-t-md h-32" />
-                        <span className="text-[10px] font-mono font-bold text-[#18280e]">Tue</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-20" />
-                        <span className="text-[10px] font-mono text-stone-400">Wed</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-22" />
-                        <span className="text-[10px] font-mono text-stone-400">Thu</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-26" />
-                        <span className="text-[10px] font-mono text-stone-400">Fr</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1.5 flex-1">
-                        <div className="w-5 bg-stone-100 rounded-t-md h-12" />
-                        <span className="text-[10px] font-mono text-stone-400">Sat</span>
-                      </div>
-                    </div>
+                  <SpotlightCard className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs">
+                    <ActiveDayChart />
                   </SpotlightCard>
 
                   {/* Repeat Customer Rate Gauge */}
@@ -913,7 +797,7 @@ export default function DashboardPage() {
                           />
                         </svg>
                         <span className="text-3xl font-extrabold font-mono text-[#18280e] relative z-10">
-                          68%
+                          <CountUp to={68} decimals={0} suffix="%" />
                         </span>
                       </div>
 
@@ -1016,7 +900,6 @@ export default function DashboardPage() {
                     <KokonutButton
                       variant="primary"
                       size="md"
-                      withMagnet
                       onClick={triggerPayPalEscrow}
                       disabled={paypalLoading}
                       className="w-full"
@@ -1294,7 +1177,6 @@ export default function DashboardPage() {
                 <KokonutButton
                   variant="secondary"
                   size="sm"
-                  withMagnet
                   onClick={() => setActiveNav("layman_store")}
                 >
                   View Merchant Cards →
@@ -1385,7 +1267,6 @@ export default function DashboardPage() {
                 <KokonutButton
                   variant="primary"
                   size="sm"
-                  withMagnet
                   onClick={triggerPayPalEscrow}
                   disabled={paypalLoading}
                 >
@@ -1480,7 +1361,6 @@ export default function DashboardPage() {
                 <KokonutButton
                   variant="secondary"
                   size="sm"
-                  withMagnet
                   onClick={() => setActiveNav("layman_store")}
                 >
                   Switch to Merchant Plain View →
