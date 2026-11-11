@@ -349,10 +349,18 @@ export function WhatsAppNotificationCenter({
 
       {/* Single Unified WhatsApp QR Modal — Spade Theme + Geist Sans */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#18280e]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
-          <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-[#d8e5ca] flex flex-col max-h-[92vh]">
+        <div
+          role="dialog"
+          aria-modal="true"
+          data-lenis-prevent
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#18280e]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans"
+        >
+          <div
+            data-lenis-prevent
+            className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-[#d8e5ca] flex flex-col max-h-[90vh]"
+          >
             {/* Modal Header */}
-            <div className="bg-[#18280e] text-white px-5 py-4 flex items-center justify-between">
+            <div className="bg-[#18280e] text-white px-5 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#b2eb76] text-[#18280e] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5" />
@@ -382,7 +390,7 @@ export function WhatsAppNotificationCenter({
             </div>
 
             {/* Clean Automation Toggle Bar */}
-            <div className="bg-[#f4faed] px-5 py-2.5 border-b border-[#d8e5ca] flex flex-wrap items-center justify-between gap-3">
+            <div className="bg-[#f4faed] px-5 py-2.5 border-b border-[#d8e5ca] flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2 text-xs font-sans font-semibold text-[#18280e]">
                 <QrCode className="w-4 h-4 text-[#3f7308]" />
                 <span>Direct WhatsApp Link — Zero Setup Needed</span>
@@ -402,8 +410,13 @@ export function WhatsAppNotificationCenter({
               </label>
             </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-[#fbfdf9]">
+            {/* Scrollable Body */}
+            <div
+              data-lenis-prevent
+              data-lenis-prevent-wheel
+              data-lenis-prevent-touch
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 space-y-5 bg-[#fbfdf9]"
+            >
               {/* STEP 1: QR LINKING */}
               <div className="bg-white rounded-2xl border border-[#d8e5ca] p-5 shadow-2xs">
                 {isConnected ? (

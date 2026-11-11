@@ -20,6 +20,12 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         wheelMultiplier: 1,
         touchMultiplier: 1.5,
         infinite: false,
+        prevent: (node) =>
+          Boolean(
+            node?.closest?.(
+              "[data-lenis-prevent], [data-lenis-prevent-wheel], [role='dialog']"
+            )
+          ),
       }}
     >
       <ClickSpark sparkColor="#b2eb76" sparkSize={3.5} sparkRadius={26} sparkCount={7} duration={400} />
