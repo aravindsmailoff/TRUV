@@ -56,3 +56,5 @@ temp/
 data/*.sqlite3-journal
 data/*.sqlite3-wal
 data/*.sqlite3-shm
+# Local account credentials and sessions are never part of the Git snapshot
+data/local-auth.sqlite3*

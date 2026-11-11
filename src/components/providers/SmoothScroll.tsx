@@ -5,6 +5,11 @@ import { usePathname } from "next/navigation";
 import { ReactLenis } from "lenis/react";
 import "lenis/dist/lenis.css";
 import { ClickSpark } from "@/components/reactbits/ClickSpark";
+import { RuntimeLoader } from "@rive-app/react-canvas";
+
+// Use the bundled runtime instead of relying on a third-party CDN in previews.
+RuntimeLoader.setWasmUrl("/rive.wasm");
+RuntimeLoader.setWasmFallbackUrl("/rive_fallback.wasm");
 
 interface SmoothScrollProps {
   children: React.ReactNode;

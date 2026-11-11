@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       transactionReference: tx.transactionReference,
       amount: depositAmount,
       currency: tx.currency,
-      description: `Advance escrow deposit for ${tx.productDescription}`,
+      description: `Advance payment for ${tx.productDescription}`,
     });
 
     return NextResponse.json({

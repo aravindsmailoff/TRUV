@@ -177,7 +177,7 @@ function SignInContent() {
                 ? "Indian Goods Exporter Rails"
                 : activeRole === "buyer"
                 ? "Verified Foreign Buyer Sourcing"
-                : "Service & Freelancer Milestone Escrow"}
+                : "Service provider workspace"}
             </span>
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-[#18280e]">
@@ -329,7 +329,7 @@ export default function SigninPage() {
       <header className="h-16 bg-white border-b border-black/10 px-5 lg:px-8 flex items-center justify-between">
         <Link href="/" className="inline-flex items-center gap-2 group">
           <span className="size-3 rounded-full bg-[#3f7308] group-hover:bg-[#b2eb76] transition-colors" />
-          <span className="font-bold text-lg tracking-tight text-[#18280e]">TRUV</span>
+          <span className="font-bold text-lg tracking-tight text-[#18280e]">TRUVX</span>
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
             SECURE PORTAL LOGIN
           </span>
@@ -349,7 +349,7 @@ export default function SigninPage() {
         <Suspense
           fallback={
             <div className="w-full max-w-md p-8 bg-white rounded-2xl border border-stone-200 text-center font-mono text-xs">
-              Loading TradeOracle secure gateway...
+              Loading...
             </div>
           }
         >
@@ -359,7 +359,7 @@ export default function SigninPage() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-xs font-mono text-stone-500 border-t border-black/10">
-        TradeOracle // Cross-Border Transaction Execution Platform • PayPal Merchant Rails Active
+        TRUVX • Trade workspace prototype
       </footer>
     </div>
   );

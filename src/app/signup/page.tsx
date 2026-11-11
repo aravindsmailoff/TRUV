@@ -58,7 +58,7 @@ export default function SignupPage() {
       <header className="h-16 bg-white border-b border-black/10 px-5 lg:px-8 flex items-center justify-between">
         <Link href="/" className="inline-flex items-center gap-2 group">
           <span className="size-3 rounded-full bg-[#3f7308] group-hover:bg-[#b2eb76] transition-colors" />
-          <span className="font-bold text-lg tracking-tight text-[#18280e]">TRUV</span>
+          <span className="font-bold text-lg tracking-tight text-[#18280e]">TRUVX</span>
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#ebf7d9] text-[#3f7308] font-bold">
             TRADE OPERATOR
           </span>

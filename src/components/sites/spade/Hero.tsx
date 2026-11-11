@@ -76,7 +76,7 @@ export function Hero() {
             {/* Title with React Bits BlurText */}
             <div className="text-84px-heading text-[#18280E] max-w-4xl tracking-tight leading-[1.05] justify-center text-center">
               <BlurText
-                text="The data & AI platform for modern finance"
+                text="Global trade, made simpler with TRUVX"
                 delay={40}
                 direction="bottom"
                 className="justify-center text-center"
@@ -94,16 +94,16 @@ export function Hero() {
             {/* Subheading / Prose */}
             <div className="prose w-full max-w-[27.75rem] opacity-80 text-[#18280E] text-center mx-auto text-sm sm:text-base leading-relaxed mt-4">
               <p>
-                Spade takes messy transaction data and turns it into structured, verified records — with AI agents that help you use it everywhere it matters.
+                Connect international buyers with Indian manufacturers and manage the journey from sourcing and quotations to shipment, all in one place.
               </p>
             </div>
 
             {/* CTA Button with React Bits Magnet */}
             <div className="flex items-center justify-center gap-x-5 mt-6 sm:mt-7">
               <Magnet padding={35} magnetStrength={2.5}>
-                <Link href="https://spade.com/contact/" target="_blank">
+                <Link href="/signup">
                   <div className="group relative inline-flex appearance-none items-center py-2.5 select-none transition-[color] justify-center text-[#b2eb76] bg-[#18280e] min-h-10.75 px-5 rounded-md hover:bg-[#18280e]/90 cursor-pointer shadow-sm">
-                    <span className="text-15px-btn relative z-10 font-semibold">Contact sales</span>
+                    <span className="text-15px-btn relative z-10 font-semibold">Request access</span>
                   </div>
                 </Link>
               </Magnet>
