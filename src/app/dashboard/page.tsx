@@ -260,8 +260,11 @@ export default function DashboardPage() {
       {/* ========================================================================= */}
       {/* 1. LEFT SIDEBAR (Original Clean Spade Theme + Polished Menu System)      */}
       {/* ========================================================================= */}
-      <aside className="w-72 bg-white border-r border-stone-200/80 flex flex-col justify-between shrink-0 min-h-screen sticky top-0 z-30 shadow-xs">
-        <div className="overflow-y-auto max-h-screen scrollbar-none flex flex-col">
+      <aside
+        data-lenis-prevent
+        className="w-72 bg-white border-r border-stone-200/80 flex flex-col justify-between shrink-0 h-screen sticky top-0 z-30 shadow-xs overflow-y-auto overscroll-contain scrollbar-none"
+      >
+        <div className="flex flex-col">
           {/* Brand Logo Header */}
           <div className="h-16 px-5 flex items-center justify-between border-b border-stone-100/90">
             <Link href="/" className="flex items-center gap-2.5 group">

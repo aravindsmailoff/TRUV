@@ -619,7 +619,7 @@ export function TradeOracleBuyerApp() {
         {/* ========================================================================= */}
         {/* 3. MAIN WORKSPACE VIEW CONTENT                                            */}
         {/* ========================================================================= */}
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl w-full mx-auto overflow-y-auto">
+        <main data-lenis-prevent className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl w-full mx-auto overflow-y-auto">
           {/* ======================================================================= */}
           {/* TAB 1: BUYER DASHBOARD                                                  */}
           {/* ======================================================================= */}
