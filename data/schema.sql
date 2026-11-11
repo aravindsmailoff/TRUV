@@ -60,3 +60,20 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE INDEX IF NOT EXISTS rfqs_recipient_idx ON rfqs(recipient_id);
 CREATE INDEX IF NOT EXISTS messages_rfq_idx ON messages(rfq_id, created_at);
 PRAGMA user_version = 1;
+
+-- One conversation per provider and request. The RFQ's buyer is the other participant.
+CREATE TABLE IF NOT EXISTS conversations (
+  id TEXT PRIMARY KEY,
+  rfq_id TEXT NOT NULL REFERENCES rfqs(id),
+  provider_id TEXT NOT NULL REFERENCES organizations(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (rfq_id, provider_id)
+);
+CREATE TABLE IF NOT EXISTS conversation_messages (
+  id TEXT PRIMARY KEY,
+  conversation_id TEXT NOT NULL REFERENCES conversations(id),
+  sender_id TEXT NOT NULL REFERENCES organizations(id),
+  body TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS conversation_messages_thread_idx ON conversation_messages(conversation_id, created_at);

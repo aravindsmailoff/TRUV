@@ -25,7 +25,17 @@ export async function GET(req: NextRequest) {
       const rows = user.role === "buyer"
         ? db.prepare("SELECT * FROM rfqs WHERE buyer_id=? ORDER BY created_at DESC").all(user.id)
         : db.prepare("SELECT r.*,o.name AS buyer_name FROM rfqs r JOIN organizations o ON o.id=r.buyer_id WHERE r.kind=? ORDER BY r.created_at DESC").all(user.role === "manufacturer" ? "goods" : "service");
-      return NextResponse.json({ user, rfqs: rows }, { headers: { "Cache-Control": "no-store" } });
+      const conversations = db.prepare(`SELECT c.id, c.rfq_id, c.provider_id, r.buyer_id, r.title,
+        buyer.name AS buyer_name, provider.name AS provider_name
+        FROM conversations c JOIN rfqs r ON r.id=c.rfq_id
+        JOIN organizations buyer ON buyer.id=r.buyer_id
+        JOIN organizations provider ON provider.id=c.provider_id
+        WHERE r.buyer_id=? OR c.provider_id=? ORDER BY c.created_at DESC`).all(user.id, user.id);
+      const messages = db.prepare(`SELECT m.id, m.conversation_id, m.sender_id, m.body, m.created_at, o.name AS sender_name
+        FROM conversation_messages m JOIN conversations c ON c.id=m.conversation_id
+        JOIN rfqs r ON r.id=c.rfq_id JOIN organizations o ON o.id=m.sender_id
+        WHERE r.buyer_id=? OR c.provider_id=? ORDER BY m.created_at, m.rowid`).all(user.id, user.id);
+      return NextResponse.json({ user, rfqs: rows, conversations, messages }, { headers: { "Cache-Control": "no-store" } });
     } finally { db.close(); }
   } catch { return error("Local storage is unavailable. Check setup instructions.", 503); }
 }
@@ -50,6 +60,34 @@ export async function POST(req: NextRequest) {
     }
     const user = session(req.cookies.get(cookie)?.value);
     if (!user) return error("Please sign in.", 401);
+    if (payload.action === "start_conversation" || payload.action === "send_message") {
+      if (typeof payload.body !== "string" || !payload.body.trim() || payload.body.length > 5000) return error("Enter a message of up to 5000 characters.", 400);
+      const db = dataDb();
+      try {
+        db.exec("BEGIN IMMEDIATE");
+        try {
+          let conversationId: string;
+          if (payload.action === "start_conversation") {
+            if (user.role === "buyer" || typeof payload.rfqId !== "string") { db.exec("ROLLBACK"); return error("Not permitted.", 403); }
+            const kind = user.role === "manufacturer" ? "goods" : "service";
+            const rfq = db.prepare("SELECT id FROM rfqs WHERE id=? AND kind=?").get(payload.rfqId, kind);
+            if (!rfq) { db.exec("ROLLBACK"); return error("Request not found.", 404); }
+            db.prepare("INSERT INTO organizations (id,name,role) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name").run(user.id, user.company, user.role);
+            db.prepare("INSERT OR IGNORE INTO conversations (id,rfq_id,provider_id) VALUES (?,?,?)").run(randomUUID(), payload.rfqId, user.id);
+            conversationId = (db.prepare("SELECT id FROM conversations WHERE rfq_id=? AND provider_id=?").get(payload.rfqId, user.id) as {id: string}).id;
+          } else {
+            if (typeof payload.conversationId !== "string") { db.exec("ROLLBACK"); return error("Conversation not found.", 404); }
+            const found = db.prepare(`SELECT c.id FROM conversations c JOIN rfqs r ON r.id=c.rfq_id
+              WHERE c.id=? AND (r.buyer_id=? OR c.provider_id=?)`).get(payload.conversationId, user.id, user.id) as {id: string} | undefined;
+            if (!found) { db.exec("ROLLBACK"); return error("Conversation not found.", 404); }
+            conversationId = found.id;
+          }
+          db.prepare("INSERT INTO conversation_messages (id,conversation_id,sender_id,body) VALUES (?,?,?,?)").run(randomUUID(), conversationId, user.id, payload.body.trim());
+          db.exec("COMMIT");
+        } catch (e) { db.exec("ROLLBACK"); throw e; }
+      } finally { db.close(); }
+      return NextResponse.json({ ok: true }, { status: 201 });
+    }
     if (payload.action !== "create_rfq" || user.role !== "buyer") return error("Not permitted.", 403);
     if (typeof payload.title !== "string" || !payload.title.trim() || payload.title.length > 200 || typeof payload.description !== "string" || !payload.description.trim() || payload.description.length > 5000 || !["goods", "service"].includes(payload.kind)) return error("Enter a title, description and request type.", 400);
     const db = dataDb();

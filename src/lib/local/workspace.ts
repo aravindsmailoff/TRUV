@@ -3,16 +3,16 @@ import { createHash, scryptSync, timingSafeEqual, randomBytes } from "node:crypt
 import path from "node:path";
 import { existsSync } from "node:fs";
 
-const root = process.cwd();
+const dataDirectory = process.env.TRUV_LOCAL_DATA_DIR || path.join(process.cwd(), "data");
 export type LocalUser = { id: string; name: string; email: string; company: string; role: "buyer" | "manufacturer" | "service" };
 type LoginRow = LocalUser & { salt: string; password_hash: string };
 export function authDb() {
-  const file = path.join(root, "data/local-auth.sqlite3");
+  const file = path.join(dataDirectory, "local-auth.sqlite3");
   if (!existsSync(file)) throw new Error("Create local accounts first using scripts/db/create-local-user.py.");
   return new DatabaseSync(file);
 }
 export function dataDb() {
-  const file = path.join(root, "data/truv.sqlite3");
+  const file = path.join(dataDirectory, "truv.sqlite3");
   if (!existsSync(file)) throw new Error("Initialize the database first using scripts/db/init.py.");
   const db = new DatabaseSync(file);
   db.exec("PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000");
