@@ -272,34 +272,34 @@ export default function DashboardPage() {
                 <span className="font-extrabold text-base tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors leading-none">
                   TradeOracle<span className="text-[#3f7308]">.</span>
                 </span>
-                <span className="text-[10px] font-mono text-stone-400 font-semibold tracking-wider uppercase mt-1">
-                  Cross-Border Rails
+                <span className="text-[10px] font-sans text-stone-500 font-semibold mt-1">
+                  Factory Export Desk
                 </span>
               </div>
             </Link>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold border border-[#d8e5ca]/70">
+            <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold border border-[#d8e5ca]/70">
               PAYPAL
             </span>
           </div>
 
           {/* Manufacturer Identity Banner */}
-          <div className="px-5 py-3 border-b border-stone-100 bg-[#fbfdf9]">
+          <div className="px-5 py-3 border-b border-stone-100 bg-[#fbfdf9] font-sans">
             <div className="flex items-center gap-2">
               <div className="size-2 rounded-full bg-[#3f7308] animate-pulse" />
-              <span className="text-[11px] font-mono font-bold text-[#18280e]">
-                Indian Manufacturer Workspace
+              <span className="text-xs font-bold text-[#18280e]">
+                My Factory Account
               </span>
             </div>
-            <span className="text-[10px] font-mono text-stone-500 block mt-0.5">
-              Factory: Moradabad Precision Foundry LLP
+            <span className="text-[11px] text-stone-500 block mt-0.5 truncate">
+              Moradabad Precision Foundry LLP
             </span>
           </div>
 
           {/* Navigation Items */}
-          <nav className="p-3.5 space-y-4 text-xs font-medium">
+          <nav className="p-3.5 space-y-4 text-xs font-medium font-sans">
             {/* Group 1: Main Platform */}
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold px-3 py-1 block">
+              <span className="text-[10px] font-sans uppercase tracking-wider text-stone-400 font-bold px-3 py-1 block">
                 Main Menu
               </span>
 
@@ -315,12 +315,12 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <LayoutDashboard className="w-4 h-4 shrink-0" />
-                  <span className="text-xs truncate">Dashboard</span>
+                  <span className="text-xs">Dashboard</span>
                 </div>
                 {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76] shrink-0" />}
               </button>
 
-              {/* 2. Layman Merchant Orders View */}
+              {/* 2. Simple Order Cards View */}
               <button
                 type="button"
                 onClick={() => setActiveNav("layman_store")}
@@ -332,20 +332,20 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <Store className={`w-4 h-4 shrink-0 ${activeNav === "layman_store" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
-                  <span className="text-xs truncate">Merchant Layman Orders</span>
+                  <span className="text-xs">Simple Order Cards</span>
                 </div>
                 <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                  className={`text-[10px] font-sans px-2 py-0.5 rounded-full font-bold shrink-0 ${
                     activeNav === "layman_store"
                       ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
                       : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
                   }`}
                 >
-                  MERCHANT
+                  3 New
                 </span>
               </button>
 
-              {/* 3. Transaction Journey */}
+              {/* 3. How Deals Work */}
               <button
                 type="button"
                 onClick={() => setActiveNav("storyline")}
@@ -357,20 +357,20 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <Layers className={`w-4 h-4 shrink-0 ${activeNav === "storyline" ? "text-[#b2eb76]" : "text-[#3f7308]"}`} />
-                  <span className="text-xs truncate">Transaction Journey</span>
+                  <span className="text-xs">How Deals Work</span>
                 </div>
                 <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                  className={`text-[10px] font-sans px-2 py-0.5 rounded-full font-bold shrink-0 ${
                     activeNav === "storyline"
                       ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
                       : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
                   }`}
                 >
-                  STORY
+                  Guide
                 </span>
               </button>
 
-              {/* 4. Orders Queue */}
+              {/* 4. All Orders */}
               <button
                 type="button"
                 onClick={() => setActiveNav("orders")}
@@ -382,10 +382,10 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <ShoppingBag className="w-4 h-4 shrink-0" />
-                  <span className="text-xs truncate">Orders</span>
+                  <span className="text-xs">All Orders</span>
                 </div>
                 <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                  className={`text-[10px] font-sans px-2 py-0.5 rounded-full font-bold shrink-0 ${
                     activeNav === "orders"
                       ? "bg-[#b2eb76]/20 text-[#b2eb76] border border-[#b2eb76]/30"
                       : "bg-[#ebf7d9] text-[#284905] border border-[#d8e5ca]/80"
@@ -395,7 +395,7 @@ export default function DashboardPage() {
                 </span>
               </button>
 
-              {/* 5. Products / RFQs */}
+              {/* 5. My Products */}
               <button
                 type="button"
                 onClick={() => setActiveNav("products")}
@@ -406,10 +406,10 @@ export default function DashboardPage() {
                 }`}
               >
                 <Package className="w-4 h-4 shrink-0" />
-                <span className="text-xs truncate">Products &amp; Catalog</span>
+                <span className="text-xs">My Products</span>
               </button>
 
-              {/* 6. Customers */}
+              {/* 6. My Foreign Buyers */}
               <button
                 type="button"
                 onClick={() => setActiveNav("customers")}
@@ -420,20 +420,20 @@ export default function DashboardPage() {
                 }`}
               >
                 <Users className="w-4 h-4 shrink-0" />
-                <span className="text-xs truncate">Global Importers</span>
+                <span className="text-xs">My Foreign Buyers</span>
               </button>
             </div>
 
-            {/* Group 2: Step-by-Step Order Stages (Zero Jargon) */}
+            {/* Group 2: Step-by-Step Order Stages (Plain English, Never Truncated) */}
             <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
                 onClick={() => setTradeRailsOpen(!tradeRailsOpen)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-sans uppercase tracking-wider text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>How Your Order Moves</span>
+                  <span>Order Progress Steps</span>
                 </div>
                 {tradeRailsOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
@@ -444,15 +444,15 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("rfq_demand")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "rfq_demand"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">1. New Buyer Requests</span>
+                    <span className="text-xs">1. Buyer Requests</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "rfq_demand"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-[#ebf7d9] text-[#284905]"
@@ -466,21 +466,21 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("msme_vetting")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "msme_vetting"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">2. Factory &amp; KYC Verified</span>
+                    <span className="text-xs">2. Factory Verified</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "msme_vetting"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      Verified ✓
+                      Done ✓
                     </span>
                   </button>
 
@@ -488,21 +488,21 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("commercial_ai")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "commercial_ai"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">3. Price &amp; Deal Agreement</span>
+                    <span className="text-xs">3. Price Agreed</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "commercial_ai"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-stone-100 text-stone-600"
                       }`}
                     >
-                      Agreed ✓
+                      Signed ✓
                     </span>
                   </button>
 
@@ -510,15 +510,15 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("paypal_escrow")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "paypal_escrow"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">4. Advance in PayPal</span>
+                    <span className="text-xs">4. Advance Money</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "paypal_escrow"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-[#ebf7d9] text-[#284905]"
@@ -532,15 +532,15 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("quality_qima")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "quality_qima"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">5. Factory Quality Check</span>
+                    <span className="text-xs">5. Quality Check</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "quality_qima"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-emerald-100 text-emerald-800"
@@ -554,21 +554,21 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveNav("customs_bl")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "customs_bl"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs truncate">6. Shipping &amp; Bank Payout</span>
+                    <span className="text-xs">6. Shipped &amp; Paid</span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "customs_bl"
                           ? "bg-[#b2eb76]/20 text-[#b2eb76]"
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      Dispatched
+                      Sent
                     </span>
                   </button>
                 </div>
@@ -580,11 +580,11 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setFinancesOpen(!financesOpen)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-sans uppercase tracking-wider text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Receipt className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Your Money &amp; Payouts</span>
+                  <span>Money &amp; Receipts</span>
                 </div>
                 {financesOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
@@ -600,7 +600,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Export Bills &amp; Invoices
+                    Bills &amp; Invoices
                   </button>
                   <button
                     type="button"
@@ -611,7 +611,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    PayPal &amp; Bank Deposits
+                    Bank Deposits
                   </button>
                   <button
                     type="button"
@@ -622,7 +622,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Tax &amp; CA Statements (e-FIRC)
+                    Tax Receipts
                   </button>
                 </div>
               )}
@@ -688,9 +688,9 @@ export default function DashboardPage() {
               <span className="size-2 rounded-full bg-[#b2eb76] animate-pulse" />
             </div>
             <div>
-              <h4 className="text-xs font-bold font-sans text-white">PayPal Active Rails</h4>
-              <p className="text-[10px] text-stone-300 leading-tight mt-0.5 font-mono truncate">
-                sb-knljl53833937@business
+              <h4 className="text-xs font-bold font-sans text-white">PayPal Payments</h4>
+              <p className="text-[11px] text-stone-300 leading-tight mt-0.5 font-sans">
+                Ready to collect advance money
               </p>
             </div>
             <button
@@ -699,7 +699,7 @@ export default function DashboardPage() {
               disabled={paypalLoading}
               className="w-full py-1.5 bg-[#b2eb76] hover:bg-[#c2f38d] text-[#18280e] font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
-              {paypalLoading ? "Connecting..." : "Trigger Escrow ($25.7k)"}
+              {paypalLoading ? "Opening PayPal..." : "Collect Advance ($25.7k)"}
             </button>
           </SpotlightCard>
         </div>
@@ -714,22 +714,22 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap truncate">
               {activeNav === "dashboard" && "Dashboard"}
-              {activeNav === "storyline" && "Order Journey Storyline"}
+              {activeNav === "storyline" && "How Deals Work"}
               {activeNav === "buyer_portal" && "Buyer Sourcing Portal"}
-              {activeNav === "layman_store" && "Merchant Layman Orders"}
-              {activeNav === "orders" && "Active Orders Queue"}
-              {activeNav === "products" && "Products & Catalog"}
-              {activeNav === "customers" && "Global Importers"}
-              {activeNav === "invoices" && "Export Bills & Invoices"}
-              {activeNav === "transactions" && "PayPal & Bank Deposits"}
-              {activeNav === "reports" && "Tax & CA Statements"}
-              {activeNav === "rfq_demand" && "1. New Buyer Requests"}
-              {activeNav === "msme_vetting" && "2. Factory & KYC Verified"}
-              {activeNav === "commercial_ai" && "3. Price & Deal Agreement"}
-              {activeNav === "paypal_escrow" && "4. Advance Money in PayPal"}
-              {activeNav === "quality_qima" && "5. Factory Quality Check"}
-              {activeNav === "customs_bl" && "6. Shipping & Bank Payout"}
-              {activeNav === "settings" && "Platform Settings"}
+              {activeNav === "layman_store" && "Simple Foreign Orders"}
+              {activeNav === "orders" && "All Orders"}
+              {activeNav === "products" && "My Products"}
+              {activeNav === "customers" && "My Foreign Buyers"}
+              {activeNav === "invoices" && "Bills & Invoices"}
+              {activeNav === "transactions" && "Bank Deposits"}
+              {activeNav === "reports" && "Tax Receipts"}
+              {activeNav === "rfq_demand" && "1. Buyer Requests"}
+              {activeNav === "msme_vetting" && "2. Factory Verified"}
+              {activeNav === "commercial_ai" && "3. Price Agreed"}
+              {activeNav === "paypal_escrow" && "4. Advance Money"}
+              {activeNav === "quality_qima" && "5. Quality Check"}
+              {activeNav === "customs_bl" && "6. Shipped & Paid"}
+              {activeNav === "settings" && "Settings"}
               {activeNav === "help" && "Help & Support"}
             </h1>
             <span className="text-xs font-sans text-stone-400 hidden 2xl:inline whitespace-nowrap shrink-0">
@@ -1024,69 +1024,69 @@ export default function DashboardPage() {
                 {/* AI Assistant & PayPal Trigger Widget */}
                 <SpotlightCard className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col justify-between space-y-4">
                   <div className="flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#3f7308] animate-pulse" />
-                      <span className="font-bold text-[#18280e]">AI Trade Assistant</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-center justify-center py-2 space-y-3">
-                    <div className="size-20 rounded-full bg-gradient-to-tr from-[#18280e] via-[#3f7308] to-[#b2eb76] p-0.5 shadow-md flex items-center justify-center">
-                      <div className="size-full bg-white rounded-full flex items-center justify-center text-[#18280e]">
-                        <Sparkles className="w-8 h-8 text-[#18280e] animate-pulse" />
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#3f7308] animate-pulse" />
+                        <span className="font-bold text-[#18280e]">PayPal Advance Helper</span>
                       </div>
                     </div>
-                    <div className="text-center">
-                      <span className="text-xs font-bold text-[#18280e] block">
-                        PayPal Orders v2 Connected
-                      </span>
-                      <span className="text-[11px] text-stone-400 font-mono">
-                        Merchant: sb-knljl53833937@business.example.com
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="space-y-2 pt-2 border-t border-stone-100">
-                    <KokonutButton
-                      variant="primary"
-                      size="md"
-                      onClick={triggerPayPalEscrow}
-                      disabled={paypalLoading}
-                      className="w-full"
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>
-                        {paypalLoading ? "Connecting to PayPal..." : "Test PayPal Escrow ($25,725)"}
-                      </span>
-                    </KokonutButton>
-
-                    {paypalResult && (
-                      <div className="p-2.5 rounded-lg bg-[#ebf7d9] text-[#18280e] text-[11px] font-mono space-y-1">
-                        <div className="flex justify-between">
-                          <span>Order:</span>
-                          <strong className="text-[#3f7308]">{paypalResult.id}</strong>
+                    <div className="flex flex-col items-center justify-center py-2 space-y-3">
+                      <div className="size-20 rounded-full bg-gradient-to-tr from-[#18280e] via-[#3f7308] to-[#b2eb76] p-0.5 shadow-md flex items-center justify-center">
+                        <div className="size-full bg-white rounded-full flex items-center justify-center text-[#18280e]">
+                          <Sparkles className="w-8 h-8 text-[#18280e] animate-pulse" />
                         </div>
-                        {paypalResult.approveUrl && (
-                          <a
-                            href={paypalResult.approveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#3f7308] underline block text-center font-bold"
-                          >
-                            Open PayPal Sandbox Checkout →
-                          </a>
-                        )}
                       </div>
-                    )}
+                      <div className="text-center">
+                        <span className="text-xs font-bold text-[#18280e] block">
+                          PayPal Payments Ready
+                        </span>
+                        <span className="text-[11px] text-stone-500 font-sans">
+                          Collect 30% advance before production
+                        </span>
+                      </div>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setActiveNav("storyline")}
-                      className="w-full py-2 text-stone-600 hover:text-[#18280e] text-xs font-mono font-medium text-center block cursor-pointer"
-                    >
-                      View Connected Transaction Story →
-                    </button>
-                  </div>
+                    <div className="space-y-2 pt-2 border-t border-stone-100">
+                      <KokonutButton
+                        variant="primary"
+                        size="md"
+                        onClick={triggerPayPalEscrow}
+                        disabled={paypalLoading}
+                        className="w-full"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>
+                          {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance ($25,725)"}
+                        </span>
+                      </KokonutButton>
+
+                      {paypalResult && (
+                        <div className="p-2.5 rounded-lg bg-[#ebf7d9] text-[#18280e] text-[11px] font-sans space-y-1">
+                          <div className="flex justify-between">
+                            <span>Payment Ref:</span>
+                            <strong className="text-[#3f7308]">{paypalResult.id}</strong>
+                          </div>
+                          {paypalResult.approveUrl && (
+                            <a
+                              href={paypalResult.approveUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#3f7308] underline block text-center font-bold"
+                            >
+                              Open PayPal Payment Window →
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveNav("storyline")}
+                        className="w-full py-2 text-stone-600 hover:text-[#18280e] text-xs font-sans font-medium text-center block cursor-pointer"
+                      >
+                        See How One Deal Works →
+                      </button>
+                    </div>
                 </SpotlightCard>
               </div>
             </>
@@ -1340,42 +1340,48 @@ export default function DashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* STAGE VIEWS (Moved from top runner into side menus)                       */}
+          {/* PLAIN-ENGLISH STEP & MENU VIEWS (For Non-Technical Factory Users)        */}
           {/* ========================================================================= */}
 
-          {/* 1. Buyer RFQ Demand */}
+          {/* 1. Buyer Requests */}
           {activeNav === "rfq_demand" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-stone-100">
                 <div>
-                  <h2 className="text-base font-bold text-[#18280e]">1. New Buyer Requests (3 Active Corridors)</h2>
-                  <span className="text-stone-500">Foreign buyer orders translated into plain language with verified budgets</span>
+                  <h2 className="text-lg font-bold text-[#18280e]">1. New Foreign Buyer Requests (3 Ready)</h2>
+                  <p className="text-xs text-stone-600 mt-0.5">
+                    Verified overseas companies asking to buy from your factory — explained simply with Indian Rupee values.
+                  </p>
                 </div>
                 <KokonutButton
                   variant="secondary"
                   size="sm"
                   onClick={() => setActiveNav("layman_store")}
                 >
-                  View Merchant Cards →
+                  Open Simple Order Cards →
                 </KokonutButton>
               </div>
 
               <div className="space-y-3">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 flex justify-between items-center">
+                  <div
+                    key={ord.id}
+                    className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+                  >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{ord.foreignBuyer.flag}</span>
+                        <span className="text-2xl">{ord.foreignBuyer.flag}</span>
                         <strong className="text-[#18280e] text-sm">{ord.productName}</strong>
-                        <span className="text-stone-400">({ord.orderNumber})</span>
+                        <span className="text-xs text-stone-400">({ord.orderNumber})</span>
                       </div>
-                      <span className="text-stone-500 block text-[11px] mt-1">
-                        Buyer: {ord.foreignBuyer.company} • Destination: {ord.deliveryPort}
-                      </span>
+                      <p className="text-stone-600 text-xs mt-1">
+                        Buyer: <strong>{ord.foreignBuyer.company}</strong> ({ord.foreignBuyer.city}) • Quantity:{" "}
+                        <strong>{ord.quantityUnits.toLocaleString()} pieces</strong>
+                      </p>
                     </div>
-                    <div className="text-right">
+                    <div className="sm:text-right shrink-0">
                       <span className="font-bold text-sm text-[#18280e] block">${ord.totalDealUSD.toLocaleString()} USD</span>
-                      <span className="text-[#3f7308] font-bold">≈ ₹{ord.approxInrLakhs} Lakhs</span>
+                      <span className="text-xs text-[#3f7308] font-bold">≈ ₹{ord.approxInrLakhs} Lakhs</span>
                     </div>
                   </div>
                 ))}
@@ -1383,63 +1389,95 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 2. MSME Vetting */}
+          {/* 2. Factory Verified */}
           {activeNav === "msme_vetting" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                2. Factory Verification &amp; KYC (Government Verified MSMEs)
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
-                  <span className="text-[10px] text-[#3f7308] uppercase font-bold">Brass &amp; Hardware Hub</span>
-                  <h4 className="font-bold text-sm text-[#18280e]">Moradabad Cluster</h4>
-                  <p className="text-stone-600 text-xs">DGFT IEC: 0508012491 • 140 Foundries Validated</p>
-                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">
-                    ✓ ISO 9001:2015 Audited
-                  </span>
-                </div>
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
-                  <span className="text-[10px] text-[#3f7308] uppercase font-bold">Forgings &amp; Valves Hub</span>
-                  <h4 className="font-bold text-sm text-[#18280e]">Rajkot GIDC Cluster</h4>
-                  <p className="text-stone-600 text-xs">DGFT IEC: 0812049182 • 85k Units/mo Capacity</p>
-                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">
-                    ✓ IATF 16949 Certified
-                  </span>
-                </div>
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
-                  <span className="text-[10px] text-[#3f7308] uppercase font-bold">Textiles &amp; Knits Hub</span>
-                  <h4 className="font-bold text-sm text-[#18280e]">Tirupur Cluster</h4>
-                  <p className="text-stone-600 text-xs">DGFT IEC: 3204918201 • OEKO-TEX Standard 100</p>
-                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">
-                    ✓ WRAP Gold Certified
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 3. Commercial Negotiation AI */}
-          {activeNav === "commercial_ai" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                3. Price &amp; Deal Agreement (Plain-English Terms)
-              </h2>
-              <div className="p-5 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-2 text-stone-700">
-                <span className="font-bold text-[#18280e] block">Plain-English Purchase Order vs Invoice Verification:</span>
-                <p className="leading-relaxed">
-                  Our system verifies the buyer&apos;s order against your proforma invoice in simple words: product quantity, material grade, and delivery port (Mundra), so both sides are 100% agreed before raw materials are purchased.
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  2. Your Factory Is Checked &amp; Trusted
+                </h2>
+                <p className="text-xs text-stone-600 mt-0.5">
+                  Foreign buyers want to know your factory is real before sending advance money. Your checks are already complete.
                 </p>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                  <span className="text-xs text-[#3f7308] font-bold">Government Export License</span>
+                  <h4 className="font-bold text-base text-[#18280e]">Moradabad Brass Factory</h4>
+                  <p className="text-stone-600 text-xs leading-relaxed">
+                    Your factory registration, tax details, and bank account match officially.
+                  </p>
+                  <span className="text-xs text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
+                    Verified ✓
+                  </span>
+                </div>
+                <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                  <span className="text-xs text-[#3f7308] font-bold">Workshop Capacity</span>
+                  <h4 className="font-bold text-base text-[#18280e]">Rajkot Parts Hub</h4>
+                  <p className="text-stone-600 text-xs leading-relaxed">
+                    Monthly production limit checked at 85,000 pieces so buyers know you can deliver on time.
+                  </p>
+                  <span className="text-xs text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
+                    Active ✓
+                  </span>
+                </div>
+                <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                  <span className="text-xs text-[#3f7308] font-bold">PayPal Payout Check</span>
+                  <h4 className="font-bold text-base text-[#18280e]">Indian Bank Linked</h4>
+                  <p className="text-stone-600 text-xs leading-relaxed">
+                    Dollar payments from overseas convert cleanly and go straight to your Indian bank account.
+                  </p>
+                  <span className="text-xs text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
+                    Ready ✓
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* 4. PayPal Milestone Escrow */}
+          {/* 3. Price Agreed */}
+          {activeNav === "commercial_ai" && (
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  3. Order Checklist Agreed Before You Start
+                </h2>
+                <p className="text-xs text-stone-600 mt-0.5">
+                  We put both sides&apos; agreement in simple words so there is never any confusion later about size, finish, or price.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-1.5">
+                  <span className="text-xs font-bold text-[#3f7308]">1. Exact Count &amp; Finish</span>
+                  <p className="text-xs text-stone-700 leading-relaxed">
+                    1,500 solid brass door handles with brushed gold polish and rust-proof coating agreed.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-1.5">
+                  <span className="text-xs font-bold text-[#3f7308]">2. Total Money Locked</span>
+                  <p className="text-xs text-stone-700 leading-relaxed">
+                    $85,750 total (about ₹71.6 Lakhs). 30% comes upfront; 70% comes after ship loading.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#f8fbf5] border border-[#d8e5ca] space-y-1.5">
+                  <span className="text-xs font-bold text-[#3f7308]">3. Delivery Port Fixed</span>
+                  <p className="text-xs text-stone-700 leading-relaxed">
+                    Goods delivered safely to Gujarat port (Mundra) packed in export wooden boxes.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 4. Advance Money in PayPal */}
           {activeNav === "paypal_escrow" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-stone-100">
                 <div>
-                  <h2 className="text-base font-bold text-[#18280e]">4. Advance Money in PayPal (30% Upfront Escrow)</h2>
-                  <span className="text-stone-500">Secured funding held safely in PayPal before production begins</span>
+                  <h2 className="text-lg font-bold text-[#18280e]">4. 30% Advance Money in PayPal</h2>
+                  <p className="text-xs text-stone-600 mt-0.5">
+                    You never have to start making goods on trust alone — the buyer deposits 30% advance first.
+                  </p>
                 </div>
                 <KokonutButton
                   variant="primary"
@@ -1447,23 +1485,32 @@ export default function DashboardPage() {
                   onClick={triggerPayPalEscrow}
                   disabled={paypalLoading}
                 >
-                  {paypalLoading ? "Connecting to PayPal..." : "+ Create Test Escrow Order ($25,725)"}
+                  {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance ($25,725)"}
                 </KokonutButton>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <span className="text-stone-400 uppercase font-bold text-[10px] block">Connected PayPal Sandbox Account</span>
-                <span className="font-bold text-sm text-[#18280e] block">sb-knljl53833937@business.example.com</span>
-                <span className="text-stone-500 block text-[11px]">
-                  Client ID: <code>AU-2yZPCo9C6_04QNEUens2pAgdB00D3FhVJYfLqV8q6lulIe23tghXNuvsEkYNHeHtPtnJJMHOfDF_s</code>
-                </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1.5">
+                  <span className="text-xs font-bold text-[#3f7308]">30% Advance Before Work Starts</span>
+                  <div className="text-2xl font-extrabold text-[#18280e]">$25,725 USD (≈ ₹21.48 Lakhs)</div>
+                  <p className="text-xs text-stone-600">
+                    Use this advance money confidently to buy brass raw material and pay factory workers.
+                  </p>
+                </div>
+                <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-1.5">
+                  <span className="text-xs font-bold text-stone-500">70% Remaining Balance</span>
+                  <div className="text-2xl font-extrabold text-[#18280e]">$60,025 USD (≈ ₹50.12 Lakhs)</div>
+                  <p className="text-xs text-stone-600">
+                    Automatically released to your linked bank account once goods pass quality check and board the ship.
+                  </p>
+                </div>
               </div>
 
               {paypalResult && (
                 <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-2">
-                  <span className="font-bold text-[#18280e] block">✓ PayPal Order Created Successfully</span>
-                  <div className="flex justify-between text-xs font-mono">
-                    <span>Order ID: <strong>{paypalResult.id}</strong></span>
+                  <span className="font-bold text-[#18280e] block text-sm">✓ PayPal Payment Ready</span>
+                  <div className="flex justify-between text-xs">
+                    <span>Reference Number: <strong>{paypalResult.id}</strong></span>
                     <span>Status: <strong>{paypalResult.status}</strong></span>
                   </div>
                   {paypalResult.approveUrl && (
@@ -1473,7 +1520,7 @@ export default function DashboardPage() {
                       rel="noopener noreferrer"
                       className="inline-block px-4 py-2 bg-[#18280e] text-[#b2eb76] rounded-xl font-bold text-xs mt-2"
                     >
-                      Complete Sandbox Payment in PayPal Checkout →
+                      Open PayPal Payment Window →
                     </a>
                   )}
                 </div>
@@ -1481,78 +1528,100 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 5. QIMA Quality Inspection */}
+          {/* 5. Factory Quality Check */}
           {activeNav === "quality_qima" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                5. Factory Quality Check (Inspection Passed Prior to Shipment)
-              </h2>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  5. Factory Quality Check Before Packing
+                </h2>
+                <p className="text-xs text-stone-600 mt-0.5">
+                  An independent inspector checks samples at your workshop so the foreign buyer cannot complain later.
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
-                    PASSED • AQL 1.5 AUDITED
+                <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                    Passed ✓ • Ready to Pack
                   </span>
-                  <h4 className="font-bold text-sm text-[#18280e]">Audit #QIMA-IN-98124 (Solid Brass Locksets)</h4>
-                  <p className="text-stone-600 text-xs">
-                    Tested 125 sample locksets for 240-hr ASTM B117 salt spray resistance and cycle durability. Zero critical defects found.
+                  <h4 className="font-bold text-base text-[#18280e]">Solid Brass Door Handles (1,500 units)</h4>
+                  <p className="text-stone-700 text-xs leading-relaxed">
+                    Inspector tested 125 sample handles for rust resistance, color finish, and strength. Zero defects found.
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
-                    PASSED • HYDRO-STATIC 25 BAR
+                <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                    Passed ✓ • Approved
                   </span>
-                  <h4 className="font-bold text-sm text-[#18280e]">Audit #TUV-RH-44018 (Grade 10.9 Fasteners)</h4>
-                  <p className="text-stone-600 text-xs">
-                    Proof load test to 830 MPa conducted at TÜV laboratory. Zinc-nickel coating thickness verified at 12 microns.
+                  <h4 className="font-bold text-base text-[#18280e]">Heavy Steel Machine Bolts (25,000 units)</h4>
+                  <p className="text-stone-700 text-xs leading-relaxed">
+                    Strength test and anti-rust silver coating passed cleanly. Photos saved to your order record.
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 6. Customs LEO & Bill of Lading */}
+          {/* 6. Shipped & Paid */}
           {activeNav === "customs_bl" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">
-                6. Shipping &amp; Bank Payout (Dispatched &amp; Remaining 70% Released)
-              </h2>
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex justify-between items-center">
-                  <strong className="text-sm text-[#18280e]">Shipping Bill #SB-INMUN1-2026-981024</strong>
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
-                    Let Export Order (LEO) Issued
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  6. Goods Shipped &amp; Final Money Sent to Bank
+                </h2>
+                <p className="text-xs text-stone-600 mt-0.5">
+                  As soon as your boxes clear port customs and load onto the ship, the remaining 70% payment is sent.
+                </p>
+              </div>
+              <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <strong className="text-sm text-[#18280e]">Order #ORD-USA-9921 • Container Loaded on Ship</strong>
+                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                    Left Gujarat Port ✓
                   </span>
                 </div>
-                <p className="text-stone-600 text-xs">
-                  Port of Loading: Mundra Port (INMUN1) • Ocean Carrier: Maersk Line • Container: MSKU-7491024 • Bill of Lading: BL-MSK-2026-44018A
+                <p className="text-stone-700 text-xs leading-relaxed">
+                  Loaded at Mundra Port onto Maersk cargo ship going to California, USA. Final balance of{" "}
+                  <strong>$60,025 (≈ ₹50.12 Lakhs)</strong> is approved for your bank account.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Fallback standard tabs */}
+          {/* All Orders */}
           {activeNav === "orders" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <div className="flex justify-between items-center pb-3 border-b border-stone-100">
-                <h2 className="text-base font-bold text-[#18280e]">Commercial Export Orders (46 Active)</h2>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-sans animate-in fade-in">
+              <div className="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-stone-100">
+                <div>
+                  <h2 className="text-lg font-bold text-[#18280e]">All Your Foreign Orders</h2>
+                  <p className="text-xs text-stone-500">Click Simple Order Cards to read full details in everyday words.</p>
+                </div>
                 <KokonutButton
                   variant="secondary"
                   size="sm"
                   onClick={() => setActiveNav("layman_store")}
                 >
-                  Switch to Merchant Plain View →
+                  Open Simple Order Cards →
                 </KokonutButton>
               </div>
               <div className="divide-y divide-stone-100">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="py-3.5 flex justify-between items-center">
+                  <div key={ord.id} className="py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                     <div>
-                      <span className="font-bold text-[#18280e]">{ord.orderNumber} • {ord.productName}</span>
-                      <span className="text-stone-500 block text-[11px]">Buyer: {ord.foreignBuyer.company} • Port: {ord.deliveryPort}</span>
+                      <span className="font-bold text-sm text-[#18280e] block">
+                        {ord.foreignBuyer.flag} {ord.orderNumber} • {ord.productName}
+                      </span>
+                      <span className="text-stone-500 block text-xs mt-0.5">
+                        Buyer: {ord.foreignBuyer.company} ({ord.foreignBuyer.city})
+                      </span>
                     </div>
-                    <div className="text-right">
-                      <span className="font-bold text-[#18280e] block">${ord.totalDealUSD.toLocaleString()} USD</span>
-                      <span className="text-[10px] font-bold text-[#3f7308] bg-[#ebf7d9] px-2 py-0.5 rounded">{ord.status}</span>
+                    <div className="sm:text-right">
+                      <span className="font-bold text-sm text-[#18280e] block">
+                        ${ord.totalDealUSD.toLocaleString()} USD (≈ ₹{ord.approxInrLakhs} Lakhs)
+                      </span>
+                      <span className="text-xs font-semibold text-[#3f7308] bg-[#ebf7d9] px-2.5 py-0.5 rounded-full inline-block mt-1">
+                        {ord.status}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1560,33 +1629,48 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* My Products */}
           {activeNav === "products" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">International RFQ Catalog</h2>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">Products Foreign Buyers Order From You</h2>
+                <p className="text-xs text-stone-500">Your listed factory items and recent order prices.</p>
+              </div>
               <div className="space-y-3">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex justify-between items-center">
+                  <div key={ord.id} className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                     <div>
                       <h4 className="font-bold text-sm text-[#18280e]">{ord.productName}</h4>
-                      <p className="text-stone-600 text-xs mt-0.5">{ord.laymanExplanation}</p>
+                      <p className="text-stone-600 text-xs mt-1 leading-relaxed">{ord.laymanExplanation}</p>
                     </div>
-                    <span className="font-bold text-sm text-[#3f7308]">${ord.totalDealUSD.toLocaleString()}</span>
+                    <div className="sm:text-right shrink-0">
+                      <span className="font-bold text-sm text-[#3f7308] block">${ord.unitPriceUSD} / piece</span>
+                      <span className="text-xs text-stone-500">Total order: ₹{ord.approxInrLakhs} Lakhs</span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
+          {/* My Foreign Buyers */}
           {activeNav === "customers" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100">Verified Global Importers</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">Verified Foreign Buyers Ordering From You</h2>
+                <p className="text-xs text-stone-500">Every buyer below has a checked company record and active PayPal payment method.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {LAYMAN_ORDERS.map((ord) => (
-                  <div key={ord.id} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-xl">{ord.foreignBuyer.flag}</span>
+                  <div key={ord.id} className="p-5 rounded-2xl bg-[#fbfdf9] border border-stone-200 space-y-2">
+                    <span className="text-2xl block">{ord.foreignBuyer.flag}</span>
                     <h4 className="font-bold text-sm text-[#18280e]">{ord.foreignBuyer.company}</h4>
-                    <p className="text-stone-600 text-xs">{ord.foreignBuyer.city} • Contact: {ord.foreignBuyer.contactPerson}</p>
-                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">
+                    <p className="text-stone-600 text-xs">
+                      {ord.foreignBuyer.city}
+                      <br />
+                      Contact: {ord.foreignBuyer.contactPerson}
+                    </p>
+                    <span className="text-xs text-emerald-800 font-semibold bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
                       {ord.foreignBuyer.verifiedStanding}
                     </span>
                   </div>
@@ -1595,32 +1679,87 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* Money, Bills & Tax Receipts */}
           {(activeNav === "invoices" || activeNav === "transactions" || activeNav === "reports") && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100 capitalize">
-                {activeNav} &amp; PayPal Settlement Ledger
-              </h2>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  {activeNav === "invoices" && "Your Bills & Invoices"}
+                  {activeNav === "transactions" && "Money Received in PayPal & Your Bank"}
+                  {activeNav === "reports" && "Export Tax & Accountant Receipts"}
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Clear record of advance payments, pending balances, and ready-to-download tax receipts for your accountant.
+                </p>
+              </div>
               <div className="divide-y divide-stone-100">
-                <div className="py-3.5 flex justify-between items-center">
+                <div className="py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                   <div>
-                    <span className="font-bold text-[#18280e]">INV-2026-9921-ADV (30% Production Advance)</span>
-                    <span className="text-stone-500 block text-[11px]">Buyer: Pacific Architectural Hardware • PayPal Capture ID: CAP-2JM21803AA</span>
+                    <span className="font-bold text-sm text-[#18280e] block">
+                      30% Advance Payment — Solid Brass Door Handles (#ORD-USA-9921)
+                    </span>
+                    <span className="text-stone-500 block text-xs mt-0.5">
+                      Paid by Pacific Architectural Hardware (USA) via PayPal
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <span className="font-bold text-[#18280e] block text-sm">$25,725.00 USD</span>
-                    <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">Settled via PayPal</span>
+                  <div className="sm:text-right">
+                    <span className="font-bold text-[#18280e] block text-sm">$25,725 USD (≈ ₹21.48 Lakhs)</span>
+                    <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs inline-block mt-1">
+                      Received in PayPal ✓
+                    </span>
+                  </div>
+                </div>
+                <div className="py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <div>
+                    <span className="font-bold text-sm text-[#18280e] block">
+                      70% Remaining Balance — Released Upon Ship Loading (#ORD-USA-9921)
+                    </span>
+                    <span className="text-stone-500 block text-xs mt-0.5">
+                      Scheduled automatic transfer to your factory bank account
+                    </span>
+                  </div>
+                  <div className="sm:text-right">
+                    <span className="font-bold text-[#18280e] block text-sm">$60,025 USD (≈ ₹50.12 Lakhs)</span>
+                    <span className="text-[#3f7308] font-bold bg-[#ebf7d9] px-2.5 py-0.5 rounded-full text-xs inline-block mt-1">
+                      On Ship Dispatch
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Simple Settings & Help */}
           {(activeNav === "settings" || activeNav === "help" || activeNav === "analytics" || activeNav === "discounts" || activeNav === "content") && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-4 font-mono text-xs animate-in fade-in">
-              <h2 className="text-base font-bold text-[#18280e] pb-3 border-b border-stone-100 capitalize">{activeNav}</h2>
-              <p className="text-stone-600">
-                Configure and review {activeNav} settings for your verified international trade and PayPal merchant profile.
-              </p>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
+              <div className="pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-[#18280e]">
+                  {activeNav === "help" ? "Help & Simple Guide" : "Factory Account Settings"}
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Manage your factory details, WhatsApp order alerts, and common questions.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1.5">
+                  <strong className="text-[#18280e] block text-sm">1. How do I accept an order?</strong>
+                  <p className="text-stone-700 leading-relaxed">
+                    Open <strong>Simple Order Cards</strong>, read what the foreign buyer wants in plain words, and slide the green button to accept.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1.5">
+                  <strong className="text-[#18280e] block text-sm">2. When do I get paid?</strong>
+                  <p className="text-stone-700 leading-relaxed">
+                    The buyer pays 30% advance in PayPal before you start making anything, and the other 70% when goods load on the ship.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1.5">
+                  <strong className="text-[#18280e] block text-sm">3. How do WhatsApp alerts work?</strong>
+                  <p className="text-stone-700 leading-relaxed">
+                    Click <strong>WhatsApp Alerts</strong> at the top right, scan the QR code once with your phone, and every update arrives in WhatsApp automatically.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </main>
