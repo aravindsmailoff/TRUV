@@ -1,5 +1,7 @@
 # TRUV — Global Trade Execution Infrastructure
 
+> **Prototype:** Trade records, supplier verification and payment milestones are sample data. PayPal Orders do not provide escrow. Authentication and persistence are not production-ready; do not use this project to handle real money or sensitive data.
+
 **TRUV** is a technology-powered international trade execution platform designed to connect foreign buyers directly with verified Indian industrial manufacturers (MSMEs). 
 
 TRUV acts as an active trade operator, coordinating opportunities from initial buyer demand (RFQ), AI-driven supplier qualification, and quotation negotiations through to official PayPal milestone payments, third-party quality inspections (QIMA / SGS), customs brokerage (ICEGATE), and ocean freight delivery (Maersk).
@@ -22,8 +24,8 @@ TRUV acts as an active trade operator, coordinating opportunities from initial b
 
 4. **PayPal Financial Execution Layer**
    - Uses official PayPal Orders v2 REST API for cross-border commercial transactions.
-   - Automates the 30% advance deposit escrow before production starts, and tracks the 70% balance payable upon Bill of Lading.
-   - Real-time webhook processing (`PAYMENT.CAPTURE.COMPLETED`), dispute monitoring, and transaction reconciliation.
+   - Can create a PayPal order for a proposed advance or balance; order creation is not a payment capture or escrow.
+   - Verifies webhook signatures with PayPal before processing matching capture events. Records and event deduplication are currently in memory only.
 
 5. **International Logistics & Export Handover**
    - Coordinates pre-shipment quality inspection via **QIMA / SGS** (AQL 1.5 standard).
@@ -78,9 +80,10 @@ Create a `.env.local` file in the root directory:
 PAYPAL_CLIENT_ID=your_paypal_client_id
 PAYPAL_CLIENT_SECRET=your_paypal_client_secret
 PAYPAL_ENV=sandbox # or 'production'
+PAYPAL_WEBHOOK_ID=your_paypal_webhook_id
 ```
 
-*Note: If no credentials are provided, TRUV runs seamlessly in sandbox simulation mode.*
+*Without credentials, payment creation is disabled. Configure PayPal sandbox credentials and a webhook ID to test real sandbox events. The seeded trade data is illustrative, not live.*
 
 ### 4. Run the Development Server
 
@@ -89,6 +92,22 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## PayPal sandbox trade demo
+
+The **Buyer portal → My Orders → PayPal sandbox trade demo** connects an example supplier quotation to a 30% advance payment:
+
+1. Sign in as the demo buyer, open **My Orders**, select an example supplier quote and click **Confirm order**.
+2. Open **Payments**, choose **Pay with PayPal**, then **Continue to PayPal sandbox**. Approve using a PayPal sandbox buyer account.
+3. PayPal returns to the buyer portal; the server captures the matching order and displays the confirmed capture ID and status on the demo trade. Cancellation does not mark it paid.
+
+Configure `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` for a PayPal **sandbox** REST app in `.env.local`, set `PAYPAL_ENV=sandbox`, and set `PAYPAL_RETURN_BASE_URL` to the public HTTPS origin of this app (for example, the origin of your preview). For local testing, `http://localhost:3000` is allowed. Restart the server after changing the environment. Open the buyer portal in a full browser tab before starting so PayPal can redirect back to the same tab.
+
+The named suppliers and quotes are illustrative. The sandbox payment goes to the merchant account associated with your sandbox app, **not** to the named sample supplier. This demo uses temporary in-memory server records and a tab-local session: orders are lost on server restart and aren't shared between server instances. It does not implement escrow, production authentication, durable reconciliation, or real manufacturer payouts. Never use it with live funds. A complete sandbox run requires valid PayPal sandbox accounts and credentials; without them the UI reports a configuration error.
+
+My Orders is for confirming a sample order; Payments is for its sandbox payment. Documents and Messages are placeholders and do not yet upload files or send messages. The signed webhook endpoint under `/api/intelligence/paypal/webhook` is separate and is not the source of truth for this sandbox demo; the demo displays a capture only after the PayPal capture response matches the order and amount.
 
 ---
 
@@ -143,3 +162,11 @@ TRUV/
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Local database snapshots
+
+`data/truv.sqlite3` is an initially empty SQLite database intended for **one local installation**, with its schema in `data/schema.sql`. Run `python3 scripts/db/init.py` to create it if missing; the script does not erase existing records. The database structure covers organizations, requests, messages, projects, milestones, document references and payment records.
+
+**This is storage groundwork, not a connected application yet.** The current browser-based sign-in and portal workflows do not use this database. Do not enter real confidential data until proper server-side authentication, authorization and access controls are implemented. PayPal still requires a server with outbound access to PayPal, and a database file does not provide escrow.
+
+The database file may be committed as a **manual snapshot** so a later clone contains that snapshot. Git does not automatically save or synchronize live changes. Stop the app and all writers first, then check database integrity and review what is being shared before committing and pushing. Every repository reader can access committed records, and Git history may retain deleted records. Do not commit passwords, tokens, payment credentials, private documents or sensitive personal data. Simultaneous updates to a SQLite binary cannot be merged reliably; for multiple installations or online users, use a shared hosted database instead. Files referenced by documents are not included in the database or repository automatically.

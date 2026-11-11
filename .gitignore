@@ -51,3 +51,8 @@ temp/
 # Local WhatsApp Linked Device Session & Config
 .whatsapp-auth/
 .whatsapp-config.json
+
+# SQLite temporary files (the database snapshot itself is intentionally tracked)
+data/*.sqlite3-journal
+data/*.sqlite3-wal
+data/*.sqlite3-shm
