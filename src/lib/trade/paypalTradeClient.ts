@@ -17,12 +17,8 @@ export class PayPalTradeClient {
   private isConfigured: boolean;
 
   constructor() {
-    this.clientId =
-      process.env.PAYPAL_CLIENT_ID ||
-      "AU-2yZPCo9C6_04QNEUens2pAgdB00D3FhVJYfLqV8q6lulIe23tghXNuvsEkYNHeHtPtnJJMHOfDF_s";
-    this.clientSecret =
-      process.env.PAYPAL_CLIENT_SECRET ||
-      "EF4NbMHU0M5Lyt74XJhYEjslMFqkVFQWIW09yT32tF2d8DYNeQc52NwOD_-5xDftAtYA6eTCondrYct9";
+    this.clientId = process.env.PAYPAL_CLIENT_ID || "";
+    this.clientSecret = process.env.PAYPAL_CLIENT_SECRET || "";
     const isLive = process.env.PAYPAL_ENV === "production";
     this.baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
     this.isConfigured = Boolean(this.clientId && this.clientSecret);
@@ -31,14 +27,14 @@ export class PayPalTradeClient {
   public getStatus() {
     return {
       configured: this.isConfigured,
-      environment: this.isConfigured ? (process.env.PAYPAL_ENV === "production" ? "live" : "sandbox") : "sandbox_mock",
+      environment: this.isConfigured ? (process.env.PAYPAL_ENV === "production" ? "live" : "sandbox") : "not_configured",
       notice: "Direct commercial payments from foreign buyers to eligible Indian manufacturers. Platform operates as technology and workflow coordinator without holding third-party funds.",
     };
   }
 
   private async getAccessToken(): Promise<string> {
     if (!this.isConfigured) {
-      return "mock_sandbox_trade_token_" + Date.now();
+      throw new Error("PayPal is not configured. Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET.");
     }
 
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
@@ -71,25 +67,7 @@ export class PayPalTradeClient {
     const { tradeOrder, amountUSD, description, payeeEmail } = params;
 
     if (!this.isConfigured) {
-      return {
-        id: `SANDBOX_TRADE_ORDER_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-        status: "CREATED",
-        tradeOrderId: tradeOrder.id,
-        orderNumber: tradeOrder.orderNumber,
-        amount: {
-          currency_code: "USD",
-          value: amountUSD.toFixed(2),
-        },
-        payee: payeeEmail || "exports@mpfbrassware.com",
-        links: [
-          {
-            rel: "approve",
-            href: `https://www.sandbox.paypal.com/checkoutnow?token=TRADE_${tradeOrder.id}`,
-            method: "GET",
-          },
-        ],
-        sandboxMode: true,
-      };
+      throw new Error("PayPal is not configured. Set sandbox credentials before creating a payment.");
     }
 
     const token = await this.getAccessToken();

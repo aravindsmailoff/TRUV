@@ -18,27 +18,25 @@ export function DevelopersCta() {
               {/* Eyebrow */}
               <div className="inline-flex items-center gap-x-2.5 mb-3.5">
                 <span className="opacity-80 text-xs font-mono font-semibold uppercase tracking-wider text-[#18280E] cursor-default">
-                  <DecryptedText text="[Developers]" animateOn="hover" speed={35} />
+                  <DecryptedText text="[Trade workspace]" animateOn="hover" speed={35} />
                 </span>
               </div>
 
               {/* Heading / Description */}
               <p className="text-xl sm:text-2xl lg:text-[28px] font-normal leading-[1.3] tracking-tight text-[#18280E]">
-                Integrate Spade’s API in minutes. No complex setup, no custom configuration — just high-performance enrichment that scales automatically.
+                From the first request to the final shipment, bring your trade journey into one connected workspace.
               </p>
 
               {/* Explore docs button with Magnet */}
               <div className="flex items-center gap-x-5 mt-6 sm:mt-8">
                 <Magnet padding={25} magnetStrength={3}>
                   <Link
-                    href="https://docs.spade.com/reference/introduction"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/signup"
                     className="inline-block"
                   >
                     <div className="group relative inline-flex appearance-none items-center py-2.5 px-5 select-none transition-all justify-center text-black rounded-md border border-black/15 bg-white hover:bg-[#b2eb76] hover:border-[#b2eb76] cursor-pointer shadow-xs active:scale-95">
                       <span className="text-sm font-medium relative z-10 flex items-center gap-2">
-                        <span>Explore our docs</span>
+                        <span>Explore TRUVX</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 22 16" fill="none" className="rotate-0 group-hover:translate-x-0.5 transition-transform">
                           <path d="M2.0326 15.6442L5.93597e-07 13.5799L9.02336e-08 2.0643L2.0326 -8.88478e-08L21.48 7.27606L21.48 8.36816L2.0326 15.6442Z" fill="currentColor" />
                         </svg>
@@ -81,7 +79,7 @@ export function DevelopersCta() {
               <div className="relative size-full">
                 <Image
                   src="/sites/spade/docs-layer-1.svg"
-                  alt="Spade API Documentation Mockup"
+                  alt="Trade workspace illustration"
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -92,7 +90,7 @@ export function DevelopersCta() {
               <div className="absolute inset-0 size-full pointer-events-none">
                 <Image
                   src="/sites/spade/docs-layer-2.png"
-                  alt="Spade Code Overlay"
+                  alt="Trade workspace detail"
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 50vw"

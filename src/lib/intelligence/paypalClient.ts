@@ -21,12 +21,8 @@ export class PayPalIntelligenceClient {
   private isConfigured: boolean;
 
   constructor() {
-    this.clientId =
-      process.env.PAYPAL_CLIENT_ID ||
-      "AU-2yZPCo9C6_04QNEUens2pAgdB00D3FhVJYfLqV8q6lulIe23tghXNuvsEkYNHeHtPtnJJMHOfDF_s";
-    this.clientSecret =
-      process.env.PAYPAL_CLIENT_SECRET ||
-      "EF4NbMHU0M5Lyt74XJhYEjslMFqkVFQWIW09yT32tF2d8DYNeQc52NwOD_-5xDftAtYA6eTCondrYct9";
+    this.clientId = process.env.PAYPAL_CLIENT_ID || "";
+    this.clientSecret = process.env.PAYPAL_CLIENT_SECRET || "";
     const isLive = process.env.PAYPAL_ENV === "production";
     this.baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
     this.isConfigured = Boolean(this.clientId && this.clientSecret);
@@ -36,7 +32,7 @@ export class PayPalIntelligenceClient {
     return {
       isLive: process.env.PAYPAL_ENV === "production",
       isConfigured: this.isConfigured,
-      environment: this.isConfigured ? (process.env.PAYPAL_ENV === "production" ? "live" : "sandbox") : "mock_sandbox",
+      environment: this.isConfigured ? (process.env.PAYPAL_ENV === "production" ? "live" : "sandbox") : "not_configured",
       notice: "PayPal handles payment execution and dispute recording. Product quality & delivery confirmation are verified via third-party inspection milestones.",
     };
   }
@@ -46,7 +42,7 @@ export class PayPalIntelligenceClient {
    */
   private async getAccessToken(): Promise<string> {
     if (!this.isConfigured) {
-      return "mock_sandbox_access_token_" + Date.now();
+      throw new Error("PayPal is not configured. Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET.");
     }
 
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
@@ -80,23 +76,7 @@ export class PayPalIntelligenceClient {
     cancelUrl?: string;
   }) {
     if (!this.isConfigured) {
-      // Clean sandbox-ready deterministic response
-      return {
-        id: `SANDBOX_ORDER_${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-        status: "CREATED",
-        commercialTransactionId: params.transactionId,
-        customId: params.transactionReference,
-        currency: params.currency,
-        value: params.amount.toFixed(2),
-        links: [
-          {
-            rel: "approve",
-            href: `https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX_TOKEN_${params.transactionId}`,
-            method: "GET",
-          },
-        ],
-        sandboxMode: true,
-      };
+      throw new Error("PayPal is not configured. Set sandbox credentials before creating a payment.");
     }
 
     const token = await this.getAccessToken();
@@ -141,13 +121,7 @@ export class PayPalIntelligenceClient {
    */
   public async captureOrder(orderId: string) {
     if (!this.isConfigured) {
-      return {
-        id: orderId,
-        status: "COMPLETED",
-        captureId: `SANDBOX_CAP_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-        capturedAt: new Date().toISOString(),
-        sandboxMode: true,
-      };
+      throw new Error("PayPal is not configured. Set sandbox credentials before capturing a payment.");
     }
 
     const token = await this.getAccessToken();
@@ -167,8 +141,35 @@ export class PayPalIntelligenceClient {
     return await res.json();
   }
 
+  /** Verify the complete event with PayPal before processing it. */
+  public async verifyWebhook(headers: Headers, payload: Record<string, unknown>): Promise<boolean> {
+    const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+    const transmissionId = headers.get("paypal-transmission-id");
+    const transmissionTime = headers.get("paypal-transmission-time");
+    const certUrl = headers.get("paypal-cert-url");
+    const authAlgo = headers.get("paypal-auth-algo");
+    const transmissionSig = headers.get("paypal-transmission-sig");
+    if (!webhookId || !this.isConfigured) {
+      throw new Error("PayPal webhook verification is not configured.");
+    }
+    if (!transmissionId || !transmissionTime || !certUrl || !authAlgo || !transmissionSig) return false;
+    const token = await this.getAccessToken();
+    const response = await fetch(`${this.baseUrl}/v1/notifications/verify-webhook-signature`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        auth_algo: authAlgo, cert_url: certUrl, transmission_id: transmissionId,
+        transmission_sig: transmissionSig, transmission_time: transmissionTime,
+        webhook_id: webhookId, webhook_event: payload,
+      }),
+    });
+    if (!response.ok) throw new Error("PayPal webhook verification request failed.");
+    const result = await response.json();
+    return result.verification_status === "SUCCESS";
+  }
+
   /**
-   * Verifies incoming webhook signature and maps event
+   * Maps an already verified webhook event
    */
   public parseWebhookEvent(payload: Record<string, unknown>) {
     const eventType = String(payload.event_type || "");

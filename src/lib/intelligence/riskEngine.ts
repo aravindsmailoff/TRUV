@@ -112,7 +112,7 @@ export function analyzeTransactionRisk(
     if (totalPaid < requiredAdvance) {
       findings.push({
         id: "risk_advance_deposit_unmet",
-        issue: "Agreed Advance Deposit Not Yet Cleared in Escrow",
+        issue: "Agreed Advance Payment Not Yet Confirmed",
         whyItMatters: "Manufacturing initiation prior to deposit confirmation increases seller exposure to order cancellation.",
         supportingEvidence: `Required 30% advance is ${transaction.currency} ${requiredAdvance.toFixed(2)}, but verified PayPal payment total is ${transaction.currency} ${totalPaid.toFixed(2)}.`,
         riskCategory: "payment_anomaly",

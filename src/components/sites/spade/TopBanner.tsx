@@ -13,13 +13,13 @@ export function TopBanner() {
           href="#trade-execution"
           className="flex items-center gap-1 font-semibold uppercase tracking-wider hover:opacity-80 transition-opacity"
         >
-          <span>TRUV Trade Execution</span>
+          <span>TRUVX Trade Execution</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
 
         <div className="flex items-center gap-2">
           <span className="px-2 py-0.5 rounded-full bg-[#f4faed] text-[10px] font-bold uppercase tracking-wider text-[#18280e]">
-            Live Corridor
+            Trade Corridor
           </span>
           <Link
             href="#trade-execution"

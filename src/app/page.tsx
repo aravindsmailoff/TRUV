@@ -12,9 +12,9 @@ import { DevelopersCta } from "@/components/sites/spade/DevelopersCta";
 import { Footer } from "@/components/sites/spade/Footer";
 
 export const metadata = {
-  title: "TRUV | Global Trade Execution Infrastructure",
+  title: "TRUVX | Global Trade Execution Infrastructure",
   description:
-    "TRUV connects international buyers with vetted Indian manufacturers, coordinating RFQs, automated supplier qualification, and PayPal milestone escrow.",
+    "TRUVX connects international buyers with Indian manufacturers across sourcing, orders and trade execution.",
 };
 
 export default function Home() {

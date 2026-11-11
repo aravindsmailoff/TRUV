@@ -14,26 +14,26 @@ interface IndustryItem {
 
 const INDUSTRIES: IndustryItem[] = [
   {
-    tag: "[FINTECHS]",
-    title: "Infrastructure for innovation",
-    description: "Power new products, rewards, and AI capabilities with a data foundation that scales.",
-    href: "/industry/fintechs/",
+    tag: "[BUYERS]",
+    title: "Find the right manufacturers",
+    description: "Share your sourcing requirements and explore Indian manufacturing opportunities.",
+    href: "/solutions/buyer",
     position: "left",
     videoTime: 0.5,
   },
   {
-    tag: "[BANKS]",
-    title: "Clarity at enterprise scale",
-    description: "Unify authorization, analytics, and AI on one trusted platform.",
-    href: "/industry/banks/",
+    tag: "[MAKERS]",
+    title: "Reach global buyers",
+    description: "Present your capabilities and manage export opportunities in one workspace.",
+    href: "/solutions/manufacturer",
     position: "right",
     videoTime: 2.5,
   },
   {
-    tag: "[AI]",
-    title: "AI that learns from the truth",
-    description: "Feed your models clean, enriched data that makes intelligence actionable.",
-    href: "/industry/ai/",
+    tag: "[SERVICES]",
+    title: "Support the trade journey",
+    description: "Connect expertise and services with businesses working across borders.",
+    href: "/solutions/service",
     position: "left",
     videoTime: 4.5,
   },
@@ -77,7 +77,7 @@ export function IndustriesGrid() {
         <div className="sticky top-0 min-h-screen flex flex-col items-center justify-center overflow-hidden px-5 lg:px-8">
           {/* Main Section Heading */}
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-medium tracking-tight text-[#18280E] text-center max-w-2xl leading-[1.15] mb-6">
-            Built for every layer of modern finance
+            Built for everyone in global trade
           </h2>
 
           {/* Tab Selector Buttons for immediate interactivity */}

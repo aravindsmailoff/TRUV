@@ -139,34 +139,8 @@ export async function POST(req: NextRequest) {
       const mfg = tradeStore.getManufacturer(trade.manufacturerId);
       const paymentOrder = await createPayPalOrderForTrade(trade, mfg, isAdvance);
 
-      // Trigger Zapier milestone escrow notification
-      await zapierAutomation.triggerTradeEvent({
-        eventType: "paypal.milestone_30_captured",
-        orderNumber: trade.orderNumber,
-        buyerName: trade.buyerCompany,
-        manufacturerLegalName: mfg?.legalEntityName || "Indian MSME",
-        payload: {
-          payPalOrderId: (paymentOrder as { id?: string }).id,
-          amountUSD: isAdvance ? trade.totalAmountUSD * 0.3 : trade.totalAmountUSD,
-          stage: isAdvance ? "30% Advance Escrow" : "70% Balance Settlement",
-        },
-      });
-
-      let whatsappDispatch = null;
-      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
-        whatsappDispatch = await sendRealWhatsAppMessage({
-          role: "manufacturer",
-          eventType: isAdvance ? "paypal_escrow_locked" : "shipment_dispatched",
-          orderNumber: trade.orderNumber,
-          buyerName: `${trade.buyerCompany} (${trade.buyerCountry})`,
-          manufacturerName: mfg?.legalEntityName || trade.manufacturerName,
-          productName: trade.productName,
-          quantity: trade.quantityUnits,
-          amountUSD: trade.totalAmountUSD,
-        });
-      }
-
-      return NextResponse.json({ success: true, paymentOrder, whatsappDispatch });
+      // An order is only a request for approval. No payment has been captured yet.
+      return NextResponse.json({ success: true, paymentOrder, paymentState: "awaiting_approval" });
     }
 
     // 5. Update Milestone

@@ -128,8 +128,8 @@ export function ScrollRevealIntro() {
             }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-medium leading-[1.2] text-white tracking-tight">
-              Financial institutions process billions of transactions every day,{" "}
-              <span className="text-[#b2eb76]">but most of that data is hard to use.</span>
+              Global trade brings buyers and manufacturers together,{" "}
+              <span className="text-[#b2eb76]">but every deal has many moving parts.</span>
             </h2>
           </div>
 
@@ -143,7 +143,7 @@ export function ScrollRevealIntro() {
             }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-medium leading-[1.2] text-[#18280E] tracking-tight">
-              Spade enriches transaction data in real time, adding structure, accuracy, and intelligence at every layer.
+              TRUVX brings sourcing, quotations and trade milestones together, so every step is easier to follow.
             </h2>
           </div>
 

@@ -73,7 +73,7 @@ interface LaymanTradeOrder {
   };
   deliveryPort: string;
   inspectionAgency: string;
-  status: "30% Advance Escrow Held" | "Production in Progress" | "Ready for QIMA Inspection" | "Customs Cleared Mundra" | "Delivered & Settled";
+  status: "30% Advance Pending" | "Production in Progress" | "Ready for QIMA Inspection" | "Customs Cleared Mundra" | "Delivered & Settled";
   category: string;
 }
 
@@ -100,11 +100,11 @@ const LAYMAN_ORDERS: LaymanTradeOrder[] = [
       advanceUSD: 25725,
       advanceInrLakhs: 21.45,
       balanceUSD: 60025,
-      terms: "30% Advance paid upfront via PayPal escrow to buy raw brass. Remaining 70% released when goods pass QIMA inspection and load on the ship.",
+      terms: "Example terms: 30% advance and 70% balance. Payment requires separate buyer approval and capture.",
     },
     deliveryPort: "Port of Long Beach, California (USLGB)",
     inspectionAgency: "QIMA Quality Services (AQL 1.5)",
-    status: "30% Advance Escrow Held",
+    status: "30% Advance Pending",
     category: "Brass & Hardware",
   },
   {
@@ -158,7 +158,7 @@ const LAYMAN_ORDERS: LaymanTradeOrder[] = [
       advanceUSD: 22680,
       advanceInrLakhs: 18.93,
       balanceUSD: 52920,
-      terms: "30% initial escrow via PayPal. Balance 70% released upon Bill of Lading arrival at Felixstowe Port.",
+      terms: "Example terms: 30% advance and 70% balance, subject to buyer approval.",
     },
     deliveryPort: "Port of Felixstowe, UK (GBFXT)",
     inspectionAgency: "Intertek Testing Services",
@@ -214,6 +214,7 @@ export default function DashboardPage() {
 
   // PayPal Live Sandbox Execution State inside the dashboard
   const [paypalLoading, setPaypalLoading] = useState(false);
+  const [paypalError, setPaypalError] = useState("");
   const [paypalResult, setPaypalResult] = useState<{
     id?: string;
     status?: string;
@@ -223,6 +224,8 @@ export default function DashboardPage() {
 
   const triggerPayPalEscrow = async () => {
     setPaypalLoading(true);
+    setPaypalError("");
+    setPaypalResult(null);
     try {
       const res = await fetch("/api/trade", {
         method: "POST",
@@ -235,18 +238,18 @@ export default function DashboardPage() {
       });
       const data = await res.json();
       if (data.success && data.paymentOrder) {
-        const approveLink =
-          data.paymentOrder.links?.find((l: { rel: string; href: string }) => l.rel === "approve")?.href ||
-          `https://www.sandbox.paypal.com/checkoutnow?token=${data.paymentOrder.id}`;
+        const approveLink = data.paymentOrder.links?.find((l: { rel: string; href: string }) => l.rel === "approve")?.href;
         setPaypalResult({
           id: data.paymentOrder.id,
           status: data.paymentOrder.status,
           approveUrl: approveLink,
-          amount: "$24,990.00 USD (30% Advance Escrow)",
+          amount: "Advance payment — awaiting buyer approval",
         });
+      } else {
+        setPaypalError(data.details || data.error || "Unable to create the PayPal order.");
       }
     } catch {
-      // fallback
+      setPaypalError("Unable to reach the payment service.");
     } finally {
       setPaypalLoading(false);
     }
@@ -702,7 +705,7 @@ export default function DashboardPage() {
               disabled={paypalLoading}
               className="w-full py-1.5 bg-[#b2eb76] hover:bg-[#c2f38d] text-[#18280e] font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
-              {paypalLoading ? "Opening PayPal..." : "Collect Advance ($25.7k)"}
+              {paypalLoading ? "Opening PayPal..." : "Create PayPal order"}
             </button>
           </SpotlightCard>
         </div>
@@ -753,7 +756,7 @@ export default function DashboardPage() {
             <button
               type="button"
               className="hidden 2xl:flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-stone-200 bg-white hover:bg-[#f4faed] text-xs font-sans font-medium text-[#18280e] transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
-              onClick={() => alert("Customize Dashboard Widgets: Added Real-time Telemetry & Escrow Monitor")}
+              onClick={() => alert("Customize Dashboard Widgets: Added payment monitor")}
             >
               <LayoutDashboard className="w-3.5 h-3.5 text-stone-500 shrink-0" />
               <span>Add widget</span>
@@ -797,6 +800,8 @@ export default function DashboardPage() {
 
         {/* Dashboard Main Grid Body */}
         <main className="p-6 md:p-8 space-y-6 max-w-[88rem] w-full mx-auto">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Demo workspace: sample orders and payment statuses are illustrative, not verified transactions. PayPal order creation is not payment confirmation or escrow.</div>
+          {paypalError && <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">{paypalError}</div>}
           {/* ========================================================================= */}
           {/* VIEW 0: TRANSACTION STORYLINE (The Heart of the Project)                 */}
           {/* ========================================================================= */}
@@ -1059,7 +1064,7 @@ export default function DashboardPage() {
                       >
                         <CreditCard className="w-3.5 h-3.5" />
                         <span>
-                          {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance ($25,725)"}
+                          {paypalLoading ? "Opening PayPal..." : "Create PayPal order"}
                         </span>
                       </KokonutButton>
 
@@ -1111,7 +1116,7 @@ export default function DashboardPage() {
                     Incoming International Buyer Orders &amp; Demands
                   </h2>
                   <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-                    We translate complicated foreign engineering specifications and trade terms into plain, simple language so you know exactly what the foreigner wants, how much they will pay in Rupees, and when your PayPal advance is safely in escrow.
+                    We translate complicated foreign engineering specifications and trade terms into plain, simple language so you know exactly what the foreigner wants, how much they will pay in Rupees, and the proposed payment terms.
                   </p>
                 </div>
 
@@ -1204,7 +1209,7 @@ export default function DashboardPage() {
                       <div className="text-[11px] text-stone-600 bg-stone-50 p-3.5 rounded-2xl border border-stone-100 space-y-1">
                         <div className="flex items-center gap-1.5 font-bold text-[#18280e]">
                           <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
-                          <span>PayPal Escrow Protection</span>
+                          <span>Example payment terms</span>
                         </div>
                         <p className="leading-snug text-stone-600 font-mono text-[10px]">
                           {order.paymentMilestones.terms}
@@ -1216,12 +1221,12 @@ export default function DashboardPage() {
                         {isLocked ? (
                           <div className="h-11 rounded-xl bg-[#18280e] text-[#b2eb76] font-mono text-xs font-bold flex items-center justify-center gap-2 shadow-xs">
                             <Check className="w-4 h-4" />
-                            <span>Deal Locked • Proforma Invoice Active</span>
+                            <span>Deal marked as reviewed</span>
                           </div>
                         ) : (
                           <SlideToConfirm
-                            text="Slide to Lock Deal &amp; Escrow"
-                            confirmedText="Deal Locked • PayPal Protected"
+                            text="Slide to mark deal as reviewed"
+                            confirmedText="Deal marked as reviewed"
                             onConfirm={() => {
                               setLockedOrderIds((prev) => ({ ...prev, [order.id]: true }));
                               setSelectedLaymanOrder(order);
@@ -1299,7 +1304,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-1">
-                    <span className="text-stone-600 block text-[10px] uppercase font-bold">30% Advance Escrow</span>
+                    <span className="text-stone-600 block text-[10px] uppercase font-bold">30% Advance Payment</span>
                     <strong className="text-[#18280e] text-sm block">
                       ${selectedLaymanOrder.paymentMilestones.advanceUSD.toLocaleString()} USD
                     </strong>
@@ -1488,7 +1493,7 @@ export default function DashboardPage() {
                   onClick={triggerPayPalEscrow}
                   disabled={paypalLoading}
                 >
-                  {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance ($25,725)"}
+                  {paypalLoading ? "Opening PayPal..." : "Create PayPal order"}
                 </KokonutButton>
               </div>
 
@@ -1511,7 +1516,7 @@ export default function DashboardPage() {
 
               {paypalResult && (
                 <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-2">
-                  <span className="font-bold text-[#18280e] block text-sm">✓ PayPal Payment Ready</span>
+                  <span className="font-bold text-[#18280e] block text-sm">PayPal order created — awaiting approval</span>
                   <div className="flex justify-between text-xs">
                     <span>Reference Number: <strong>{paypalResult.id}</strong></span>
                     <span>Status: <strong>{paypalResult.status}</strong></span>

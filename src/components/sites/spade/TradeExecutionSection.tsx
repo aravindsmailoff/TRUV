@@ -36,9 +36,7 @@ export function TradeExecutionSection() {
               {/* Description */}
               <div className="mt-3.5 opacity-80 text-stone-700 text-sm sm:text-base leading-relaxed">
                 <p>
-                  We operate end-to-end international trade execution: from buyer demand discovery and MSME manufacturer
-                  qualification, to commercial purchase orders, PayPal milestone invoicing, QIMA inspections, and freight
-                  forwarding to international ports.
+                  Explore a connected trade workflow, from buyer requirements and manufacturer discovery to quotations, payment milestones, inspection and shipping.
                 </p>
               </div>
 
@@ -47,7 +45,7 @@ export function TradeExecutionSection() {
                 <Magnet padding={25} magnetStrength={3}>
                   <Link href="/signup" className="inline-block">
                     <div className="group relative inline-flex appearance-none items-center py-2.5 px-5 select-none transition-all justify-center text-white bg-[#18280e] rounded-md hover:bg-[#18280e]/90 cursor-pointer shadow-xs active:scale-95">
-                      <span className="text-sm font-semibold text-[#b2eb76] relative z-10">Request Whitelisted Access</span>
+                      <span className="text-sm font-semibold text-[#b2eb76] relative z-10">Request Access</span>
                     </div>
                   </Link>
                 </Magnet>
@@ -75,10 +73,10 @@ export function TradeExecutionSection() {
                 </div>
 
                 <div className="text-2xl font-mono font-bold text-[#18280e] shrink-0 tracking-tight">
-                  <DecryptedText text="100%" animateOn="hover" speed={40} />
+                  <DecryptedText text="01" animateOn="hover" speed={40} />
                 </div>
                 <p className="text-xs text-stone-600 font-mono uppercase tracking-wider leading-tight">
-                  <DecryptedText text="DGFT IEC & GSTIN VERIFIED EVIDENCE" animateOn="hover" speed={30} />
+                  <DecryptedText text="CONNECTED WORKSPACE FOR CROSS-BORDER TRADE" animateOn="hover" speed={30} />
                 </p>
               </div>
             </div>
@@ -138,11 +136,11 @@ export function TradeExecutionSection() {
 
                   <div className="flex items-center gap-1.5 text-white/90 font-medium">
                     <span className="text-[#b2eb76] text-xs">►</span>
-                    <span className="tracking-wider uppercase">Verified Standing</span>
+                    <span className="tracking-wider uppercase">Supplier Details</span>
                   </div>
                   <div className="mt-1 text-stone-300 text-[9px] sm:text-[10px] font-mono tracking-wide">
                     DGFT IEC: 0508012491 | GSTIN: 09AAHFM<br />
-                    INSPECTION: QIMA AQL 1.5 AUDITED
+                    INSPECTION: EXAMPLE MILESTONE
                   </div>
                 </div>
               </div>
@@ -163,10 +161,10 @@ export function TradeExecutionSection() {
                   <div className="flex flex-col items-center text-center pb-3 border-b border-[#3f7308]/20">
                     <ShieldCheck className="w-6 h-6 text-[#3f7308] mb-1.5" />
                     <span className="text-xs font-bold tracking-tight uppercase">
-                      PayPal Milestone Escrow Active
+                      Example Payment Milestone
                     </span>
                     <span className="text-[10px] text-stone-600 mt-0.5">
-                      30% Advance Released to Manufacturer
+                      Illustrative trade workflow
                     </span>
                   </div>
 
@@ -185,14 +183,14 @@ export function TradeExecutionSection() {
                         -$42,750.00
                       </span>
                       <span className="text-[9px] text-[#3f7308] font-bold block">
-                        PayPal Orders v2
+                        Sample transaction
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-2.5 pt-2 border-t border-[#3f7308]/20 text-[10px] text-stone-700 flex justify-between items-center">
                     <span>FOB Mundra Port</span>
-                    <span className="text-[#3f7308] font-semibold">QIMA AQL 1.5 Passed</span>
+                    <span className="text-[#3f7308] font-semibold">Inspection milestone</span>
                   </div>
                 </div>
               </div>
