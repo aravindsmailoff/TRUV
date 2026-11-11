@@ -708,69 +708,69 @@ export default function DashboardPage() {
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-stone-200/80 px-8 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-[#18280e] tracking-tight capitalize font-sans">
+        <header className="h-16 bg-white border-b border-stone-200/80 px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-2xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap truncate">
               {activeNav === "dashboard" && "Dashboard"}
-              {activeNav === "storyline" && "TradeOracle Transaction Storyline"}
-              {activeNav === "buyer_portal" && "Foreign Buyer AI Sourcing Portal"}
-              {activeNav === "layman_store" && "Merchant Layman Orders View"}
+              {activeNav === "storyline" && "Order Journey Storyline"}
+              {activeNav === "buyer_portal" && "Buyer Sourcing Portal"}
+              {activeNav === "layman_store" && "Merchant Layman Orders"}
               {activeNav === "orders" && "Active Orders Queue"}
-              {activeNav === "products" && "Products & International RFQs"}
-              {activeNav === "customers" && "Customers & Global Importers"}
-              {activeNav === "invoices" && "Commercial Export Invoices"}
-              {activeNav === "transactions" && "PayPal Settlement Ledger"}
-              {activeNav === "reports" && "Financial Export Reports"}
-              {activeNav === "rfq_demand" && "1. Buyer RFQ Demand (Active Orders)"}
-              {activeNav === "msme_vetting" && "2. MSME Vetting & Industrial Hubs"}
-              {activeNav === "commercial_ai" && "3. Commercial Negotiation (AI) UCP 600"}
-              {activeNav === "paypal_escrow" && "4. PayPal Milestone Escrow"}
-              {activeNav === "quality_qima" && "5. QIMA Pre-Shipment Inspection"}
-              {activeNav === "customs_bl" && "6. Customs LEO & Bill of Lading"}
+              {activeNav === "products" && "Products & Catalog"}
+              {activeNav === "customers" && "Global Importers"}
+              {activeNav === "invoices" && "Export Bills & Invoices"}
+              {activeNav === "transactions" && "PayPal & Bank Deposits"}
+              {activeNav === "reports" && "Tax & CA Statements"}
+              {activeNav === "rfq_demand" && "1. New Buyer Requests"}
+              {activeNav === "msme_vetting" && "2. Factory & KYC Verified"}
+              {activeNav === "commercial_ai" && "3. Price & Deal Agreement"}
+              {activeNav === "paypal_escrow" && "4. Advance Money in PayPal"}
+              {activeNav === "quality_qima" && "5. Factory Quality Check"}
+              {activeNav === "customs_bl" && "6. Shipping & Bank Payout"}
               {activeNav === "settings" && "Platform Settings"}
               {activeNav === "help" && "Help & Support"}
             </h1>
-            <span className="text-xs font-mono text-stone-400 hidden sm:inline">
-              {"// Trade Execution Hub"}
+            <span className="text-xs font-sans text-stone-400 hidden 2xl:inline whitespace-nowrap shrink-0">
+              • Factory Export Workspace
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Date Range Selector matching reference template */}
-            <div className="hidden md:flex items-center gap-2 bg-[#f4faed] border border-[#d8e5ca] px-3.5 py-1.5 rounded-xl text-xs font-mono text-stone-700">
-              <Calendar className="w-3.5 h-3.5 text-stone-500" />
-              <span>Jan 1, 2026 - Feb 1, 2026</span>
-              <span className="text-stone-300">|</span>
-              <span className="font-semibold text-[#18280e]">Last 30 days ∨</span>
+          <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
+            {/* Date Range Selector */}
+            <div className="hidden xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
+              <span>Jan 1 – Feb 1, 2026</span>
+              <span className="text-[#d8e5ca]">|</span>
+              <span className="font-semibold">30d ∨</span>
             </div>
 
             {/* Add Widget Button */}
             <button
               type="button"
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-xs font-mono font-semibold text-stone-700 transition-colors shadow-2xs cursor-pointer"
+              className="hidden 2xl:flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-stone-200 bg-white hover:bg-[#f4faed] text-xs font-sans font-medium text-[#18280e] transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
               onClick={() => alert("Customize Dashboard Widgets: Added Real-time Telemetry & Escrow Monitor")}
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500" />
+              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500 shrink-0" />
               <span>Add widget</span>
             </button>
 
-            {/* WhatsApp Real-time Alerts */}
+            {/* WhatsApp Automation Center */}
             <WhatsAppNotificationCenter role="manufacturer" compact={true} />
 
-            {/* Export Button matching reference */}
+            {/* Export Button */}
             <button
               type="button"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-mono font-bold transition-colors shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-sans font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
               onClick={() => alert("Exporting verified commercial trade ledger CSV...")}
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 shrink-0" />
               <span>Export</span>
             </button>
 
-            {/* User Profile & Direct Sign Out */}
-            <div className="flex items-center gap-2 pl-3 border-l border-stone-200">
+            {/* Sign Out */}
+            <div className="flex items-center gap-2 pl-2.5 border-l border-stone-200 shrink-0">
               {currentUser && (
-                <span className="text-[11px] font-mono text-stone-400 hidden xl:inline px-1">
+                <span className="text-xs font-sans text-stone-500 hidden 2xl:inline px-1 whitespace-nowrap">
                   {currentUser.email}
                 </span>
               )}
@@ -780,10 +780,10 @@ export default function DashboardPage() {
                   setCurrentSessionUser(null);
                   router.push("/signin");
                 }}
-                className="text-xs font-mono font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                className="h-9 text-xs font-sans font-medium text-stone-700 hover:text-rose-700 bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-200 px-3 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0"
                 title="Sign out of TradeOracle session"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
                 <span>Sign Out</span>
               </button>
             </div>

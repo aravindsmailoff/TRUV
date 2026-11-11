@@ -379,41 +379,41 @@ export function FreelancerServicePortal() {
       {/* 2. MAIN CONTENT                                                           */}
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar matching reference */}
-        <header className="h-16 bg-white border-b border-stone-200/80 px-8 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-[#18280e] tracking-tight capitalize font-sans">
+        {/* Top Header Bar */}
+        <header className="h-16 bg-white border-b border-stone-200/80 px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-2xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap truncate">
               {activeTab === "dashboard" && "Freelancer & Agency Service Portal"}
-              {activeTab === "contracts" && "International Client Contracts & Scope of Work"}
+              {activeTab === "contracts" && "International Client Contracts & Scope"}
               {activeTab === "milestones" && "Milestone Delivery Proof & Git Commits"}
-              {activeTab === "payouts" && "PayPal Commercial Escrow & e-FIRC Ledger"}
+              {activeTab === "payouts" && "PayPal Commercial Escrow & e-FIRC"}
               {activeTab === "disputes" && "Chargeback & Dispute Defense Shield"}
-              {activeTab === "rfqs" && "Incoming Global Sourcing RFQs (Software & Creative)"}
-              {activeTab === "sandbox_guide" && "PayPal Orders v2 Sandbox Overview & Testing Guide"}
-              {activeTab === "settings" && "Freelancer Profile & Bank Reconciliation"}
+              {activeTab === "rfqs" && "Incoming Global Sourcing RFQs"}
+              {activeTab === "sandbox_guide" && "PayPal Orders v2 Sandbox Guide"}
+              {activeTab === "settings" && "Freelancer Profile & Reconciliation"}
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
             {/* Date Range Selector */}
-            <div className="hidden md:flex items-center gap-2 bg-[#f4faed] border border-[#d8e5ca] px-3.5 py-1.5 rounded-xl text-xs font-mono text-stone-700">
-              <Calendar className="w-3.5 h-3.5 text-stone-500" />
-              <span>Jan 1, 2026 - Feb 1, 2026</span>
-              <span className="text-stone-300">|</span>
-              <span className="font-semibold text-[#18280e]">Last 30 days ∨</span>
+            <div className="hidden xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
+              <span>Jan 1 – Feb 1, 2026</span>
+              <span className="text-[#d8e5ca]">|</span>
+              <span className="font-semibold">30d ∨</span>
             </div>
 
             {/* Add Widget */}
             <button
               type="button"
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-xs font-mono font-semibold text-stone-700 transition-colors shadow-2xs cursor-pointer"
+              className="hidden 2xl:flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-stone-200 bg-white hover:bg-[#f4faed] text-xs font-sans font-medium text-[#18280e] transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
               onClick={() => alert("Added: GitHub Webhook Activity Widget")}
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500" />
+              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500 shrink-0" />
               <span>Add widget</span>
             </button>
 
-            {/* WhatsApp Live Alerts */}
+            {/* WhatsApp Automation Center */}
             <WhatsAppNotificationCenter
               role="service"
               recipientPhone="+91 98450 88721"
@@ -424,25 +424,25 @@ export function FreelancerServicePortal() {
             {/* Export Button */}
             <button
               type="button"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-mono font-bold transition-colors shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-sans font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
               onClick={() => alert("Exporting Service Export Inward Remittances CSV...")}
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 shrink-0" />
               <span>Export</span>
             </button>
 
             {/* Sign Out */}
-            <div className="flex items-center gap-2 pl-3 border-l border-stone-200">
+            <div className="flex items-center gap-2 pl-2.5 border-l border-stone-200 shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   setCurrentSessionUser(null);
                   router.push("/signin");
                 }}
-                className="text-xs font-mono font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                className="h-9 text-xs font-sans font-medium text-stone-700 hover:text-rose-700 bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-200 px-3 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0"
                 title="Sign out of TradeOracle session"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
                 <span>Sign Out</span>
               </button>
             </div>

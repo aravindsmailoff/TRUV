@@ -382,27 +382,27 @@ export function TradeOracleBuyerApp() {
           />
 
           {/* User Company Info */}
-          <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
-            <div className="size-7 rounded-lg bg-[#ebf7d9] text-[#18280e] font-bold text-xs flex items-center justify-center font-mono">
-              🇺🇸
+          <div className="flex items-center gap-2 pl-3 border-l border-stone-200 shrink-0">
+            <div className="size-8 rounded-lg bg-[#ebf7d9] text-[#18280e] font-bold text-xs flex items-center justify-center shrink-0">
+              US
             </div>
-            <div className="hidden md:flex flex-col text-left">
+            <div className="hidden lg:flex flex-col text-left whitespace-nowrap">
               <span className="text-xs font-bold text-[#18280e] leading-tight">Marcus Vance</span>
-              <span className="text-[10px] font-mono text-stone-500">Pacific Arch Hardware LLC</span>
+              <span className="text-[11px] text-stone-500">Pacific Arch Hardware LLC</span>
             </div>
           </div>
 
-          {/* Always Visible Sign Out Button */}
+          {/* Sign Out Button */}
           <button
             type="button"
             onClick={() => {
               setCurrentSessionUser(null);
               router.push("/signin");
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-mono font-bold transition-colors cursor-pointer shadow-2xs"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-white hover:bg-rose-50 text-stone-700 hover:text-rose-700 border border-stone-200 hover:border-rose-200 text-xs font-sans font-medium transition-colors cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
             title="Sign out of TradeOracle session"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span>Sign Out</span>
           </button>
         </div>

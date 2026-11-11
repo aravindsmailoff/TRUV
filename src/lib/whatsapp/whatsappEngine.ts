@@ -40,6 +40,8 @@ export interface WhatsAppDispatchLog {
   orderNumber: string;
   text: string;
   status: "sent" | "failed" | "skipped_not_connected";
+  deliveryChannel?: "whatsapp_qr" | "zapier_webhook" | "both" | "none";
+  zapierStatus?: "dispatched" | "not_configured" | "failed";
   messageId?: string;
   error?: string;
 }
@@ -55,6 +57,7 @@ export interface WhatsAppIncomingReply {
 
 export interface WhatsAppConfig {
   autoNotifyOnEvents: boolean;
+  zapierWebhookUrl: string;
   recipientPhones: {
     manufacturer: string;
     buyer: string;
@@ -81,6 +84,7 @@ const CONFIG_PATH = path.join(process.cwd(), ".whatsapp-config.json");
 
 const DEFAULT_CONFIG: WhatsAppConfig = {
   autoNotifyOnEvents: true,
+  zapierWebhookUrl: process.env.ZAPIER_TRADE_WEBHOOK_URL || "",
   recipientPhones: {
     manufacturer: "",
     buyer: "",
@@ -96,6 +100,7 @@ function loadConfigFromDisk(): WhatsAppConfig {
       return {
         autoNotifyOnEvents:
           typeof parsed.autoNotifyOnEvents === "boolean" ? parsed.autoNotifyOnEvents : true,
+        zapierWebhookUrl: parsed.zapierWebhookUrl || process.env.ZAPIER_TRADE_WEBHOOK_URL || "",
         recipientPhones: {
           manufacturer: parsed.recipientPhones?.manufacturer || "",
           buyer: parsed.recipientPhones?.buyer || "",
@@ -199,6 +204,7 @@ export async function connectWhatsApp(forceFreshQr = false): Promise<{
       fs.mkdirSync(AUTH_DIR, { recursive: true });
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Baileys helper named with `use*` prefix, not a React hook
     const { state: authState, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
     let version: [number, number, number] | undefined;
     try {
@@ -421,6 +427,10 @@ export function updateWhatsAppConfig(partial: Partial<WhatsAppConfig>): WhatsApp
       typeof partial.autoNotifyOnEvents === "boolean"
         ? partial.autoNotifyOnEvents
         : state.config.autoNotifyOnEvents,
+    zapierWebhookUrl:
+      typeof partial.zapierWebhookUrl === "string"
+        ? partial.zapierWebhookUrl.trim()
+        : state.config.zapierWebhookUrl,
     recipientPhones: {
       manufacturer:
         partial.recipientPhones?.manufacturer ?? state.config.recipientPhones.manufacturer,
@@ -563,6 +573,10 @@ export async function sendRealWhatsAppMessage(params: {
 
   const text = formatPlainEnglishWhatsAppMessage(params);
   const normalized = normalizePhoneToJid(targetPhone);
+  const zapierUrl =
+    state.config.zapierWebhookUrl?.trim() ||
+    process.env.ZAPIER_TRADE_WEBHOOK_URL?.trim() ||
+    "";
 
   const logEntry: WhatsAppDispatchLog = {
     id: `wa_msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -574,44 +588,87 @@ export async function sendRealWhatsAppMessage(params: {
     orderNumber: params.orderNumber,
     text,
     status: "failed",
+    deliveryChannel: "none",
+    zapierStatus: zapierUrl ? "failed" : "not_configured",
   };
 
-  if (state.status !== "connected" || !state.sock) {
-    logEntry.status = "skipped_not_connected";
-    logEntry.error =
-      "WhatsApp device is not linked yet. Scan the QR code in WhatsApp Alerts to activate real automated messages.";
-    state.logs.unshift(logEntry);
-    if (state.logs.length > 50) state.logs.pop();
-    return logEntry;
-  }
-
-  if (!normalized) {
-    logEntry.status = "failed";
-    logEntry.error = "Invalid recipient mobile number. Include country code (e.g. +91 9820012345).";
-    state.logs.unshift(logEntry);
-    if (state.logs.length > 50) state.logs.pop();
-    return logEntry;
-  }
-
-  try {
-    // Resolve exact WhatsApp JID if registered
-    let targetJid = normalized.jid;
+  let sentViaZapier = false;
+  if (zapierUrl) {
     try {
-      const results = await state.sock.onWhatsApp(normalized.digits);
-      if (results && results.length > 0 && results[0]?.jid) {
-        targetJid = results[0].jid;
+      const amountUSD = params.amountUSD ?? 85750;
+      const zRes = await fetch(zapierUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: logEntry.id,
+          timestamp: logEntry.timestamp,
+          source: "TradeOracle Cross-Border Platform",
+          channel: "whatsapp",
+          eventType: params.eventType,
+          role: params.role,
+          orderNumber: params.orderNumber,
+          recipientPhone: targetPhone,
+          plainEnglishMessage: text,
+          buyerName: params.buyerName || "Pacific Architectural Hardware LLC",
+          manufacturerName: params.manufacturerName || "Moradabad Precision Foundry LLP",
+          productName: params.productName || "Solid Brass Mortise Handles",
+          quantity: params.quantity || 1500,
+          amountUSD,
+          amountINRLakhs: Number(((amountUSD * 83.5) / 100000).toFixed(2)),
+        }),
+      });
+      if (zRes.ok) {
+        sentViaZapier = true;
+        logEntry.zapierStatus = "dispatched";
+      } else {
+        logEntry.zapierStatus = "failed";
       }
     } catch {
-      // proceed with standard JID
+      logEntry.zapierStatus = "failed";
     }
+  }
 
-    const sent = await state.sock.sendMessage(targetJid, { text });
+  let sentViaQr = false;
+  if (state.status === "connected" && state.sock && normalized) {
+    try {
+      let targetJid = normalized.jid;
+      try {
+        const results = await state.sock.onWhatsApp(normalized.digits);
+        if (results && results.length > 0 && results[0]?.jid) {
+          targetJid = results[0].jid;
+        }
+      } catch {
+        // proceed with standard JID
+      }
+
+      const sent = await state.sock.sendMessage(targetJid, { text });
+      sentViaQr = true;
+      logEntry.jid = targetJid;
+      logEntry.messageId = sent?.key?.id || undefined;
+    } catch (err) {
+      logEntry.error = (err as Error).message || "Failed to send via linked WhatsApp device";
+    }
+  }
+
+  if (sentViaQr && sentViaZapier) {
     logEntry.status = "sent";
-    logEntry.jid = targetJid;
-    logEntry.messageId = sent?.key?.id || undefined;
-  } catch (err) {
-    logEntry.status = "failed";
-    logEntry.error = (err as Error).message || "Failed to send WhatsApp message";
+    logEntry.deliveryChannel = "both";
+    logEntry.error = undefined;
+  } else if (sentViaQr) {
+    logEntry.status = "sent";
+    logEntry.deliveryChannel = "whatsapp_qr";
+    logEntry.error = undefined;
+  } else if (sentViaZapier) {
+    logEntry.status = "sent";
+    logEntry.deliveryChannel = "zapier_webhook";
+    logEntry.error = undefined;
+  } else {
+    logEntry.status = state.status === "connected" ? "failed" : "skipped_not_connected";
+    if (!logEntry.error) {
+      logEntry.error = !normalized && state.status === "connected"
+        ? "Invalid recipient mobile number. Include country code (e.g. +91 9820012345)."
+        : "Link WhatsApp via QR code or add a Zapier Webhook URL to dispatch automated messages.";
+    }
   }
 
   state.logs.unshift(logEntry);

@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
     const updated = updateWhatsAppConfig({
       autoNotifyOnEvents:
         typeof body.autoNotifyOnEvents === "boolean" ? body.autoNotifyOnEvents : undefined,
+      zapierWebhookUrl:
+        typeof body.zapierWebhookUrl === "string" ? body.zapierWebhookUrl : undefined,
       recipientPhones: body.recipientPhones,
     });
 

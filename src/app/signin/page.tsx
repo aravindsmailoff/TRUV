@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -23,29 +23,31 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const roleParam = searchParams.get("role") || "manufacturer";
 
-  const [activeRole, setActiveRole] = useState<"manufacturer" | "buyer" | "service">(
-    roleParam === "buyer" ? "buyer" : roleParam === "service" ? "service" : "manufacturer"
-  );
-  const [email, setEmail] = useState("");
+  const getDefaultEmailForRole = (role: "manufacturer" | "buyer" | "service") => {
+    if (role === "buyer") return "m.vance@pacificarchhardware.com";
+    if (role === "service") return "accounts@hyperscalelabs.io";
+    return "exports@mpfbrassware.com";
+  };
+
+  const initialRole: "manufacturer" | "buyer" | "service" =
+    roleParam === "buyer" ? "buyer" : roleParam === "service" ? "service" : "manufacturer";
+
+  const [activeRole, setActiveRole] = useState<"manufacturer" | "buyer" | "service">(initialRole);
+  const [email, setEmail] = useState(() => getDefaultEmailForRole(initialRole));
   const [password, setPassword] = useState("");
+  const [prevRoleParam, setPrevRoleParam] = useState(roleParam);
   const [statusMsg, setStatusMsg] = useState<{
     type: "error" | "pending" | "success";
     text: string;
   } | null>(null);
 
-  // Sync role from query parameter
-  useEffect(() => {
-    if (roleParam === "buyer") {
-      setActiveRole("buyer");
-      setEmail("m.vance@pacificarchhardware.com");
-    } else if (roleParam === "service") {
-      setActiveRole("service");
-      setEmail("accounts@hyperscalelabs.io");
-    } else {
-      setActiveRole("manufacturer");
-      setEmail("exports@mpfbrassware.com");
-    }
-  }, [roleParam]);
+  if (roleParam !== prevRoleParam) {
+    setPrevRoleParam(roleParam);
+    const syncedRole: "manufacturer" | "buyer" | "service" =
+      roleParam === "buyer" ? "buyer" : roleParam === "service" ? "service" : "manufacturer";
+    setActiveRole(syncedRole);
+    setEmail(getDefaultEmailForRole(syncedRole));
+  }
 
   const handleRoleTabClick = (role: "manufacturer" | "buyer" | "service") => {
     setActiveRole(role);
