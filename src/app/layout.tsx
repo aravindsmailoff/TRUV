@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Website Clone",
-  description: "Pixel-perfect website clone",
+  title: "TradeOracle — International Trade Platform",
+  description:
+    "Connect what was promised, what was paid, and what was delivered across global buyers, Indian manufacturers, and service exporters.",
 };
 
 export default function RootLayout({
