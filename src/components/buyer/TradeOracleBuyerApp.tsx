@@ -128,9 +128,8 @@ export function TradeOracleBuyerApp() {
   const [supplierTypeFilter, setSupplierTypeFilter] = useState<"all" | "goods" | "service">("all");
   const [supplierCategoryFilter, setSupplierCategoryFilter] = useState("all");
 
-  // Multi-step RFQ Modal State
+  // Place Order Modal State
   const [isRfqModalOpen, setIsRfqModalOpen] = useState(false);
-  const [rfqType, setRfqType] = useState<"goods" | "service">("goods");
   const [rfqForm, setRfqForm] = useState({
     title: "",
     category: "Brassware & Hardware",
@@ -138,11 +137,10 @@ export function TradeOracleBuyerApp() {
     unit: "pcs",
     budgetUSD: 45000,
     specifications: "",
-    qualityRequirements: "QIMA AQL 1.5 Pre-Shipment Inspection Certificate",
     destinationPort: "Port of Long Beach, California (USLGB)",
     deliveryDate: "2026-05-15",
-    scopeOfWork: "",
-    skills: "React, Next.js, PayPal API",
+    supplierId: "",
+    supplierName: "",
   });
 
   // PayPal Sandbox Payment Trigger
@@ -156,48 +154,95 @@ export function TradeOracleBuyerApp() {
     );
   };
 
-  // Handle RFQ Submit
+  // Handle Place Order Submit
   const handleCreateRFQ = (e: React.FormEvent) => {
     e.preventDefault();
+    const chosenSupplier =
+      suppliers.find((s) => s.id === rfqForm.supplierId) || suppliers[0];
+    const orderType = chosenSupplier.type;
+    const totalAmount = Number(rfqForm.budgetUSD) || 45000;
+    const orderNumber = `ORD-USA-${Math.floor(1000 + Math.random() * 9000)}`;
+    const rfqId = "rfq_" + Date.now();
+    const productTitle = rfqForm.title.trim() || "Custom Order Batch";
+
     const newRfq: RFQItem = {
-      id: "rfq_" + Date.now(),
+      id: rfqId,
       rfqNumber: `RFQ-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: rfqType,
-      title: rfqForm.title || (rfqType === "goods" ? "Precision Brass Custom Batch" : "Fintech Integration Sprint"),
+      type: orderType,
+      title: productTitle,
       category: rfqForm.category,
-      targetQuantity: rfqType === "goods" ? Number(rfqForm.quantity) : undefined,
-      targetUnit: rfqType === "goods" ? rfqForm.unit : undefined,
-      budgetUSD: Number(rfqForm.budgetUSD),
-      specifications: rfqForm.specifications || "Standard international export specifications.",
-      qualityRequirements: rfqForm.qualityRequirements,
+      targetQuantity: Number(rfqForm.quantity) || 1,
+      targetUnit: rfqForm.unit,
+      budgetUSD: totalAmount,
+      specifications: rfqForm.specifications || "Standard export specifications.",
       destinationPort: rfqForm.destinationPort,
       expectedDeliveryDate: rfqForm.deliveryDate,
-      scopeOfWork: rfqType === "service" ? rfqForm.scopeOfWork : undefined,
-      status: "open",
+      status: "contracted",
       createdAt: new Date().toISOString().split("T")[0],
-      quotesCount: 0,
+      quotesCount: 1,
     };
+
+    const newOrder: OrderWorkspaceItem = {
+      id: "ord_" + Date.now(),
+      orderNumber,
+      rfqId,
+      quotationId: "direct_" + Date.now(),
+      supplierId: chosenSupplier.id,
+      supplierName: rfqForm.supplierName || chosenSupplier.name,
+      supplierEmail: chosenSupplier.contactEmail,
+      buyerCompany: "Pacific Architectural Hardware LLC (USA)",
+      type: orderType,
+      productOrServiceName: productTitle,
+      totalAmountUSD: totalAmount,
+      advanceDepositUSD: Math.round(totalAmount * 0.3),
+      balanceUSD: Math.round(totalAmount * 0.7),
+      currency: "USD",
+      currentStageIndex: 0,
+      milestones: [
+        { id: "m1", title: "1. Order Placed", description: "Order details sent to verified seller.", status: "completed" },
+        { id: "m2", title: "2. Advance Payment", description: "Authorize 30% advance via PayPal.", status: "in_progress" },
+        { id: "m3", title: "3. Production & Quality Check", description: "Seller prepares and verifies order specs.", status: "pending" },
+        { id: "m4", title: "4. Shipped & Delivered", description: `Delivery to ${rfqForm.destinationPort}.`, status: "pending" },
+      ],
+      paypalTransaction: {
+        status: "NOT_INITIATED",
+        paidAdvanceUSD: 0,
+        paidBalanceUSD: 0,
+        lastUpdated: new Date().toISOString(),
+      },
+      disputeEvidence: {
+        commercialPOUrl: "",
+        notes: "",
+      },
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+
     setRfqs([newRfq, ...rfqs]);
+    setOrders([newOrder, ...orders]);
+    setSelectedOrder(newOrder);
     setIsRfqModalOpen(false);
-    setActiveTab("rfqs");
+    setActiveTab("orders");
 
     // Auto-dispatch real WhatsApp alerts to both Manufacturer and Buyer
     void triggerAutomatedWhatsAppAlert({
       role: "manufacturer",
-      eventType: "rfq_published",
-      orderNumber: newRfq.rfqNumber,
+      eventType: "new_order",
+      orderNumber,
       buyerName: "Pacific Architectural Hardware LLC (USA)",
-      productName: newRfq.title,
-      quantity: newRfq.targetQuantity || 1000,
-      amountUSD: newRfq.budgetUSD,
+      manufacturerName: newOrder.supplierName,
+      productName: newOrder.productOrServiceName,
+      quantity: Number(rfqForm.quantity) || 1000,
+      amountUSD: totalAmount,
     });
     void triggerAutomatedWhatsAppAlert({
       role: "buyer",
-      eventType: "rfq_published",
-      orderNumber: newRfq.rfqNumber,
-      productName: newRfq.title,
-      quantity: newRfq.targetQuantity || 1000,
-      amountUSD: newRfq.budgetUSD,
+      eventType: "new_order",
+      orderNumber,
+      buyerName: "Pacific Architectural Hardware LLC (USA)",
+      manufacturerName: newOrder.supplierName,
+      productName: newOrder.productOrServiceName,
+      quantity: Number(rfqForm.quantity) || 1000,
+      amountUSD: totalAmount,
     });
   };
 
@@ -775,13 +820,17 @@ export function TradeOracleBuyerApp() {
                     <button
                       type="button"
                       onClick={() => {
-                        setRfqType("goods");
+                        setRfqForm((prev) => ({
+                          ...prev,
+                          supplierId: "",
+                          supplierName: "",
+                        }));
                         setIsRfqModalOpen(true);
                       }}
                       className="px-3.5 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Create RFQ</span>
+                      <span>Place Order</span>
                     </button>
                     <button
                       type="button"
@@ -964,13 +1013,14 @@ export function TradeOracleBuyerApp() {
                                         title: aiResult.extractedRequirements.product,
                                         category: seller.category,
                                         specifications: `${match.exactMaterialMatch} — ${aiResult.extractedRequirements.finishOrStandard}`,
+                                        supplierId: seller.id,
+                                        supplierName: seller.name,
                                       }));
-                                      setRfqType(seller.type);
                                       setIsRfqModalOpen(true);
                                     }}
                                     className="py-2 px-3 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs cursor-pointer transition-colors"
                                   >
-                                    Request Quote
+                                    Place Order
                                   </button>
                                 </div>
                               </div>
@@ -1147,11 +1197,14 @@ export function TradeOracleBuyerApp() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsRfqModalOpen(true)}
+                  onClick={() => {
+                    setRfqForm((prev) => ({ ...prev, supplierId: "", supplierName: "" }));
+                    setIsRfqModalOpen(true);
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Send Direct RFQ</span>
+                  <span>Place Order</span>
                 </button>
               </div>
 
@@ -1398,13 +1451,15 @@ export function TradeOracleBuyerApp() {
                               ...prev,
                               title: `Sourcing ${supplier.productsOrServices[0]}`,
                               category: supplier.category,
+                              specifications: supplier.materials?.[0] || "",
+                              supplierId: supplier.id,
+                              supplierName: supplier.name,
                             }));
-                            setRfqType(supplier.type);
                             setIsRfqModalOpen(true);
                           }}
                           className="px-3.5 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                         >
-                          <span>Send RFQ</span>
+                          <span>Place Order</span>
                           <ArrowRight className="w-3 h-3" />
                         </button>
                       </div>
@@ -1426,16 +1481,19 @@ export function TradeOracleBuyerApp() {
                     Request for Quotation (RFQ) &amp; Commercial Offers
                   </h2>
                   <p className="text-xs text-stone-500">
-                    Submit new goods or services scopes, review quotations from verified suppliers, and convert accepted offers into live orders.
+                    Review supplier quotations and place orders directly.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsRfqModalOpen(true)}
+                  onClick={() => {
+                    setRfqForm((prev) => ({ ...prev, supplierId: "", supplierName: "" }));
+                    setIsRfqModalOpen(true);
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>New RFQ Form</span>
+                  <span>Place Order</span>
                 </button>
               </div>
 
@@ -1989,16 +2047,18 @@ export function TradeOracleBuyerApp() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. MULTI-STEP RFQ CREATION MODAL (Goods vs Services)                      */}
+      {/* 4. SIMPLE PLACE ORDER MODAL                                               */}
       {/* ========================================================================= */}
       {isRfqModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto font-sans">
+          <div data-lenis-prevent className="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 space-y-5 shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto font-sans">
             <div className="flex justify-between items-center pb-4 border-b border-stone-100">
               <div>
-                <h3 className="font-bold text-lg text-[#18280e]">Create Sourcing Request (RFQ)</h3>
+                <h3 className="font-bold text-lg text-[#18280e]">Place Order</h3>
                 <p className="text-xs text-stone-500 font-mono">
-                  Submit detailed technical specs to receive binding commercial quotations from Indian suppliers.
+                  {rfqForm.supplierName
+                    ? `Placing order directly with ${rfqForm.supplierName}`
+                    : "Enter your product, exact material, quantity, and delivery details."}
                 </p>
               </div>
               <button
@@ -2010,135 +2070,75 @@ export function TradeOracleBuyerApp() {
               </button>
             </div>
 
-            {/* Type Switcher */}
-            <div className="flex items-center gap-2 p-1.5 bg-[#f4faed] rounded-2xl border border-[#d8e5ca] font-mono text-xs">
-              <button
-                type="button"
-                onClick={() => setRfqType("goods")}
-                className={`flex-1 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-                  rfqType === "goods" ? "bg-[#18280e] text-[#b2eb76] shadow-xs" : "text-stone-600 hover:text-black"
-                }`}
-              >
-                🏭 Physical Goods (Foundry / Fasteners / Textiles)
-              </button>
-              <button
-                type="button"
-                onClick={() => setRfqType("service")}
-                className={`flex-1 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-                  rfqType === "service" ? "bg-[#18280e] text-[#b2eb76] shadow-xs" : "text-stone-600 hover:text-black"
-                }`}
-              >
-                💻 Engineering / IT Services (Software / Cloud)
-              </button>
-            </div>
-
             <form onSubmit={handleCreateRFQ} className="space-y-4 font-mono text-xs">
               <div className="space-y-1">
-                <label className="text-stone-700 font-bold block">
-                  {rfqType === "goods" ? "Product Name & Category" : "Project / Service Title"}
-                </label>
+                <label className="text-stone-700 font-bold block">Product Name</label>
                 <input
                   type="text"
                   required
-                  placeholder={rfqType === "goods" ? "e.g. Architectural Solid Brass Door Handles" : "e.g. Cross-Border PayPal API Integration"}
+                  placeholder="e.g. Solid Brass Mortise Door Locksets"
                   value={rfqForm.title}
                   onChange={(e) => setRfqForm({ ...rfqForm, title: e.target.value })}
                   className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none focus:border-[#18280e]"
                 />
               </div>
 
-              {rfqType === "goods" ? (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Target Quantity</label>
-                      <input
-                        type="number"
-                        required
-                        value={rfqForm.quantity}
-                        onChange={(e) => setRfqForm({ ...rfqForm, quantity: Number(e.target.value) })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Target Budget (USD)</label>
-                      <input
-                        type="number"
-                        required
-                        value={rfqForm.budgetUSD}
-                        onChange={(e) => setRfqForm({ ...rfqForm, budgetUSD: Number(e.target.value) })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                  </div>
+              <div className="space-y-1">
+                <label className="text-stone-700 font-bold block">Exact Material &amp; Specifications</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Forged CW617N solid brass, PVD satin gold finish..."
+                  value={rfqForm.specifications}
+                  onChange={(e) => setRfqForm({ ...rfqForm, specifications: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none resize-none focus:border-[#18280e]"
+                />
+              </div>
 
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">Technical Specifications &amp; Material</label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Forged CW617N brass, 240-hr ASTM B117 salt spray anti-tarnish coating, retail box packaging..."
-                      value={rfqForm.specifications}
-                      onChange={(e) => setRfqForm({ ...rfqForm, specifications: e.target.value })}
-                      className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none resize-none"
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-stone-700 font-bold block">Quantity</label>
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={rfqForm.quantity}
+                    onChange={(e) => setRfqForm({ ...rfqForm, quantity: Number(e.target.value) })}
+                    className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none focus:border-[#18280e]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-stone-700 font-bold block">Order Budget (USD)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={rfqForm.budgetUSD}
+                    onChange={(e) => setRfqForm({ ...rfqForm, budgetUSD: Number(e.target.value) })}
+                    className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none focus:border-[#18280e]"
+                  />
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Destination Port</label>
-                      <input
-                        type="text"
-                        value={rfqForm.destinationPort}
-                        onChange={(e) => setRfqForm({ ...rfqForm, destinationPort: e.target.value })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Target Delivery Date</label>
-                      <input
-                        type="date"
-                        value={rfqForm.deliveryDate}
-                        onChange={(e) => setRfqForm({ ...rfqForm, deliveryDate: e.target.value })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">Scope of Work &amp; Milestones</label>
-                    <textarea
-                      rows={3}
-                      placeholder="e.g. Implement PayPal Orders v2 capture, verify webhooks, Jest automated unit tests..."
-                      value={rfqForm.scopeOfWork}
-                      onChange={(e) => setRfqForm({ ...rfqForm, scopeOfWork: e.target.value })}
-                      className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none resize-none"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Budget (USD)</label>
-                      <input
-                        type="number"
-                        required
-                        value={rfqForm.budgetUSD}
-                        onChange={(e) => setRfqForm({ ...rfqForm, budgetUSD: Number(e.target.value) })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-stone-700 font-bold block">Target Deadline</label>
-                      <input
-                        type="date"
-                        value={rfqForm.deliveryDate}
-                        onChange={(e) => setRfqForm({ ...rfqForm, deliveryDate: e.target.value })}
-                        className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-stone-700 font-bold block">Delivery Destination</label>
+                  <input
+                    type="text"
+                    value={rfqForm.destinationPort}
+                    onChange={(e) => setRfqForm({ ...rfqForm, destinationPort: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none focus:border-[#18280e]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-stone-700 font-bold block">Delivery Date</label>
+                  <input
+                    type="date"
+                    value={rfqForm.deliveryDate}
+                    onChange={(e) => setRfqForm({ ...rfqForm, deliveryDate: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 outline-none focus:border-[#18280e]"
+                  />
+                </div>
+              </div>
 
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-stone-100">
                 <button
@@ -2152,7 +2152,7 @@ export function TradeOracleBuyerApp() {
                   type="submit"
                   className="px-5 py-2.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer shadow-xs"
                 >
-                  Publish RFQ to Verified Indian Hubs →
+                  Place Order →
                 </button>
               </div>
             </form>
@@ -2254,18 +2254,21 @@ export function TradeOracleBuyerApp() {
               <button
                 type="button"
                 onClick={() => {
+                  const target = selectedSupplier;
                   setSelectedSupplier(null);
                   setRfqForm((prev) => ({
                     ...prev,
-                    title: `Sourcing ${selectedSupplier.productsOrServices[0]}`,
-                    category: selectedSupplier.category,
+                    title: `Sourcing ${target.productsOrServices[0]}`,
+                    category: target.category,
+                    specifications: target.materials?.[0] || "",
+                    supplierId: target.id,
+                    supplierName: target.name,
                   }));
-                  setRfqType(selectedSupplier.type);
                   setIsRfqModalOpen(true);
                 }}
                 className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] text-xs font-bold cursor-pointer"
               >
-                Send RFQ to This Supplier →
+                Place Order with This Seller →
               </button>
             </div>
           </div>
