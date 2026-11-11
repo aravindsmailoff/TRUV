@@ -51,7 +51,7 @@ TRUV acts as an active trade operator, coordinating opportunities from initial b
 
 ## 📋 Prerequisites
 
-- **Node.js**: `v20.0.0` or higher (Node 24 recommended)
+- **Node.js**: Node 24 or newer (required by this project)
 - **Package Manager**: `npm` (included with Node.js)
 
 ---
@@ -61,7 +61,7 @@ TRUV acts as an active trade operator, coordinating opportunities from initial b
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/aravindsmailoff/TRUV.git
+git clone --branch arena/65384baf-truv https://github.com/aravindsmailoff/TRUV.git
 cd TRUV
 ```
 
@@ -167,7 +167,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 `data/truv.sqlite3` is an initially empty SQLite database intended for **one local installation**, with its schema in `data/schema.sql`. Run `python3 scripts/db/init.py` to create it if missing; the script does not erase existing records. The database structure covers organizations, requests, messages, projects, milestones, document references and payment records.
 
-**This is storage groundwork, not a connected application yet.** The current browser-based sign-in and portal workflows do not use this database. Do not enter real confidential data until proper server-side authentication, authorization and access controls are implemented. PayPal still requires a server with outbound access to PayPal, and a database file does not provide escrow.
+**The separate local workspace connects RFQs and messages to this database.** The existing browser-based sign-in and portal workflows do not use it. Do not enter real confidential data until proper server-side authentication, authorization and access controls are implemented. PayPal still requires a server with outbound access to PayPal, and a database file does not provide escrow.
 
 The database file may be committed as a **manual snapshot** so a later clone contains that snapshot. Git does not automatically save or synchronize live changes. Stop the app and all writers first, then check database integrity and review what is being shared before committing and pushing. Every repository reader can access committed records, and Git history may retain deleted records. Do not commit passwords, tokens, payment credentials, private documents or sensitive personal data. Simultaneous updates to a SQLite binary cannot be merged reliably; for multiple installations or online users, use a shared hosted database instead. Files referenced by documents are not included in the database or repository automatically.
 
@@ -179,7 +179,7 @@ This is a separate, deliberately **local-only** workspace at `/local-workspace`;
 
 Start with `TRUV_LOCAL_WORKSPACE=1 npm run dev -- --hostname 127.0.0.1`, and open `http://localhost:3000/local-workspace`. Sign in as buyer to create a goods or service RFQ. Sign out, then sign in as a manufacturer to see goods requests, or as a service provider to see service requests. All local accounts of a matching role can see those requests; this is not targeted private delivery. The request data persists in `data/truv.sqlite3`. Stop the server before reviewing, committing and pushing a snapshot. Other local installations need their own accounts after pulling; recreate each account with the same email and role to access its buyer requests.
 
-This starter does not provide production-grade security, rate limiting, multi-tenant isolation, account recovery or remote access. Do not expose it to the internet or put sensitive data in it. The existing portal, messages, projects, documents and payments are not connected to this flow. PayPal remains unavailable from the preview network.
+This starter does not provide production-grade security, rate limiting, multi-tenant isolation, account recovery or remote access. Do not expose it to the internet or put sensitive data in it. The existing portal and its messages, projects, documents and payments are not connected to this flow. PayPal remains unavailable from the preview network.
 
 To use messaging after updating an existing checkout, stop the server and run `python3 scripts/db/init.py` again; this adds the conversation tables without deleting existing records. In the local workspace, a manufacturer or service provider can choose **Message buyer** on a matching request. The buyer and that provider can then exchange replies under **Messages**; other accounts cannot read that conversation through the local API. Use **Refresh** to see new replies (there are no push notifications). Messages persist in the tracked SQLite database and are included in any database snapshot you commit, so repository readers can access them regardless of app permissions. This local prototype is not suitable for sensitive data or internet deployment.
 
