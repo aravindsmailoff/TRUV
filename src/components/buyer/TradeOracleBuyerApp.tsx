@@ -9,46 +9,76 @@ import {
   FileQuestion,
   ShoppingBag,
   CreditCard,
-  FileText,
   MessageSquare,
   Settings,
   Bell,
   HelpCircle,
   Plus,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2,
-  Clock,
-  ArrowUpRight,
   ExternalLink,
-  Download,
   Filter,
-  Layers,
-  Building,
   Check,
   Ship,
   Sparkles,
-  AlertCircle,
-  Eye,
   LogOut,
-  ChevronRight,
+  Send,
+  Package,
 } from "lucide-react";
 import {
   INITIAL_SUPPLIERS,
   INITIAL_RFQS,
   INITIAL_QUOTES,
   INITIAL_ORDERS,
-  INITIAL_DOCUMENTS,
   SupplierItem,
   RFQItem,
   QuotationItem,
   OrderWorkspaceItem,
-  DocumentItem,
 } from "@/lib/buyer/buyerStore";
 import { setCurrentSessionUser } from "@/lib/auth/authStore";
 import { useSessionUser } from "@/lib/auth/useSessionUser";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
+
+interface AiMatchItem {
+  supplierId: string;
+  matchScore: number;
+  exactMaterialMatch: string;
+  matchingProducts: string[];
+  whyThisSeller: string;
+  samplePromptSuggestion: string;
+}
+
+interface AiMatchResponse {
+  poweredBy: "NVIDIA NIM AI" | "Catalog Fallback";
+  model: string;
+  extractedRequirements: {
+    product: string;
+    material: string;
+    finishOrStandard: string;
+    quantityHint: string;
+  };
+  summary: string;
+  matches: AiMatchItem[];
+  noExactMatchReason?: string;
+}
+
+interface BuyerConversationMessage {
+  id: string;
+  sender: "buyer";
+  text: string;
+  sentAt: string;
+}
+
+interface BuyerConversationThread {
+  supplierId: string;
+  supplierName: string;
+  supplierCity: string;
+  matchedProduct: string;
+  matchedMaterial: string;
+  samplePolicy: string;
+  messages: BuyerConversationMessage[];
+}
 
 export function TradeOracleBuyerApp() {
   const router = useRouter();
@@ -65,10 +95,10 @@ export function TradeOracleBuyerApp() {
     }
   }, [currentUser, isHydrated, router]);
 
-  // Navigation Tabs matching prompt:
-  // 1. Dashboard, 2. Find Suppliers, 3. My RFQs, 4. My Orders, 5. Payments, 6. Documents, 7. Messages, 8. Settings
+  // Navigation Tabs:
+  // 1. Dashboard, 2. Find Suppliers, 3. My RFQs, 4. My Orders, 5. Payments, 6. Messages, 7. Settings
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "suppliers" | "rfqs" | "orders" | "payments" | "documents" | "messages" | "settings"
+    "dashboard" | "suppliers" | "rfqs" | "orders" | "payments" | "messages" | "settings"
   >("dashboard");
 
   // State collections
@@ -76,12 +106,22 @@ export function TradeOracleBuyerApp() {
   const [rfqs, setRfqs] = useState<RFQItem[]>(INITIAL_RFQS);
   const [quotes, setQuotes] = useState<QuotationItem[]>(INITIAL_QUOTES);
   const [orders, setOrders] = useState<OrderWorkspaceItem[]>(INITIAL_ORDERS);
-  const [documents, setDocuments] = useState<DocumentItem[]>(INITIAL_DOCUMENTS);
 
   // Active selections
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierItem | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderWorkspaceItem>(orders[0]);
   const [compareQuotesForRfqId, setCompareQuotesForRfqId] = useState<string | null>(null);
+
+  // NVIDIA AI Exact Seller & Material Matcher
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiResult, setAiResult] = useState<AiMatchResponse | null>(null);
+
+  // Clean Direct Seller Messaging (starts empty — never pre-seeded with a random seller)
+  const [conversations, setConversations] = useState<BuyerConversationThread[]>([]);
+  const [activeThreadSupplierId, setActiveThreadSupplierId] = useState<string | null>(null);
+  const [messageDraft, setMessageDraft] = useState("");
 
   // Supplier Search & Filters
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -309,13 +349,118 @@ export function TradeOracleBuyerApp() {
     }
   };
 
+  // Run NVIDIA AI Exact Seller & Material Match
+  const handleRunAiSellerMatch = async (customQuery?: string) => {
+    const queryToUse = (customQuery ?? aiQuery).trim();
+    if (!queryToUse) {
+      setAiError("Please describe the product, exact material, finish, or quantity you need.");
+      return;
+    }
+    if (customQuery !== undefined) {
+      setAiQuery(customQuery);
+    }
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const res = await fetch("/api/ai/match-seller", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: queryToUse }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAiError(data.error || "Unable to find a matching seller right now.");
+        return;
+      }
+      setAiResult(data as AiMatchResponse);
+    } catch {
+      setAiError("Could not reach the AI seller matcher. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Open direct conversation with the exact matched seller to ask for a sample
+  const openSampleMessageThread = (
+    supplier: SupplierItem,
+    matchedProduct?: string,
+    matchedMaterial?: string,
+    suggestedMessage?: string
+  ) => {
+    const productLabel = matchedProduct || supplier.productsOrServices[0];
+    const materialLabel = matchedMaterial || supplier.materials?.[0] || supplier.category;
+
+    setConversations((prev) => {
+      const existing = prev.find((t) => t.supplierId === supplier.id);
+      if (existing) {
+        return prev;
+      }
+      return [
+        {
+          supplierId: supplier.id,
+          supplierName: supplier.name,
+          supplierCity: `${supplier.city}, ${supplier.state}`,
+          matchedProduct: productLabel,
+          matchedMaterial: materialLabel,
+          samplePolicy:
+            supplier.samplePolicy || "Sample availability and dispatch timing confirmed on request.",
+          messages: [],
+        },
+        ...prev,
+      ];
+    });
+
+    setActiveThreadSupplierId(supplier.id);
+    setMessageDraft(
+      suggestedMessage ||
+        `Hello ${supplier.name}, I would like to request a sample of ${productLabel} (${materialLabel}). Please confirm sample unit availability, cost, and shipping timeline.`
+    );
+    setActiveTab("messages");
+  };
+
+  const handleSendBuyerMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = messageDraft.trim();
+    if (!trimmed || !activeThreadSupplierId) return;
+
+    const nowLabel = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    setConversations((prev) =>
+      prev.map((thread) =>
+        thread.supplierId === activeThreadSupplierId
+          ? {
+              ...thread,
+              messages: [
+                ...thread.messages,
+                {
+                  id: "msg_" + Date.now(),
+                  sender: "buyer",
+                  text: trimmed,
+                  sentAt: `Today, ${nowLabel}`,
+                },
+              ],
+            }
+          : thread
+      )
+    );
+    setMessageDraft("");
+  };
+
   // Filtered Suppliers
+  const q = supplierSearchQuery.toLowerCase();
   const filteredSuppliers = suppliers.filter((sup) => {
     const matchesSearch =
-      sup.name.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
-      sup.city.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
-      sup.category.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
-      sup.productsOrServices.some((p) => p.toLowerCase().includes(supplierSearchQuery.toLowerCase()));
+      !q ||
+      sup.name.toLowerCase().includes(q) ||
+      sup.city.toLowerCase().includes(q) ||
+      sup.category.toLowerCase().includes(q) ||
+      sup.productsOrServices.some((p) => p.toLowerCase().includes(q)) ||
+      (sup.materials || []).some((m) => m.toLowerCase().includes(q)) ||
+      (sup.finishes || []).some((f) => f.toLowerCase().includes(q)) ||
+      sup.capabilities.some((c) => c.toLowerCase().includes(q));
     const matchesType = supplierTypeFilter === "all" || sup.type === supplierTypeFilter;
     const matchesCategory = supplierCategoryFilter === "all" || sup.category === supplierCategoryFilter;
     return matchesSearch && matchesType && matchesCategory;
@@ -522,30 +667,7 @@ export function TradeOracleBuyerApp() {
               </span>
             </button>
 
-            {/* 6. Documents */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("documents")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
-                activeTab === "documents"
-                  ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
-                  : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 shrink-0" />
-                <span>Documents</span>
-              </div>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                  activeTab === "documents" ? "bg-[#b2eb76]/20 text-[#b2eb76]" : "bg-stone-100 text-stone-600"
-                }`}
-              >
-                {documents.length}
-              </span>
-            </button>
-
-            {/* 7. Messages */}
+            {/* 6. Messages (Direct Sample & Seller Inquiries) */}
             <button
               type="button"
               onClick={() => setActiveTab("messages")}
@@ -559,10 +681,18 @@ export function TradeOracleBuyerApp() {
                 <MessageSquare className="w-4 h-4 shrink-0" />
                 <span>Messages</span>
               </div>
-              <span className="size-2 rounded-full bg-emerald-600" />
+              {conversations.length > 0 && (
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                    activeTab === "messages" ? "bg-[#b2eb76]/20 text-[#b2eb76]" : "bg-stone-100 text-stone-600"
+                  }`}
+                >
+                  {conversations.length}
+                </span>
+              )}
             </button>
 
-            {/* 8. Settings */}
+            {/* 7. Settings */}
             <button
               type="button"
               onClick={() => setActiveTab("settings")}
@@ -659,41 +789,197 @@ export function TradeOracleBuyerApp() {
                       className="px-3.5 py-2 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors border border-[#d8e5ca]"
                     >
                       <Search className="w-3.5 h-3.5 text-[#3f7308]" />
-                      <span>Find Suppliers</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("documents")}
-                      className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-50 text-stone-700 font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors border border-stone-200"
-                    >
-                      <FileText className="w-3.5 h-3.5 text-stone-500" />
-                      <span>View Documents</span>
+                      <span>Browse All Sellers</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Inline Supplier Search Bar */}
-                <div className="pt-2">
-                  <div className="flex items-center gap-2 p-2 rounded-2xl bg-stone-50 border border-stone-200">
-                    <Search className="w-4 h-4 text-stone-400 ml-2" />
+                {/* NVIDIA AI Exact Seller & Material Finder */}
+                <div className="pt-2 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#3f7308]" />
+                      <span className="text-xs font-bold text-[#18280e]">
+                        AI Seller &amp; Material Finder
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-semibold">
+                        NVIDIA NIM AI
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-stone-400 hidden sm:inline">
+                      Describe the exact product, material &amp; finish to match the right seller
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl bg-stone-50 border border-stone-200 focus-within:border-[#18280e] transition-colors">
                     <input
                       type="text"
-                      placeholder="What are you sourcing today? (e.g. CW617N brass door handles, Grade 10.9 flange bolts, organic knitwear, or React/Node engineering)"
-                      value={supplierSearchQuery}
-                      onChange={(e) => setSupplierSearchQuery(e.target.value)}
+                      placeholder="Describe exact product & material (e.g. 3,500 CW617N solid brass mortise locksets with satin gold PVD coating)"
+                      value={aiQuery}
+                      onChange={(e) => setAiQuery(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") setActiveTab("suppliers");
+                        if (e.key === "Enter") void handleRunAiSellerMatch();
                       }}
-                      className="w-full bg-transparent text-xs font-mono placeholder:text-stone-400 outline-none"
+                      className="w-full px-3 py-1.5 bg-transparent text-xs font-mono placeholder:text-stone-400 outline-none"
                     />
                     <button
                       type="button"
-                      onClick={() => setActiveTab("suppliers")}
-                      className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] font-bold text-xs whitespace-nowrap cursor-pointer hover:bg-[#253d16] transition-colors"
+                      disabled={aiLoading}
+                      onClick={() => void handleRunAiSellerMatch()}
+                      className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] font-bold text-xs whitespace-nowrap cursor-pointer hover:bg-[#253d16] transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
-                      Search Suppliers →
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{aiLoading ? "Matching..." : "Find Exact Seller"}</span>
                     </button>
                   </div>
+
+                  {/* Quick Example Prompts */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span className="text-stone-400 font-mono">Try:</span>
+                    {[
+                      "CW617N solid brass door handles with PVD satin gold finish",
+                      "Grade 10.9 flange bolts AISI 4140 steel zinc-nickel plated",
+                      "AISI 316 stainless steel high-pressure hydraulic valves",
+                      "GOTS organic cotton 400 GSM heavyweight hoodies",
+                    ].map((sample) => (
+                      <button
+                        key={sample}
+                        type="button"
+                        onClick={() => void handleRunAiSellerMatch(sample)}
+                        className="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-[#ebf7d9] text-stone-700 hover:text-[#18280e] transition-colors cursor-pointer text-left"
+                      >
+                        {sample}
+                      </button>
+                    ))}
+                  </div>
+
+                  {aiError && (
+                    <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800">
+                      {aiError}
+                    </div>
+                  )}
+
+                  {/* AI Match Results */}
+                  {aiResult && (
+                    <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-[#18280e]">
+                              {aiResult.summary}
+                            </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-[#d8e5ca] text-[#284905]">
+                              {aiResult.poweredBy}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-[11px] font-mono text-stone-600 pt-1">
+                            <span>Product: <strong>{aiResult.extractedRequirements.product}</strong></span>
+                            <span>•</span>
+                            <span>Material: <strong>{aiResult.extractedRequirements.material}</strong></span>
+                            <span>•</span>
+                            <span>Spec: <strong>{aiResult.extractedRequirements.finishOrStandard}</strong></span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAiResult(null)}
+                          className="text-xs text-stone-500 hover:text-stone-800 cursor-pointer underline"
+                        >
+                          Clear
+                        </button>
+                      </div>
+
+                      {aiResult.matches.length === 0 ? (
+                        <div className="p-4 rounded-xl bg-white border border-stone-200 text-xs text-stone-600">
+                          {aiResult.noExactMatchReason ||
+                            "No verified seller in the directory matched that exact material and product specification."}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {aiResult.matches.map((match) => {
+                            const seller = suppliers.find((s) => s.id === match.supplierId);
+                            if (!seller) return null;
+                            return (
+                              <div
+                                key={match.supplierId}
+                                className="p-4 rounded-2xl bg-white border border-[#d8e5ca] shadow-xs space-y-3 flex flex-col justify-between"
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                      <h4 className="font-bold text-sm text-[#18280e]">{seller.name}</h4>
+                                      <span className="text-[11px] font-mono text-stone-500">
+                                        {seller.city}, {seller.state} • {seller.approxPricingRange}
+                                      </span>
+                                    </div>
+                                    <span className="px-2 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] text-[10px] font-mono font-bold shrink-0">
+                                      {match.matchScore}% Match
+                                    </span>
+                                  </div>
+
+                                  <div className="text-[11px] font-mono bg-stone-50 rounded-xl p-2.5 space-y-1">
+                                    <div className="text-[#284905] font-bold">
+                                      Exact Material: {match.exactMaterialMatch}
+                                    </div>
+                                    {match.matchingProducts.length > 0 && (
+                                      <div className="text-stone-600">
+                                        Products: {match.matchingProducts.join(", ")}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <p className="text-xs text-stone-700 leading-relaxed">
+                                    {match.whyThisSeller}
+                                  </p>
+
+                                  {seller.samplePolicy && (
+                                    <p className="text-[11px] font-mono text-stone-500 flex items-center gap-1.5">
+                                      <Package className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
+                                      <span>{seller.samplePolicy}</span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-100">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      openSampleMessageThread(
+                                        seller,
+                                        aiResult.extractedRequirements.product,
+                                        match.exactMaterialMatch,
+                                        match.samplePromptSuggestion
+                                      )
+                                    }
+                                    className="flex-1 py-2 px-3 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    <span>Ask for Sample</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRfqForm((prev) => ({
+                                        ...prev,
+                                        title: aiResult.extractedRequirements.product,
+                                        category: seller.category,
+                                        specifications: `${match.exactMaterialMatch} — ${aiResult.extractedRequirements.finishOrStandard}`,
+                                      }));
+                                      setRfqType(seller.type);
+                                      setIsRfqModalOpen(true);
+                                    }}
+                                    className="py-2 px-3 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs cursor-pointer transition-colors"
+                                  >
+                                    Request Quote
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -869,6 +1155,85 @@ export function TradeOracleBuyerApp() {
                 </button>
               </div>
 
+              {/* AI Match Quick Bar inside Find Suppliers */}
+              <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 bg-white px-3 py-1.5 rounded-xl border border-[#d8e5ca]">
+                  <Sparkles className="w-4 h-4 text-[#3f7308] shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Ask NVIDIA AI to find the exact seller by material, coating, or product specs..."
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void handleRunAiSellerMatch();
+                    }}
+                    className="w-full text-xs font-mono bg-transparent outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  disabled={aiLoading}
+                  onClick={() => void handleRunAiSellerMatch()}
+                  className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
+                >
+                  {aiLoading ? "Matching..." : "Match Exact Seller with AI"}
+                </button>
+              </div>
+
+              {aiResult && (
+                <div className="p-4 rounded-2xl bg-white border border-[#d8e5ca] shadow-xs space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#18280e]">
+                      {aiResult.summary} ({aiResult.poweredBy})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAiResult(null)}
+                      className="text-xs text-stone-500 hover:text-stone-800 underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  {aiResult.matches.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {aiResult.matches.map((match) => {
+                        const seller = suppliers.find((s) => s.id === match.supplierId);
+                        if (!seller) return null;
+                        return (
+                          <div key={match.supplierId} className="p-3.5 rounded-xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <strong className="text-xs text-[#18280e]">{seller.name}</strong>
+                              <span className="px-2 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] text-[10px] font-mono font-bold">
+                                {match.matchScore}% Match
+                              </span>
+                            </div>
+                            <p className="text-[11px] font-mono text-[#284905]">
+                              Material: {match.exactMaterialMatch}
+                            </p>
+                            <p className="text-xs text-stone-700">{match.whyThisSeller}</p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openSampleMessageThread(
+                                  seller,
+                                  aiResult.extractedRequirements.product,
+                                  match.exactMaterialMatch,
+                                  match.samplePromptSuggestion
+                                )
+                              }
+                              className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-xs font-bold cursor-pointer hover:bg-[#253d16] inline-flex items-center gap-1.5"
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                              <span>Ask for Sample</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Filters Bar */}
               <div className="p-4 rounded-2xl bg-white border border-stone-200/80 shadow-xs flex flex-wrap items-center gap-3 text-xs font-mono">
                 <div className="flex items-center gap-2 text-stone-500">
@@ -917,6 +1282,8 @@ export function TradeOracleBuyerApp() {
                   <option value="Brassware & Hardware">Brassware &amp; Hardware</option>
                   <option value="Fasteners & Forgings">Fasteners &amp; Forgings</option>
                   <option value="Heritage Brassware">Heritage Brassware</option>
+                  <option value="Industrial Valves & CNC Parts">Industrial Valves &amp; CNC Parts</option>
+                  <option value="Aerospace & Precision CNC">Aerospace &amp; Precision CNC</option>
                   <option value="Textiles & Organic Apparel">Textiles &amp; Organic Apparel</option>
                   <option value="Software Engineering & Cloud">Software Engineering &amp; Cloud</option>
                 </select>
@@ -958,21 +1325,23 @@ export function TradeOracleBuyerApp() {
                         </button>
                       </div>
 
-                      {/* Verification Status Banner with exact source & meaning */}
+                      {/* Verification Status Banner */}
                       <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1 font-mono text-[11px]">
                         <div className="flex items-center gap-1.5 text-[#284905] font-bold">
                           <CheckCircle2 className="w-3.5 h-3.5 text-[#3f7308]" />
-                          <span>Verification Source: {supplier.verificationSource}</span>
+                          <span>Verified: {supplier.verificationSource}</span>
                         </div>
-                        <p className="text-stone-500 text-[10px] leading-tight">
-                          Meaning: {supplier.verificationMeaning}
-                        </p>
+                        {supplier.materials && supplier.materials.length > 0 && (
+                          <p className="text-stone-600 text-[10px] leading-tight">
+                            Materials: {supplier.materials.join(" • ")}
+                          </p>
+                        )}
                       </div>
 
                       {/* Products / Capabilities */}
                       <div className="space-y-1.5 font-mono text-xs">
                         <span className="text-[10px] text-stone-400 uppercase font-bold block">
-                          Export Products / Scope:
+                          Products / Scope:
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {supplier.productsOrServices.map((p, idx) => (
@@ -1004,31 +1373,41 @@ export function TradeOracleBuyerApp() {
                     </div>
 
                     {/* Actions */}
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-3">
+                    <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedSupplier(supplier)}
                         className="text-xs font-mono font-bold text-stone-600 hover:text-black hover:underline cursor-pointer"
                       >
-                        View Full Dossier →
+                        Details →
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRfqForm((prev) => ({
-                            ...prev,
-                            title: `Sourcing ${supplier.productsOrServices[0]}`,
-                            category: supplier.category,
-                          }));
-                          setRfqType(supplier.type);
-                          setIsRfqModalOpen(true);
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
-                      >
-                        <span>Send RFQ</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openSampleMessageThread(supplier)}
+                          className="px-3 py-1.5 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+                        >
+                          <MessageSquare className="w-3 h-3" />
+                          <span>Ask for Sample</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRfqForm((prev) => ({
+                              ...prev,
+                              title: `Sourcing ${supplier.productsOrServices[0]}`,
+                              category: supplier.category,
+                            }));
+                            setRfqType(supplier.type);
+                            setIsRfqModalOpen(true);
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <span>Send RFQ</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1280,23 +1659,23 @@ export function TradeOracleBuyerApp() {
                 )}
               </div>
 
-              {/* Fulfilment Milestones Timeline (Goods vs Services) */}
+              {/* Order Progress Steps (Simplified) */}
               <div className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-bold text-base text-[#18280e]">
-                      Fulfilment Milestones &amp; Evidence Timeline
+                      Order Progress
                     </h3>
                     <p className="text-xs text-stone-500 font-mono">
-                      Each payment release is linked to verified documentation and inspection certificates.
+                      Simple step-by-step tracking from order confirmation to delivery.
                     </p>
                   </div>
                   <span className="text-xs font-mono text-stone-400">
-                    Stage {selectedOrder.currentStageIndex + 1} of {selectedOrder.milestones.length}
+                    Step {selectedOrder.currentStageIndex + 1} of {selectedOrder.milestones.length}
                   </span>
                 </div>
 
-                <div className="space-y-4 pt-2">
+                <div className="space-y-3 pt-2">
                   {selectedOrder.milestones.map((milestone, idx) => {
                     const isCompleted = milestone.status === "completed";
                     const isCurrent = milestone.status === "in_progress";
@@ -1311,7 +1690,7 @@ export function TradeOracleBuyerApp() {
                             : "bg-stone-50/50 border-stone-200/50 opacity-70"
                         }`}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {isCompleted ? (
@@ -1332,59 +1711,13 @@ export function TradeOracleBuyerApp() {
                             <p className="text-xs text-stone-600 font-mono pl-7">{milestone.description}</p>
                           </div>
 
-                          <div className="pl-7 sm:pl-0 font-mono text-xs">
-                            {milestone.evidenceName ? (
-                              <button
-                                type="button"
-                                onClick={() => setActiveTab("documents")}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 text-stone-800 hover:bg-stone-50 transition-colors cursor-pointer text-[11px]"
-                              >
-                                <FileText className="w-3 h-3 text-[#3f7308]" />
-                                <span>{milestone.evidenceName}</span>
-                              </button>
-                            ) : (
-                              <span className="text-stone-400 text-[10px]">
-                                {isCompleted ? `Verified: ${milestone.completedAt}` : "Pending Verification"}
-                              </span>
-                            )}
-                          </div>
+                          <span className="pl-7 sm:pl-0 text-stone-500 font-mono text-[11px] shrink-0">
+                            {isCompleted ? "Done" : isCurrent ? "In Progress" : "Upcoming"}
+                          </span>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* Dispute Evidence & Legal Contract Pack */}
-              <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-mono text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#3f7308]" />
-                    <h3 className="font-bold text-sm text-[#18280e] font-sans">
-                      Dispute Assistance &amp; Authorised Evidence Repository
-                    </h3>
-                  </div>
-                  <span className="text-[10px] text-stone-400">PayPal Resolution Center Integration</span>
-                </div>
-                <p className="text-stone-600 leading-relaxed">
-                  {selectedOrder.disputeEvidence.notes}
-                </p>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => alert("Downloading complete signed PO & specification evidence pack (.ZIP)...")}
-                    className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Evidence Dossier (.ZIP)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("documents")}
-                    className="px-3.5 py-2 rounded-xl bg-[#ebf7d9] text-[#18280e] font-bold text-xs hover:bg-[#d8e5ca] flex items-center gap-2 cursor-pointer transition-colors"
-                  >
-                    <span>View All Associated Documents →</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -1459,99 +1792,172 @@ export function TradeOracleBuyerApp() {
           )}
 
           {/* ======================================================================= */}
-          {/* TAB 6: DOCUMENTS AND EVIDENCE                                           */}
+          {/* TAB 6: MESSAGES (Direct Seller Sample Inquiries — No Random Seller)    */}
           {/* ======================================================================= */}
-          {activeTab === "documents" && (
-            <div className="space-y-6 animate-in fade-in duration-200 font-sans">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-[#18280e] tracking-tight">
-                    Document &amp; Commercial Evidence Repository
-                  </h2>
-                  <p className="text-xs text-stone-500 font-mono">
-                    All POs, invoices, QIMA inspection reports, and ICEGATE shipping bills linked to orders.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => alert("Simulating upload of new commercial inspection evidence...")}
-                  className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Upload Document</span>
-                </button>
-              </div>
+          {activeTab === "messages" && (() => {
+            const activeThread =
+              conversations.find((t) => t.supplierId === activeThreadSupplierId) ||
+              conversations[0] ||
+              null;
 
-              {/* Documents Table */}
-              <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-mono text-xs">
-                <div className="divide-y divide-stone-100 overflow-x-auto">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="py-3.5 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-[#f4faed] text-[#3f7308]">
-                          <FileText className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="font-bold text-stone-900 block">{doc.title}</span>
-                          <span className="text-stone-400 text-[11px]">
-                            {doc.category} • {doc.orderNumber} • {doc.fileSize}
+            return (
+              <div className="space-y-6 animate-in fade-in duration-200 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#18280e] tracking-tight">
+                      Seller Sample &amp; Sourcing Messages
+                    </h2>
+                    <p className="text-xs text-stone-500">
+                      Only sellers you explicitly match and choose appear here—no random pre-configured chats.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("dashboard")}
+                    className="px-4 py-2 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors self-start"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#3f7308]" />
+                    <span>Find Exact Seller with AI</span>
+                  </button>
+                </div>
+
+                {!activeThread ? (
+                  <div className="p-8 md:p-12 rounded-3xl bg-white border border-stone-200/80 shadow-xs text-center space-y-4">
+                    <div className="size-12 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-[#3f7308] flex items-center justify-center mx-auto">
+                      <MessageSquare className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1 max-w-md mx-auto">
+                      <h3 className="font-bold text-base text-[#18280e]">No Seller Messages Yet</h3>
+                      <p className="text-xs text-stone-600 leading-relaxed">
+                        Describe the exact product and material you need in the AI Seller Finder (or browse Find Suppliers), then click <strong>Ask for Sample</strong> on the matched seller to message them directly.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("dashboard")}
+                        className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] font-bold text-xs cursor-pointer hover:bg-[#253d16]"
+                      >
+                        Go to AI Seller Finder →
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("suppliers")}
+                        className="px-4 py-2 rounded-xl bg-stone-100 text-stone-700 font-bold text-xs cursor-pointer hover:bg-stone-200"
+                      >
+                        Browse All Sellers
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Matched Seller Thread List */}
+                    <div className="p-4 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-2 h-fit">
+                      <span className="text-[10px] font-mono text-stone-400 uppercase font-bold px-2 block">
+                        Matched Sellers ({conversations.length})
+                      </span>
+                      {conversations.map((thread) => (
+                        <button
+                          key={thread.supplierId}
+                          type="button"
+                          onClick={() => setActiveThreadSupplierId(thread.supplierId)}
+                          className={`w-full p-3 rounded-2xl text-left transition-colors cursor-pointer border ${
+                            activeThread.supplierId === thread.supplierId
+                              ? "bg-[#f4faed] border-[#d8e5ca]"
+                              : "bg-white border-stone-100 hover:bg-stone-50"
+                          }`}
+                        >
+                          <div className="font-bold text-xs text-[#18280e]">{thread.supplierName}</div>
+                          <div className="text-[11px] font-mono text-[#3f7308] truncate mt-0.5">
+                            {thread.matchedMaterial}
+                          </div>
+                          <div className="text-[10px] font-mono text-stone-400 mt-1">
+                            {thread.messages.length} sent message{thread.messages.length === 1 ? "" : "s"}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Active Seller Sample Chat */}
+                    <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4">
+                      <div className="pb-4 border-b border-stone-100 space-y-2">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-bold text-base text-[#18280e]">
+                              {activeThread.supplierName}
+                            </h3>
+                            <span className="text-xs font-mono text-stone-500">
+                              {activeThread.supplierCity}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
+                            Direct Sample Inquiry
                           </span>
                         </div>
+                        <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-mono space-y-1">
+                          <div className="text-[#18280e]">
+                            Product: <strong>{activeThread.matchedProduct}</strong>
+                          </div>
+                          <div className="text-[#284905]">
+                            Exact Material: <strong>{activeThread.matchedMaterial}</strong>
+                          </div>
+                          <div className="text-stone-600 text-[11px]">
+                            Sample Terms: {activeThread.samplePolicy}
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-stone-100 text-stone-600 font-bold hidden sm:inline">
-                          Verified: {doc.verifiedBy}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => alert(`Downloading verified file: ${doc.fileName}`)}
-                          className="p-2 rounded-xl bg-stone-50 hover:bg-stone-100 text-stone-700 transition-colors cursor-pointer"
-                          title="Download Document"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                        </button>
+                      {/* Messages History */}
+                      <div className="space-y-3 min-h-[140px]">
+                        {activeThread.messages.length === 0 ? (
+                          <p className="text-xs font-mono text-stone-400 py-6 text-center">
+                            No message sent to {activeThread.supplierName} yet. Customize your sample request below and click Send.
+                          </p>
+                        ) : (
+                          activeThread.messages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className="p-4 rounded-2xl bg-[#18280e] text-white space-y-1.5 ml-auto max-w-xl"
+                            >
+                              <div className="flex justify-between items-center text-[10px] font-mono text-[#b2eb76]">
+                                <strong>Marcus Vance (You)</strong>
+                                <span>{msg.sentAt}</span>
+                              </div>
+                              <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                            </div>
+                          ))
+                        )}
                       </div>
+
+                      {/* Sample Message Composer */}
+                      <form onSubmit={handleSendBuyerMessage} className="space-y-2 pt-2 border-t border-stone-100">
+                        <label className="text-[11px] font-mono text-stone-500 block">
+                          Message to {activeThread.supplierName} (Sample / Specification Check)
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <textarea
+                            rows={3}
+                            required
+                            value={messageDraft}
+                            onChange={(e) => setMessageDraft(e.target.value)}
+                            placeholder={`Ask ${activeThread.supplierName} for a product sample matching ${activeThread.matchedMaterial}...`}
+                            className="flex-1 p-3 rounded-xl bg-[#fbfdf9] border border-stone-200 text-xs font-mono outline-none focus:border-[#18280e]"
+                          />
+                          <button
+                            type="submit"
+                            className="px-5 py-3 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors flex items-center justify-center gap-1.5 self-end sm:self-stretch"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Send Sample Request</span>
+                          </button>
+                        </div>
+                      </form>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-
-          {/* ======================================================================= */}
-          {/* TAB 7: MESSAGES                                                         */}
-          {/* ======================================================================= */}
-          {activeTab === "messages" && (
-            <div className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-mono text-xs">
-              <h2 className="text-base font-bold text-[#18280e] font-sans">
-                Supplier Communications &amp; Technical Queries
-              </h2>
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex justify-between items-center">
-                  <strong className="text-stone-900">Jamnagar Precision Brass Castings Ltd</strong>
-                  <span className="text-stone-400 text-[10px]">Today, 11:15 AM</span>
-                </div>
-                <p className="text-stone-600 text-xs">
-                  &ldquo;Hello Marcus, the third melt induction heat is complete. QIMA inspector has confirmed their visit for Tuesday 9:00 AM. ASTM B117 salt spray sample plates are prepared in chamber.&rdquo;
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Reply to supplier or attach engineering drawings..."
-                  className="flex-1 p-3 rounded-xl bg-[#fbfdf9] border border-stone-200 text-xs font-mono outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => alert("Message dispatched to supplier email and notification channel.")}
-                  className="px-4 py-3 rounded-xl bg-[#18280e] text-[#b2eb76] font-bold text-xs"
-                >
-                  Send Message
-                </button>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ======================================================================= */}
           {/* TAB 8: SETTINGS                                                         */}
@@ -1786,6 +2192,19 @@ export function TradeOracleBuyerApp() {
                 </div>
               </div>
 
+              {selectedSupplier.materials && selectedSupplier.materials.length > 0 && (
+                <div>
+                  <strong className="text-stone-900 block mb-1">Exact Materials Supported:</strong>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedSupplier.materials.map((m, idx) => (
+                      <span key={idx} className="px-2 py-0.5 rounded-md bg-[#ebf7d9] text-[#284905] text-[11px] font-bold">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <strong className="text-stone-900 block mb-1">Production Capabilities:</strong>
                 <ul className="list-disc list-inside space-y-0.5 text-stone-600 text-[11px]">
@@ -1805,15 +2224,32 @@ export function TradeOracleBuyerApp() {
                   ))}
                 </div>
               </div>
+
+              {selectedSupplier.samplePolicy && (
+                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-[11px] text-stone-700">
+                  <strong>Sample Policy:</strong> {selectedSupplier.samplePolicy}
+                </div>
+              )}
             </div>
 
-            <div className="pt-3 border-t border-stone-100 flex justify-end gap-2">
+            <div className="pt-3 border-t border-stone-100 flex flex-wrap justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedSupplier(null)}
-                className="px-4 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold"
+                className="px-4 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold cursor-pointer"
               >
                 Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = selectedSupplier;
+                  setSelectedSupplier(null);
+                  openSampleMessageThread(target);
+                }}
+                className="px-4 py-2 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] text-xs font-bold cursor-pointer"
+              >
+                Ask for Sample
               </button>
               <button
                 type="button"
@@ -1827,7 +2263,7 @@ export function TradeOracleBuyerApp() {
                   setRfqType(selectedSupplier.type);
                   setIsRfqModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] text-xs font-bold"
+                className="px-4 py-2 rounded-xl bg-[#18280e] text-[#b2eb76] text-xs font-bold cursor-pointer"
               >
                 Send RFQ to This Supplier →
               </button>
