@@ -17,9 +17,6 @@ import {
   CheckCircle2,
   Loader2,
   Radio,
-  Zap,
-  Copy,
-  Check,
 } from "lucide-react";
 
 type ConnectionStatus =
@@ -44,8 +41,6 @@ interface DispatchLogItem {
   orderNumber: string;
   text: string;
   status: "sent" | "failed" | "skipped_not_connected";
-  deliveryChannel?: "whatsapp_qr" | "zapier_webhook" | "both" | "none";
-  zapierStatus?: "dispatched" | "not_configured" | "failed";
   messageId?: string;
   error?: string;
 }
@@ -75,7 +70,6 @@ export function WhatsAppNotificationCenter({
   compact = false,
 }: WhatsAppNotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [channelMode, setChannelMode] = useState<"qr" | "zapier">("qr");
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [connectedPhone, setConnectedPhone] = useState<string | null>(null);
@@ -83,9 +77,7 @@ export function WhatsAppNotificationCenter({
   const [lastError, setLastError] = useState<string | null>(null);
   const [autoNotify, setAutoNotify] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState(recipientPhone);
-  const [zapierWebhookUrl, setZapierWebhookUrl] = useState("");
   const [savedToastMsg, setSavedToastMsg] = useState<string | null>(null);
-  const [copiedPayload, setCopiedPayload] = useState(false);
 
   const [activeTab, setActiveTab] = useState<StageKey>("new_order");
   const [logs, setLogs] = useState<DispatchLogItem[]>([]);
@@ -112,9 +104,6 @@ export function WhatsAppNotificationCenter({
         setIncomingReplies(data.incomingReplies || []);
         if (data.config) {
           setAutoNotify(Boolean(data.config.autoNotifyOnEvents));
-          if (data.config.zapierWebhookUrl && !zapierWebhookUrl) {
-            setZapierWebhookUrl(data.config.zapierWebhookUrl);
-          }
           const savedForRole = data.config.recipientPhones?.[role];
           if (savedForRole && !phoneNumber) {
             setPhoneNumber(savedForRole);
@@ -126,7 +115,7 @@ export function WhatsAppNotificationCenter({
     } catch {
       // ignore poll error
     }
-  }, [role, phoneNumber, zapierWebhookUrl]);
+  }, [role, phoneNumber]);
 
   useEffect(() => {
     void fetchStatus();
@@ -184,18 +173,13 @@ export function WhatsAppNotificationCenter({
     }
   };
 
-  const handleSaveConfig = async (
-    nextPhone: string,
-    nextAuto: boolean,
-    nextZapierUrl: string
-  ) => {
+  const handleSaveConfig = async (nextPhone: string, nextAuto: boolean) => {
     try {
       const res = await fetch("/api/whatsapp/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           autoNotifyOnEvents: nextAuto,
-          zapierWebhookUrl: nextZapierUrl,
           recipientPhones: { [role]: nextPhone },
         }),
       });
@@ -213,7 +197,7 @@ export function WhatsAppNotificationCenter({
     setSending(true);
     setSendFeedback(null);
     try {
-      await handleSaveConfig(phoneNumber.trim(), autoNotify, zapierWebhookUrl.trim());
+      await handleSaveConfig(phoneNumber.trim(), autoNotify);
       const res = await fetch("/api/whatsapp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,22 +211,14 @@ export function WhatsAppNotificationCenter({
       });
       const data = await res.json();
       if (data.success) {
-        const channelText =
-          data.log?.deliveryChannel === "both"
-            ? "WhatsApp Device + Zapier Webhook"
-            : data.log?.deliveryChannel === "zapier_webhook"
-            ? "Zapier Catch Hook"
-            : "Linked WhatsApp Device";
         setSendFeedback({
           type: "success",
-          text: `Automated message dispatched via ${channelText} to ${
-            data.log?.to || phoneNumber || "Zapier"
-          }.`,
+          text: `WhatsApp message sent to ${data.log?.to || phoneNumber || connectedPhone}.`,
         });
       } else {
         setSendFeedback({
           type: "error",
-          text: data.log?.error || data.error || "Could not dispatch automated message.",
+          text: data.log?.error || data.error || "Could not send WhatsApp message.",
         });
       }
       await fetchStatus();
@@ -261,11 +237,11 @@ export function WhatsAppNotificationCenter({
       return {
         new_order: {
           title: "New Export Order Received",
-          body: `TradeOracle — You Have Received a New Order!\n\nNamaste ${recipientName},\n\nConfirmed export order #${orderNumber}:\n• Buyer: Pacific Architectural Hardware LLC (USA)\n• Item: 1,500 units — Solid Brass Mortise Handles\n• Total Value: $85,750 USD (approx ₹71.60 Lakhs)\n• Advance Payment: $25,725 USD (₹21.48 Lakhs) is locked safely in PayPal Escrow before you start.\n\nReply 1 here to accept this order, or open your TradeOracle Manufacturer Dashboard.`,
+          body: `TradeOracle — You Have Received a New Order!\n\nNamaste ${recipientName},\n\nConfirmed export order #${orderNumber}:\n• Buyer: Pacific Architectural Hardware LLC (USA)\n• Item: 1,500 units — Solid Brass Mortise Handles\n• Total Value: $85,750 USD (approx ₹71.60 Lakhs)\n• Advance Payment: $25,725 USD (₹21.48 Lakhs) is protected in PayPal before you start.\n\nReply 1 here to accept this order, or open your TradeOracle dashboard.`,
         },
         paypal_escrow_locked: {
           title: "Advance Money Received in PayPal",
-          body: `Advance Money Received in PayPal!\n\nOrder: #${orderNumber}\nPacific Architectural Hardware LLC has deposited 30% ($25,725 USD / approx ₹21.48 Lakhs) into PayPal Escrow.\n\nYour payment is protected. You can safely start casting and production now.`,
+          body: `Advance Money Received in PayPal!\n\nOrder: #${orderNumber}\nPacific Architectural Hardware LLC has deposited 30% ($25,725 USD / approx ₹21.48 Lakhs).\n\nYour payment is secured. You can safely start production now.`,
         },
         quality_inspection_passed: {
           title: "Factory Quality Check Passed",
@@ -282,19 +258,19 @@ export function WhatsAppNotificationCenter({
       return {
         new_order: {
           title: "Order Created in India",
-          body: `TradeOracle Order Created (#${orderNumber})\n\nYour Purchase Order with Moradabad Precision Foundry is live.\n• Product: 1,500 units — Solid Brass Mortise Handles\n• Total Deal: $85,750 USD\n• Next Step: Fund 30% PayPal Escrow ($25,725 USD) to initiate production.`,
+          body: `TradeOracle Order Created (#${orderNumber})\n\nYour Purchase Order with Moradabad Precision Foundry is live.\n• Product: 1,500 units — Solid Brass Mortise Handles\n• Total Deal: $85,750 USD\n• Next Step: Fund 30% PayPal advance ($25,725 USD) to start production.`,
         },
         paypal_escrow_locked: {
-          title: "PayPal 30% Escrow Active",
-          body: `PayPal 30% Escrow Active (#${orderNumber})\n\nYour $25,725 USD deposit is held safely in PayPal Escrow. The factory has been notified to start manufacturing.`,
+          title: "PayPal 30% Advance Funded",
+          body: `PayPal 30% Advance Funded (#${orderNumber})\n\nYour $25,725 USD deposit is protected. The factory has been notified to start manufacturing.`,
         },
         quality_inspection_passed: {
           title: "Pre-Shipment Inspection Passed",
-          body: `Pre-Shipment Quality Inspection Passed (#${orderNumber})\n\nInspectors approved your batch at Moradabad Precision Foundry with 0 critical defects. Inspection photos are live in your Buyer Portal.`,
+          body: `Pre-Shipment Quality Inspection Passed (#${orderNumber})\n\nInspectors approved your batch at Moradabad Precision Foundry with 0 critical defects. Photos are live in your Buyer Portal.`,
         },
         shipment_dispatched: {
           title: "Shipment Dispatched from India",
-          body: `Shipment Dispatched from India (#${orderNumber})\n\nYour cargo has been cleared and loaded onto the vessel. Ocean Bill of Lading and tracking are live in your Buyer Portal.`,
+          body: `Shipment Dispatched from India (#${orderNumber})\n\nYour cargo has cleared port customs and tracking is live in your Buyer Portal.`,
         },
       }[activeTab];
     }
@@ -302,7 +278,7 @@ export function WhatsAppNotificationCenter({
     return {
       new_order: {
         title: "New Client Milestone Funded",
-        body: `TradeOracle — New Client Milestone Funded!\n\nOrder: #${orderNumber}\nYour client has funded $2,500 USD (approx ₹2.09 Lakhs) into PayPal Escrow. Funds are protected so you can start engineering work safely.`,
+        body: `TradeOracle — New Client Milestone Funded!\n\nOrder: #${orderNumber}\nYour client has funded $2,500 USD (approx ₹2.09 Lakhs) via PayPal. Funds are protected so you can start engineering work safely.`,
       },
       paypal_escrow_locked: {
         title: "PayPal Milestone Payout Released",
@@ -314,56 +290,34 @@ export function WhatsAppNotificationCenter({
       },
       shipment_dispatched: {
         title: "Final Service Settlement Completed",
-        body: `PayPal Final Milestone Released (#${orderNumber})\n\nClient approved deliverables and final payout has been cleared to your bank with automated compliance.`,
+        body: `PayPal Final Milestone Released (#${orderNumber})\n\nClient approved deliverables and final payout has been cleared to your bank.`,
       },
     }[activeTab];
   };
 
   const currentMsg = getPreviewMessage();
   const isConnected = status === "connected";
-  const hasZapier = Boolean(zapierWebhookUrl.trim());
-  const isAnyAutomationReady = isConnected || hasZapier;
-
-  const sampleZapierPayload = JSON.stringify(
-    {
-      eventType: activeTab,
-      orderNumber,
-      role,
-      recipientPhone: phoneNumber || "+919820012345",
-      plainEnglishMessage: currentMsg.body,
-      amountUSD: 85750,
-      amountINRLakhs: 71.6,
-    },
-    null,
-    2
-  );
 
   return (
     <>
-      {/* Trigger Button — Strictly aligned & themed with TradeOracle Spade Palette + Geist Sans */}
+      {/* Trigger Pill — Matched cleanly to TradeOracle Spade theme + Geist Sans */}
       {compact ? (
         <button
           type="button"
           onClick={() => setIsOpen(true)}
           className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-sans font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer border ${
-            isAnyAutomationReady
+            isConnected
               ? "bg-[#ebf7d9] hover:bg-[#b2eb76]/50 text-[#18280e] border-[#b2eb76]"
               : "bg-[#f4faed] hover:bg-[#ebf7d9] text-[#18280e] border-[#d8e5ca]"
           }`}
-          title="Configure automated WhatsApp & Zapier order alerts"
+          title="Connect WhatsApp for automated order updates"
         >
           <span
             className={`size-2 rounded-full shrink-0 ${
-              isAnyAutomationReady ? "bg-[#3f7308] animate-pulse" : "bg-[#18280e]/40"
+              isConnected ? "bg-[#3f7308] animate-pulse" : "bg-[#18280e]/40"
             }`}
           />
-          <span>
-            {isConnected
-              ? "WhatsApp Live"
-              : hasZapier
-              ? "Zapier Auto On"
-              : "WhatsApp Alerts"}
-          </span>
+          <span>{isConnected ? "WhatsApp Live" : "WhatsApp Alerts"}</span>
         </button>
       ) : (
         <button
@@ -377,25 +331,15 @@ export function WhatsAppNotificationCenter({
             </div>
             <div className="min-w-0">
               <div className="text-xs font-bold text-[#18280e] flex items-center gap-1.5 whitespace-nowrap">
-                <span>
-                  {isConnected
-                    ? "WhatsApp Live"
-                    : hasZapier
-                    ? "Zapier WhatsApp Active"
-                    : "WhatsApp Automation"}
-                </span>
+                <span>{isConnected ? "WhatsApp Live" : "WhatsApp Alerts"}</span>
                 <span
                   className={`size-1.5 rounded-full shrink-0 ${
-                    isAnyAutomationReady ? "bg-[#3f7308] animate-ping" : "bg-stone-400"
+                    isConnected ? "bg-[#3f7308] animate-ping" : "bg-stone-400"
                   }`}
                 />
               </div>
               <p className="text-[11px] text-stone-600 truncate">
-                {isConnected
-                  ? `Linked: ${connectedPhone}`
-                  : hasZapier
-                  ? "Zapier Catch Hook Ready"
-                  : "QR Link or Zapier Hook"}
+                {isConnected ? `Linked: ${connectedPhone}` : "Scan QR to auto-notify"}
               </p>
             </div>
           </div>
@@ -403,7 +347,7 @@ export function WhatsAppNotificationCenter({
         </button>
       )}
 
-      {/* Automation Modal — 100% TradeOracle Forest Green / Sage / Geist Sans Theme */}
+      {/* Single Unified WhatsApp QR Modal — Spade Theme + Geist Sans */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#18280e]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
           <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-[#d8e5ca] flex flex-col max-h-[92vh]">
@@ -416,18 +360,14 @@ export function WhatsAppNotificationCenter({
                 <div>
                   <div className="flex items-center gap-2.5">
                     <span className="font-bold text-sm sm:text-base tracking-tight font-sans">
-                      TradeOracle WhatsApp Automation
+                      WhatsApp Order Alerts
                     </span>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#b2eb76] text-[#18280e]">
-                      {isConnected
-                        ? "QR LINKED"
-                        : hasZapier
-                        ? "ZAPIER HOOK"
-                        : "READY TO CONNECT"}
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full bg-[#b2eb76] text-[#18280e]">
+                      {isConnected ? "Connected" : "Ready to Connect"}
                     </span>
                   </div>
                   <p className="text-xs text-stone-300 mt-0.5 font-sans">
-                    Automatically send plain-English order &amp; PayPal escrow updates straight to WhatsApp.
+                    Automatically send plain-English order and payment updates straight to your WhatsApp.
                   </p>
                 </div>
               </div>
@@ -441,33 +381,11 @@ export function WhatsAppNotificationCenter({
               </button>
             </div>
 
-            {/* Channel Switcher Bar */}
+            {/* Clean Automation Toggle Bar */}
             <div className="bg-[#f4faed] px-5 py-2.5 border-b border-[#d8e5ca] flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex rounded-lg bg-white p-1 border border-[#d8e5ca]">
-                <button
-                  type="button"
-                  onClick={() => setChannelMode("qr")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-sans font-semibold transition-all cursor-pointer ${
-                    channelMode === "qr"
-                      ? "bg-[#18280e] text-[#b2eb76]"
-                      : "text-stone-600 hover:text-[#18280e]"
-                  }`}
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Direct QR Link (Zero Setup)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setChannelMode("zapier")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-sans font-semibold transition-all cursor-pointer ${
-                    channelMode === "zapier"
-                      ? "bg-[#18280e] text-[#b2eb76]"
-                      : "text-stone-600 hover:text-[#18280e]"
-                  }`}
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  <span>Zapier Catch Hook Automation</span>
-                </button>
+              <div className="flex items-center gap-2 text-xs font-sans font-semibold text-[#18280e]">
+                <QrCode className="w-4 h-4 text-[#3f7308]" />
+                <span>Direct WhatsApp Link — Zero Setup Needed</span>
               </div>
 
               <label className="flex items-center gap-2 text-xs font-sans font-medium text-[#18280e] cursor-pointer">
@@ -476,181 +394,113 @@ export function WhatsAppNotificationCenter({
                   checked={autoNotify}
                   onChange={(e) => {
                     setAutoNotify(e.target.checked);
-                    void handleSaveConfig(phoneNumber, e.target.checked, zapierWebhookUrl);
+                    void handleSaveConfig(phoneNumber, e.target.checked);
                   }}
                   className="accent-[#18280e] w-3.5 h-3.5"
                 />
-                <span>Auto-send on orders &amp; PayPal events</span>
+                <span>Auto-send alerts on every order &amp; payment</span>
               </label>
             </div>
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-[#fbfdf9]">
-              {/* CHANNEL 1: DIRECT QR LINK */}
-              {channelMode === "qr" && (
-                <div className="bg-white rounded-2xl border border-[#d8e5ca] p-5 shadow-2xs">
-                  {isConnected ? (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-xl bg-[#ebf7d9] text-[#3f7308] flex items-center justify-center shrink-0">
-                          <Radio className="w-5 h-5 animate-pulse" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-[#18280e] flex items-center gap-1.5">
-                            <span>WhatsApp Device Connected</span>
-                            <CheckCircle2 className="w-4 h-4 text-[#3f7308]" />
-                          </div>
-                          <p className="text-xs text-stone-600 mt-0.5">
-                            Active number: <strong className="font-mono text-[#18280e]">{connectedPhone}</strong> ({connectedName})
-                          </p>
-                        </div>
+              {/* STEP 1: QR LINKING */}
+              <div className="bg-white rounded-2xl border border-[#d8e5ca] p-5 shadow-2xs">
+                {isConnected ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-xl bg-[#ebf7d9] text-[#3f7308] flex items-center justify-center shrink-0">
+                        <Radio className="w-5 h-5 animate-pulse" />
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={handleDisconnect}
-                        disabled={connecting}
-                        className="px-3.5 py-2 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-sans font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-                      >
-                        <Power className="w-3.5 h-3.5" />
-                        <span>Unlink Device</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="space-y-2.5 flex-1">
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase text-[#3f7308] bg-[#ebf7d9] px-2.5 py-1 rounded-full">
-                          <QrCode className="w-3.5 h-3.5" />
-                          <span>No API Keys or External Tools Required</span>
-                        </span>
-                        <h4 className="text-base font-bold text-[#18280e]">
-                          Scan QR once to send automated messages directly to WhatsApp
-                        </h4>
-                        <ol className="text-xs text-stone-600 space-y-1.5 list-decimal list-inside leading-relaxed">
-                          <li>Click <strong>Generate QR Code</strong> on the right.</li>
-                          <li>Open <strong>WhatsApp</strong> on your phone → <strong>Linked Devices</strong> → <strong>Link a Device</strong>.</li>
-                          <li>Scan the QR code. Every new order and PayPal deposit will then push automatically to WhatsApp.</li>
-                        </ol>
-
-                        {lastError && (
-                          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{lastError}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col items-center justify-center shrink-0 bg-[#f4faed] border border-[#d8e5ca] rounded-2xl p-4 min-w-[210px]">
-                        {status === "qr_ready" && qrDataUrl ? (
-                          <div className="space-y-2 text-center">
-                            <img
-                              src={qrDataUrl}
-                              alt="WhatsApp Link QR Code"
-                              className="w-40 h-40 rounded-xl border border-[#d8e5ca] bg-white mx-auto"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleStartLink(true)}
-                              className="text-xs font-sans font-semibold text-[#3f7308] hover:underline inline-flex items-center gap-1 cursor-pointer"
-                            >
-                              <RefreshCw className="w-3 h-3" />
-                              <span>Refresh QR Code</span>
-                            </button>
-                          </div>
-                        ) : status === "connecting" || connecting ? (
-                          <div className="py-8 text-center space-y-2">
-                            <Loader2 className="w-7 h-7 animate-spin text-[#18280e] mx-auto" />
-                            <span className="text-xs text-stone-600 block">
-                              Generating pairing QR...
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="py-4 text-center space-y-3">
-                            <QrCode className="w-11 h-11 text-[#18280e]/30 mx-auto" />
-                            <button
-                              type="button"
-                              onClick={() => handleStartLink(false)}
-                              className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] font-sans text-xs font-semibold shadow-xs cursor-pointer flex items-center gap-2"
-                            >
-                              <QrCode className="w-4 h-4" />
-                              <span>Generate QR Code</span>
-                            </button>
-                          </div>
-                        )}
+                      <div>
+                        <div className="text-sm font-bold text-[#18280e] flex items-center gap-1.5">
+                          <span>WhatsApp Connected</span>
+                          <CheckCircle2 className="w-4 h-4 text-[#3f7308]" />
+                        </div>
+                        <p className="text-xs text-stone-600 mt-0.5">
+                          Linked phone: <strong className="text-[#18280e]">{connectedPhone}</strong> ({connectedName})
+                        </p>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
 
-              {/* CHANNEL 2: ZAPIER CATCH HOOK AUTOMATION */}
-              {channelMode === "zapier" && (
-                <div className="bg-white rounded-2xl border border-[#d8e5ca] p-5 space-y-4 shadow-2xs">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase text-[#3f7308] bg-[#ebf7d9] px-2.5 py-0.5 rounded-full mb-1.5">
-                        <Zap className="w-3 h-3" />
-                        <span>Zapier Trade Automation Connected</span>
+                    <button
+                      type="button"
+                      onClick={handleDisconnect}
+                      disabled={connecting}
+                      className="px-3.5 py-2 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-sans font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    >
+                      <Power className="w-3.5 h-3.5" />
+                      <span>Disconnect</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-2.5 flex-1">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-sans font-semibold text-[#3f7308] bg-[#ebf7d9] px-2.5 py-1 rounded-full">
+                        <QrCode className="w-3.5 h-3.5" />
+                        <span>No API keys or third-party accounts required</span>
                       </span>
-                      <h4 className="text-sm font-bold text-[#18280e]">
-                        Send Orders &amp; PayPal Milestones via Zapier Webhook → WhatsApp
+                      <h4 className="text-base font-bold text-[#18280e]">
+                        Scan this QR code once with WhatsApp on your phone
                       </h4>
+                      <ol className="text-xs text-stone-600 space-y-1.5 list-decimal list-inside leading-relaxed">
+                        <li>Click <strong>Generate QR Code</strong> on the right.</li>
+                        <li>Open <strong>WhatsApp</strong> on your phone → <strong>Linked Devices</strong> → <strong>Link a Device</strong>.</li>
+                        <li>Scan once. Every new order and PayPal deposit will arrive automatically in WhatsApp.</li>
+                      </ol>
+
+                      {lastError && (
+                        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>{lastError}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center shrink-0 bg-[#f4faed] border border-[#d8e5ca] rounded-2xl p-4 min-w-[210px]">
+                      {status === "qr_ready" && qrDataUrl ? (
+                        <div className="space-y-2 text-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={qrDataUrl}
+                            alt="WhatsApp Link QR Code"
+                            className="w-40 h-40 rounded-xl border border-[#d8e5ca] bg-white mx-auto"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleStartLink(true)}
+                            className="text-xs font-sans font-semibold text-[#3f7308] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            <span>Refresh QR Code</span>
+                          </button>
+                        </div>
+                      ) : status === "connecting" || connecting ? (
+                        <div className="py-8 text-center space-y-2">
+                          <Loader2 className="w-7 h-7 animate-spin text-[#18280e] mx-auto" />
+                          <span className="text-xs text-stone-600 block">
+                            Generating QR code...
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="py-4 text-center space-y-3">
+                          <QrCode className="w-11 h-11 text-[#18280e]/30 mx-auto" />
+                          <button
+                            type="button"
+                            onClick={() => handleStartLink(false)}
+                            className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] font-sans text-xs font-semibold shadow-xs cursor-pointer flex items-center gap-2"
+                          >
+                            <QrCode className="w-4 h-4" />
+                            <span>Generate QR Code</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-[#18280e] block">
-                      Zapier Catch Hook URL (Triggers automatically on New Order, RFQ &amp; PayPal Escrow)
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="url"
-                        value={zapierWebhookUrl}
-                        onChange={(e) => setZapierWebhookUrl(e.target.value)}
-                        placeholder="https://hooks.zapier.com/hooks/catch/..."
-                        className="flex-1 bg-[#f4faed] border border-[#d8e5ca] rounded-xl px-3.5 py-2 text-xs font-mono text-[#18280e] focus:outline-none focus:border-[#3f7308]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleSaveConfig(phoneNumber, autoNotify, zapierWebhookUrl)
-                        }
-                        className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-sans font-semibold cursor-pointer shrink-0"
-                      >
-                        {savedToastMsg || "Save Hook"}
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-stone-500">
-                      In Zapier: Create a Zap → Trigger: <strong>Webhooks by Zapier (Catch Hook)</strong> → Action: <strong>WhatsApp Notifications / Twilio</strong> mapped to <code className="text-[#18280e] font-semibold">recipientPhone</code> &amp; <code className="text-[#18280e] font-semibold">plainEnglishMessage</code>.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-[#f4faed] border border-[#d8e5ca] p-3 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold uppercase text-[#3f7308]">
-                        Outgoing Zapier JSON Payload Preview
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard?.writeText(sampleZapierPayload);
-                          setCopiedPayload(true);
-                          setTimeout(() => setCopiedPayload(false), 1800);
-                        }}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#18280e] hover:underline cursor-pointer"
-                      >
-                        {copiedPayload ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedPayload ? "Copied" : "Copy JSON"}</span>
-                      </button>
-                    </div>
-                    <pre className="text-[10px] font-mono text-stone-700 overflow-x-auto leading-relaxed">
-                      {sampleZapierPayload}
-                    </pre>
-                  </div>
-                </div>
-              )}
-
-              {/* RECIPIENT PHONE & PLAIN-ENGLISH MESSAGE DISPATCH */}
+              {/* STEP 2: RECIPIENT NUMBER & PLAIN-ENGLISH MESSAGE PREVIEW */}
               <div className="bg-white rounded-2xl border border-[#d8e5ca] p-5 space-y-4 shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
                   <div>
@@ -670,14 +520,12 @@ export function WhatsAppNotificationCenter({
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="+91 98XXXXXXXX"
-                        className="font-mono text-xs text-[#18280e] font-bold bg-transparent focus:outline-none w-36"
+                        className="font-sans text-xs text-[#18280e] font-semibold bg-transparent focus:outline-none w-36"
                       />
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
-                        handleSaveConfig(phoneNumber, autoNotify, zapierWebhookUrl)
-                      }
+                      onClick={() => handleSaveConfig(phoneNumber, autoNotify)}
                       className="px-3.5 py-2 rounded-xl bg-[#ebf7d9] hover:bg-[#b2eb76] text-[#18280e] border border-[#d8e5ca] text-xs font-sans font-semibold cursor-pointer"
                     >
                       {savedToastMsg || "Save"}
@@ -691,7 +539,7 @@ export function WhatsAppNotificationCenter({
                     { key: "new_order" as StageKey, label: "1. New Order Received" },
                     { key: "paypal_escrow_locked" as StageKey, label: "2. Advance in PayPal" },
                     { key: "quality_inspection_passed" as StageKey, label: "3. Quality Passed" },
-                    { key: "shipment_dispatched" as StageKey, label: "4. Shipped & Payout" },
+                    { key: "shipment_dispatched" as StageKey, label: "4. Shipped & Paid" },
                   ].map((tab) => (
                     <button
                       key={tab.key}
@@ -708,7 +556,7 @@ export function WhatsAppNotificationCenter({
                   ))}
                 </div>
 
-                {/* Preview Card in TradeOracle Sage Palette */}
+                {/* Plain-English Message Preview */}
                 <div className="bg-[#f4faed] rounded-xl p-4 border border-[#d8e5ca]">
                   <div className="bg-white rounded-xl p-4 border border-[#d8e5ca]/80 space-y-2 shadow-2xs">
                     <div className="flex items-center justify-between border-b border-stone-100 pb-2">
@@ -716,8 +564,8 @@ export function WhatsAppNotificationCenter({
                         <Sparkles className="w-3.5 h-3.5 text-[#3f7308]" />
                         <span>{currentMsg.title}</span>
                       </span>
-                      <span className="text-[10px] font-mono text-[#3f7308] bg-[#ebf7d9] px-2 py-0.5 rounded-full font-bold">
-                        Plain English
+                      <span className="text-[11px] font-sans text-[#3f7308] bg-[#ebf7d9] px-2.5 py-0.5 rounded-full font-semibold">
+                        Simple English
                       </span>
                     </div>
                     <div className="text-xs text-stone-700 leading-relaxed whitespace-pre-line font-sans">
@@ -751,14 +599,14 @@ export function WhatsAppNotificationCenter({
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
                   <span className="text-xs text-stone-500">
-                    Orders &amp; PayPal escrow payments trigger this alert automatically.
+                    New orders and PayPal payments send this update automatically.
                   </span>
                   <button
                     type="button"
                     onClick={handleSendRealMessage}
-                    disabled={sending || !isAnyAutomationReady}
+                    disabled={sending || !isConnected}
                     className={`px-4 py-2.5 rounded-xl font-sans text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs whitespace-nowrap ${
-                      isAnyAutomationReady
+                      isConnected
                         ? "bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] cursor-pointer"
                         : "bg-stone-200 text-stone-500 cursor-not-allowed"
                     }`}
@@ -770,21 +618,21 @@ export function WhatsAppNotificationCenter({
                     )}
                     <span>
                       {sending
-                        ? "Dispatching Alert..."
-                        : isAnyAutomationReady
-                        ? "Send Automated Alert Now"
-                        : "Link QR or Add Zapier Hook Above"}
+                        ? "Sending to WhatsApp..."
+                        : isConnected
+                        ? "Send Test Message to WhatsApp"
+                        : "Scan QR Code Above to Enable"}
                     </span>
                   </button>
                 </div>
               </div>
 
-              {/* DISPATCH HISTORY & 2-WAY REPLIES */}
+              {/* SENT ALERTS & REPLIES */}
               {(logs.length > 0 || incomingReplies.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white rounded-2xl border border-[#d8e5ca] p-4 space-y-2.5">
-                    <span className="text-[11px] font-mono font-bold uppercase text-[#3f7308] block">
-                      Server Dispatch History ({logs.length})
+                    <span className="text-xs font-sans font-bold text-[#3f7308] block">
+                      Recent Sent Alerts ({logs.length})
                     </span>
                     <div className="space-y-2 max-h-36 overflow-y-auto">
                       {logs.slice(0, 6).map((item) => (
@@ -797,20 +645,20 @@ export function WhatsAppNotificationCenter({
                               {item.orderNumber} → {item.to}
                             </span>
                             <span className="text-[11px] text-stone-500 block truncate">
-                              {item.eventType} {item.deliveryChannel ? `(${item.deliveryChannel})` : ""}
+                              {item.eventType.replace(/_/g, " ")}
                             </span>
                             {item.error && (
                               <span className="text-[11px] text-rose-600 block">{item.error}</span>
                             )}
                           </div>
                           <span
-                            className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                            className={`text-[10px] font-sans px-2 py-0.5 rounded-full font-bold shrink-0 ${
                               item.status === "sent"
                                 ? "bg-[#b2eb76] text-[#18280e]"
                                 : "bg-rose-100 text-rose-800"
                             }`}
                           >
-                            {item.status === "sent" ? "SENT" : "SKIPPED"}
+                            {item.status === "sent" ? "Sent" : "Pending QR"}
                           </span>
                         </div>
                       ))}
@@ -818,12 +666,12 @@ export function WhatsAppNotificationCenter({
                   </div>
 
                   <div className="bg-white rounded-2xl border border-[#d8e5ca] p-4 space-y-2.5">
-                    <span className="text-[11px] font-mono font-bold uppercase text-[#3f7308] block">
-                      2-Way WhatsApp Replies ({incomingReplies.length})
+                    <span className="text-xs font-sans font-bold text-[#3f7308] block">
+                      Replies from WhatsApp ({incomingReplies.length})
                     </span>
                     {incomingReplies.length === 0 ? (
                       <p className="text-xs text-stone-400 py-4 text-center">
-                        Reply &quot;1&quot; or &quot;STATUS&quot; on WhatsApp to test 2-way order automation.
+                        Reply &quot;1&quot; or &quot;STATUS&quot; on WhatsApp to test 2-way order confirmation.
                       </p>
                     ) : (
                       <div className="space-y-2 max-h-36 overflow-y-auto">
