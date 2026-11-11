@@ -41,6 +41,7 @@ import { TotalProfitChart } from "@/components/kokonutui/TotalProfitChart";
 import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
 import { ForeignBuyerPortal } from "@/components/kokonutui/ForeignBuyerPortal";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
+import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
 
 // =========================================================================
 // DATA MODELS & LAYMAN ORDERS (For Indian Merchants & Foundries)
@@ -1219,6 +1220,16 @@ export default function DashboardPage() {
                             onConfirm={() => {
                               setLockedOrderIds((prev) => ({ ...prev, [order.id]: true }));
                               setSelectedLaymanOrder(order);
+                              void triggerAutomatedWhatsAppAlert({
+                                role: "manufacturer",
+                                eventType: "new_order",
+                                orderNumber: order.orderNumber,
+                                buyerName: `${order.foreignBuyer.company} (${order.foreignBuyer.city})`,
+                                manufacturerName: "Moradabad Precision Foundry LLP",
+                                productName: order.productName,
+                                quantity: order.quantityUnits,
+                                amountUSD: order.totalDealUSD,
+                              });
                             }}
                           />
                         )}
@@ -1306,9 +1317,20 @@ export default function DashboardPage() {
                     Statutory Verification: DGFT IEC, GSTIN, and ICEGATE clearance active.
                   </span>
                   <HoldToConfirm
-                    onConfirm={() => alert(`Statutory verification certificate generated for order #${selectedLaymanOrder.orderNumber}`)}
+                    onConfirm={() => {
+                      void triggerAutomatedWhatsAppAlert({
+                        role: "manufacturer",
+                        eventType: "quality_inspection_passed",
+                        orderNumber: selectedLaymanOrder.orderNumber,
+                        buyerName: selectedLaymanOrder.foreignBuyer.company,
+                        manufacturerName: "Moradabad Precision Foundry LLP",
+                        productName: selectedLaymanOrder.productName,
+                        quantity: selectedLaymanOrder.quantityUnits,
+                        amountUSD: selectedLaymanOrder.totalDealUSD,
+                      });
+                    }}
                     label="Hold to Verify Statutory Evidence Pack"
-                    confirmedLabel="✓ Evidence Pack Audited & Locked"
+                    confirmedLabel="✓ Evidence Pack Audited & WhatsApp Sent"
                   />
                 </div>
               </SpotlightCard>

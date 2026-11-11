@@ -47,6 +47,7 @@ import {
 } from "@/lib/buyer/buyerStore";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
+import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
 
 export function TradeOracleBuyerApp() {
   const router = useRouter();
@@ -137,6 +138,25 @@ export function TradeOracleBuyerApp() {
     setRfqs([newRfq, ...rfqs]);
     setIsRfqModalOpen(false);
     setActiveTab("rfqs");
+
+    // Auto-dispatch real WhatsApp alerts to both Manufacturer and Buyer
+    void triggerAutomatedWhatsAppAlert({
+      role: "manufacturer",
+      eventType: "rfq_published",
+      orderNumber: newRfq.rfqNumber,
+      buyerName: "Pacific Architectural Hardware LLC (USA)",
+      productName: newRfq.title,
+      quantity: newRfq.targetQuantity || 1000,
+      amountUSD: newRfq.budgetUSD,
+    });
+    void triggerAutomatedWhatsAppAlert({
+      role: "buyer",
+      eventType: "rfq_published",
+      orderNumber: newRfq.rfqNumber,
+      productName: newRfq.title,
+      quantity: newRfq.targetQuantity || 1000,
+      amountUSD: newRfq.budgetUSD,
+    });
   };
 
   // Handle Quotation Acceptance -> Creates Order Workspace
@@ -193,6 +213,28 @@ export function TradeOracleBuyerApp() {
       prev.map((q) => (q.id === quote.id ? { ...q, status: "accepted" } : q.rfqId === quote.rfqId ? { ...q, status: "rejected" } : q))
     );
     setActiveTab("orders");
+
+    // Auto-dispatch real "You Have Received a New Order!" WhatsApp alert
+    void triggerAutomatedWhatsAppAlert({
+      role: "manufacturer",
+      eventType: "new_order",
+      orderNumber: newOrder.orderNumber,
+      buyerName: newOrder.buyerCompany,
+      manufacturerName: newOrder.supplierName,
+      productName: newOrder.productOrServiceName,
+      quantity: parentRfq?.targetQuantity || 1500,
+      amountUSD: newOrder.totalAmountUSD,
+    });
+    void triggerAutomatedWhatsAppAlert({
+      role: "buyer",
+      eventType: "new_order",
+      orderNumber: newOrder.orderNumber,
+      buyerName: newOrder.buyerCompany,
+      manufacturerName: newOrder.supplierName,
+      productName: newOrder.productOrServiceName,
+      quantity: parentRfq?.targetQuantity || 1500,
+      amountUSD: newOrder.totalAmountUSD,
+    });
   };
 
   // Trigger Live PayPal Sandbox Escrow Payment for Selected Order

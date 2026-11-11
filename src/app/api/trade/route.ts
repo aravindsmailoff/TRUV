@@ -4,6 +4,10 @@ import { createPayPalOrderForTrade, payPalTradeClient } from "@/lib/trade/paypal
 import { elasticSearchEngine } from "@/lib/trade/elasticSearchEngine";
 import { zapierAutomation } from "@/lib/trade/zapierAutomation";
 import { astropodsTracker } from "@/lib/trade/astropodsTelemetry";
+import {
+  getWhatsAppStatusSnapshot,
+  sendRealWhatsAppMessage,
+} from "@/lib/whatsapp/whatsappEngine";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -74,7 +78,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json({ success: true, rfq });
+      let whatsappDispatch = null;
+      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        whatsappDispatch = await sendRealWhatsAppMessage({
+          role: "manufacturer",
+          eventType: "rfq_published",
+          orderNumber: rfq.rfqNumber,
+          buyerName: `${rfq.buyerCompany} (${rfq.buyerCountry})`,
+          productName: rfq.productName,
+          quantity: rfq.targetQuantity,
+          amountUSD: rfq.targetQuantity * rfq.targetPricePerUnit,
+        });
+      }
+
+      return NextResponse.json({ success: true, rfq, whatsappDispatch });
     }
 
     // 2. Elastic AI Manufacturer Search & Shortlisting
@@ -93,7 +110,22 @@ export async function POST(req: NextRequest) {
     if (action === "initiate_trade") {
       const { rfqId, manufacturerId, quoteId } = body;
       const trade = tradeStore.initiateTradeOrder({ rfqId, manufacturerId, quoteId });
-      return NextResponse.json({ success: true, trade });
+
+      let whatsappDispatch = null;
+      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        whatsappDispatch = await sendRealWhatsAppMessage({
+          role: "manufacturer",
+          eventType: "new_order",
+          orderNumber: trade.orderNumber,
+          buyerName: `${trade.buyerCompany} (${trade.buyerCountry})`,
+          manufacturerName: trade.manufacturerName,
+          productName: trade.productName,
+          quantity: trade.quantityUnits,
+          amountUSD: trade.totalAmountUSD,
+        });
+      }
+
+      return NextResponse.json({ success: true, trade, whatsappDispatch });
     }
 
     // 4. Create PayPal Direct Commercial Payment (Uses User's Sandbox Account)
@@ -120,14 +152,44 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json({ success: true, paymentOrder });
+      let whatsappDispatch = null;
+      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        whatsappDispatch = await sendRealWhatsAppMessage({
+          role: "manufacturer",
+          eventType: isAdvance ? "paypal_escrow_locked" : "shipment_dispatched",
+          orderNumber: trade.orderNumber,
+          buyerName: `${trade.buyerCompany} (${trade.buyerCountry})`,
+          manufacturerName: mfg?.legalEntityName || trade.manufacturerName,
+          productName: trade.productName,
+          quantity: trade.quantityUnits,
+          amountUSD: trade.totalAmountUSD,
+        });
+      }
+
+      return NextResponse.json({ success: true, paymentOrder, whatsappDispatch });
     }
 
     // 5. Update Milestone
     if (action === "advance_milestone") {
       const { tradeId, milestoneId } = body;
       const updated = tradeStore.advanceMilestone(tradeId, milestoneId);
-      return NextResponse.json({ success: true, milestone: updated });
+      const trade = tradeStore.getTrade(tradeId);
+
+      let whatsappDispatch = null;
+      if (trade && getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        whatsappDispatch = await sendRealWhatsAppMessage({
+          role: "manufacturer",
+          eventType: "quality_inspection_passed",
+          orderNumber: trade.orderNumber,
+          buyerName: `${trade.buyerCompany} (${trade.buyerCountry})`,
+          manufacturerName: trade.manufacturerName,
+          productName: trade.productName,
+          quantity: trade.quantityUnits,
+          amountUSD: trade.totalAmountUSD,
+        });
+      }
+
+      return NextResponse.json({ success: true, milestone: updated, whatsappDispatch });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });

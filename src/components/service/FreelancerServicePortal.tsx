@@ -33,6 +33,7 @@ import { CountUp } from "@/components/reactbits/CountUp";
 import { KokonutButton } from "@/components/kokonutui/KokonutButton";
 import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
+import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
 
 export function FreelancerServicePortal() {
   const router = useRouter();
@@ -96,6 +97,14 @@ export function FreelancerServicePortal() {
           approveUrl: approveLink,
           amount: "$1,500.00 USD (Software Milestone 1 Escrow)",
         });
+        void triggerAutomatedWhatsAppAlert({
+          role: "service",
+          eventType: "service_milestone_funded",
+          orderNumber: selectedProject.contractNumber || "SRV-2026-101",
+          buyerName: selectedProject.client.company,
+          productName: selectedMilestone.title,
+          amountUSD: selectedMilestone.amountUSD || 1500,
+        });
       }
     } catch {
       // fallback
@@ -135,6 +144,14 @@ export function FreelancerServicePortal() {
         return proj;
       })
     );
+    void triggerAutomatedWhatsAppAlert({
+      role: "service",
+      eventType: "service_delivery_submitted",
+      orderNumber: selectedProject.contractNumber || "SRV-2026-101",
+      buyerName: selectedProject.client.company,
+      productName: selectedMilestone.title,
+      amountUSD: selectedMilestone.amountUSD || 1500,
+    });
   };
 
   return (

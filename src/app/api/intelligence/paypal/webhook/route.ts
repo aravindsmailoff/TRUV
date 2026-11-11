@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { payPalClient } from "@/lib/intelligence/paypalClient";
 import { INITIAL_PAYPAL_EVENTS, INITIAL_MILESTONES } from "@/lib/intelligence/store";
+import {
+  getWhatsAppStatusSnapshot,
+  sendRealWhatsAppMessage,
+} from "@/lib/whatsapp/whatsappEngine";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +38,15 @@ export async function POST(req: NextRequest) {
         notes: "Webhook confirmed real-time payment capture.",
         timestamp: new Date().toISOString(),
       });
+
+      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        await sendRealWhatsAppMessage({
+          role: "manufacturer",
+          eventType: "paypal_escrow_locked",
+          orderNumber: newEvent.commercialTransactionId,
+          amountUSD: Number(amount.value) > 0 ? Number(amount.value) / 0.3 : 85750,
+        });
+      }
     }
 
     return NextResponse.json({
