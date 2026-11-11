@@ -45,15 +45,17 @@ import {
   OrderWorkspaceItem,
   DocumentItem,
 } from "@/lib/buyer/buyerStore";
-import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
+import { setCurrentSessionUser } from "@/lib/auth/authStore";
+import { useSessionUser } from "@/lib/auth/useSessionUser";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
 
 export function TradeOracleBuyerApp() {
   const router = useRouter();
-  const currentUser = getCurrentSessionUser();
+  const { currentUser, isHydrated } = useSessionUser();
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!currentUser) {
       router.push("/signin?role=buyer");
     } else if (currentUser.role === "manufacturer") {
@@ -61,7 +63,7 @@ export function TradeOracleBuyerApp() {
     } else if (currentUser.role === "service") {
       router.push("/service");
     }
-  }, [currentUser, router]);
+  }, [currentUser, isHydrated, router]);
 
   // Navigation Tabs matching prompt:
   // 1. Dashboard, 2. Find Suppliers, 3. My RFQs, 4. My Orders, 5. Payments, 6. Documents, 7. Messages, 8. Settings

@@ -31,15 +31,17 @@ import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ClickSpark } from "@/components/reactbits/ClickSpark";
 import { CountUp } from "@/components/reactbits/CountUp";
 import { KokonutButton } from "@/components/kokonutui/KokonutButton";
-import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
+import { setCurrentSessionUser } from "@/lib/auth/authStore";
+import { useSessionUser } from "@/lib/auth/useSessionUser";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
 
 export function FreelancerServicePortal() {
   const router = useRouter();
-  const currentUser = getCurrentSessionUser();
+  const { currentUser, isHydrated } = useSessionUser();
 
   React.useEffect(() => {
+    if (!isHydrated) return;
     if (!currentUser) {
       router.push("/signin?role=service");
     } else if (currentUser.role === "buyer") {
@@ -47,7 +49,7 @@ export function FreelancerServicePortal() {
     } else if (currentUser.role === "manufacturer") {
       router.push("/dashboard");
     }
-  }, [currentUser, router]);
+  }, [currentUser, isHydrated, router]);
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "contracts" | "milestones" | "payouts" | "disputes" | "rfqs" | "sandbox_guide" | "settings"
   >("dashboard");

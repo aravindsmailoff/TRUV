@@ -29,7 +29,8 @@ import {
   Globe,
   Code2,
 } from "lucide-react";
-import { getCurrentSessionUser, setCurrentSessionUser } from "@/lib/auth/authStore";
+import { setCurrentSessionUser } from "@/lib/auth/authStore";
+import { useSessionUser } from "@/lib/auth/useSessionUser";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ClickSpark } from "@/components/reactbits/ClickSpark";
 import { CountUp } from "@/components/reactbits/CountUp";
@@ -168,7 +169,7 @@ const LAYMAN_ORDERS: LaymanTradeOrder[] = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const currentUser = getCurrentSessionUser();
+  const { currentUser, isHydrated } = useSessionUser();
 
   // Active view switcher: Main navigation + Trade Engine Side Menus
   const [activeNav, setActiveNav] = useState<
@@ -193,9 +194,10 @@ export default function DashboardPage() {
     | "paypal_escrow"
     | "quality_qima"
     | "customs_bl"
-  >(currentUser?.role === "buyer" ? "buyer_portal" : "dashboard");
+  >( "dashboard" );
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!currentUser) {
       router.push("/signin?role=manufacturer");
     } else if (currentUser.role === "buyer") {
@@ -203,7 +205,7 @@ export default function DashboardPage() {
     } else if (currentUser.role === "service") {
       router.push("/service");
     }
-  }, [currentUser, router]);
+  }, [currentUser, isHydrated, router]);
 
   const [financesOpen, setFinancesOpen] = useState(true);
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
