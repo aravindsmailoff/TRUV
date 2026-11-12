@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { translateTradeText } from "@/lib/ai/translator";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const AI_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b";
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are TradeOracle AI's International Export Quality & Certification Assistant for Indian manufacturers.
 Given a product, raw material, and target export countries, return the exact required quality certificates and markings (such as ISO 9001:2015, CE Mark, UKCA, ASTM/UL/FCC, SASO/SABER, BIS/ISI, GOTS/OEKO-TEX depending on the product).
 Also generate:
-1. "nativeSummary": A clear, friendly 2-3 sentence summary in ${preferredLanguage} (in native script if ${preferredLanguage} is Gujarati, Hindi, Punjabi, Tamil, or Kannada) explaining what certificates are needed and reassuring the seller that TradeOracle handles the English paperwork.
+1. "nativeSummary": A clear, friendly 2-3 sentence summary in simple English explaining what certificates are needed and reassuring the seller that TradeOracle handles the English paperwork.
 2. "generatedDossier": A clean English Technical File & Declaration of Conformity draft ready for an accredited lab (QIMA, SGS, TÜV, Intertek, or NABL/BIS lab).
 3. "packagingLabelSpecs": 4 short strings to print on the export carton label.
 
@@ -209,11 +210,22 @@ Seller Preferred Language: ${preferredLanguage}`;
     };
 
     const fallback = buildFallbackPlan(productName, material, targetCountries, companyName);
+    const englishSummary = parsed.nativeSummary || fallback.nativeSummary;
+    const translatedSummary =
+      preferredLanguage.toLowerCase() === "english"
+        ? englishSummary
+        : (
+            await translateTradeText({
+              text: englishSummary,
+              sourceLanguage: "English",
+              targetLanguage: preferredLanguage,
+            })
+          ).translatedText;
 
     return NextResponse.json({
       poweredBy: "TradeOracle AI",
       hsCode: parsed.hsCode || fallback.hsCode,
-      nativeSummary: parsed.nativeSummary || fallback.nativeSummary,
+      nativeSummary: translatedSummary,
       requiredCertificates:
         Array.isArray(parsed.requiredCertificates) && parsed.requiredCertificates.length > 0
           ? parsed.requiredCertificates
