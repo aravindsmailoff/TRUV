@@ -897,18 +897,10 @@ export function TRUVXBuyerApp() {
       <header className="h-16 bg-white border-b border-stone-200/90 px-6 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         {/* Left: Global Search & Switcher */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="size-8 rounded-lg bg-[#18280e] flex items-center justify-center text-[#b2eb76] font-black text-sm shadow-xs">
-              TO
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-base tracking-tight text-[#18280e] leading-tight">
-                TRUVX<span className="text-[#3f7308]">.</span>
-              </span>
-              <span className="text-[10px] font-mono text-stone-400 uppercase font-semibold">
-                Foreign Buyer Portal
-              </span>
-            </div>
+          <Link href="/" className="inline-block text-[#18280E] cursor-pointer group">
+            <span className="text-2xl font-black tracking-tight group-hover:text-[#3f7308] transition-colors">
+              TRUVX<span className="text-[#79a83e]">.</span>
+            </span>
           </Link>
 
           <div className="relative hidden md:block w-72">

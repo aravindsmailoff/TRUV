@@ -1039,18 +1039,10 @@ export default function DashboardPage() {
         <div className="flex flex-col">
           {/* Brand Logo Header */}
           <div className="h-16 px-5 flex items-center justify-between border-b border-stone-100/90">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-[#18280e] flex items-center justify-center text-[#b2eb76] font-black text-sm shadow-xs transition-transform group-hover:scale-105">
-                TO
-              </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-base tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors leading-none">
-                  TRUVX<span className="text-[#3f7308]">.</span>
-                </span>
-                <span className="text-[10px] font-sans text-stone-500 font-semibold mt-1">
-                  Factory Export Desk
-                </span>
-              </div>
+            <Link href="/" className="inline-block text-[#18280E] cursor-pointer group">
+              <span className="text-2xl font-black tracking-tight group-hover:text-[#3f7308] transition-colors">
+                TRUVX<span className="text-[#79a83e]">.</span>
+              </span>
             </Link>
             <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold border border-[#d8e5ca]/70">
               PAYPAL
