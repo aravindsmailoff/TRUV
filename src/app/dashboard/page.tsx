@@ -234,6 +234,7 @@ export default function DashboardPage() {
   } | null>(null);
   const [autoApplyingMark, setAutoApplyingMark] = useState<string | null>(null);
   const [autoApplyingAll, setAutoApplyingAll] = useState(false);
+  const [autoApplyNotice, setAutoApplyNotice] = useState<string>("");
   const [autoApplications, setAutoApplications] = useState<
     Record<
       string,
@@ -600,14 +601,90 @@ export default function DashboardPage() {
     }
   };
 
-  const handleAutoApplyCertificate = async (cert: {
-    markName: string;
-    country: string;
-    standardCode: string;
-    labPartner: string;
-  }) => {
+  const downloadGovtPacket = (
+    certs: Array<{ markName: string; country: string; standardCode: string; labPartner: string }>,
+    filePrefix: string
+  ) => {
+    if (typeof window === "undefined" || certs.length === 0) return;
+    const company = currentUser?.companyName || "Indian Export Manufacturer";
+    const rows = certs
+      .map((c) => {
+        const portal = getOfficialPortalInfo(c.markName, c.country);
+        return `<tr>
+          <td style="padding:8px;border:1px solid #d8e5ca;"><strong>${c.markName}</strong><br/><small>${c.country}</small></td>
+          <td style="padding:8px;border:1px solid #d8e5ca;">${c.standardCode}</td>
+          <td style="padding:8px;border:1px solid #d8e5ca;">${c.labPartner}</td>
+          <td style="padding:8px;border:1px solid #d8e5ca;"><a href="${portal.url}">${portal.url}</a></td>
+        </tr>`;
+      })
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Official Govt Export Certification Packet - ${company}</title></head>
+<body style="font-family:Arial,sans-serif;max-width:820px;margin:32px auto;color:#18280e;line-height:1.5;">
+  <div style="border-bottom:3px solid #18280e;padding-bottom:12px;margin-bottom:20px;">
+    <h1 style="margin:0;font-size:20px;">OFFICIAL EXPORT DECLARATION OF CONFORMITY &amp; GOVT FILING PACKET</h1>
+    <p style="margin:4px 0 0;font-size:12px;color:#3f7308;">Prepared by TradeOracle AI · Ready for Official Government Portal Upload</p>
+  </div>
+  <p><strong>Manufacturer:</strong> ${company}<br/>
+  <strong>Product:</strong> ${certProduct}<br/>
+  <strong>Material &amp; Finish:</strong> ${certMaterial}<br/>
+  <strong>HS Code:</strong> ${certPlan?.hsCode || "8301.40"}<br/>
+  <strong>Generated On:</strong> ${new Date().toLocaleString()}</p>
+  <h2 style="font-size:15px;margin-top:20px;">Target Government Authorities &amp; Statutory Standards</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="background:#f4faed;text-align:left;">
+        <th style="padding:8px;border:1px solid #d8e5ca;">Certificate / Market</th>
+        <th style="padding:8px;border:1px solid #d8e5ca;">Statutory Standard</th>
+        <th style="padding:8px;border:1px solid #d8e5ca;">Government Authority</th>
+        <th style="padding:8px;border:1px solid #d8e5ca;">Official Govt Portal</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <h2 style="font-size:15px;margin-top:20px;">Technical File &amp; Declaration of Conformity</h2>
+  <pre style="white-space:pre-wrap;background:#f4faed;padding:12px;border:1px solid #d8e5ca;font-size:12px;">${certPlan?.generatedDossier || ""}</pre>
+  <p style="margin-top:24px;font-size:12px;color:#555;">Authorized Signatory: ___________________________ &nbsp;&nbsp; Company Stamp / Date: ___________________</p>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filePrefix.replace(/[^a-zA-Z0-9_-]+/g, "_")}_Govt_Filing_Packet.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAutoApplyCertificate = async (
+    cert: {
+      markName: string;
+      country: string;
+      standardCode: string;
+      labPartner: string;
+    },
+    skipWindowOpen = false
+  ) => {
     setAutoApplyingMark(cert.markName);
     const portal = getOfficialPortalInfo(cert.markName, cert.country);
+
+    if (!skipWindowOpen && typeof window !== "undefined") {
+      downloadGovtPacket([cert], `${certProduct}_${cert.markName}`);
+      const clipboardSummary = `Company: ${currentUser?.companyName || "Indian Export Manufacturer"} | Product: ${certProduct} (${certMaterial}) | HS Code: ${certPlan?.hsCode || "8301.40"} | Standard: ${cert.standardCode}`;
+      navigator.clipboard?.writeText(clipboardSummary).catch(() => {});
+      const opened = window.open(portal.url, "_blank", "noopener,noreferrer");
+      setAutoApplyNotice(
+        opened
+          ? `Downloaded your filled Govt Filing Packet, copied your product/HS specs to clipboard, and opened ${portal.label} in a new tab.`
+          : `Downloaded your filled Govt Filing Packet & copied specs to clipboard. Allow pop-ups or click "${portal.label} ↗" below to open the government portal.`
+      );
+    }
+
     try {
       const res = await fetch("/api/ai/apply-certificate", {
         method: "POST",
@@ -644,11 +721,31 @@ export default function DashboardPage() {
   const handleAutoApplyAllCertificates = async () => {
     if (!certPlan || certPlan.requiredCertificates.length === 0) return;
     setAutoApplyingAll(true);
+
+    // Synchronously download the combined govt filing packet & open portal tabs before any await
+    const allCerts = certPlan.requiredCertificates;
+    downloadGovtPacket(allCerts, `${certProduct}_All_Govt_Certificates`);
+    const clipboardSummary = `Company: ${currentUser?.companyName || "Indian Export Manufacturer"} | Product: ${certProduct} (${certMaterial}) | HS Code: ${certPlan.hsCode}`;
+    navigator.clipboard?.writeText(clipboardSummary).catch(() => {});
+
+    let openedCount = 0;
+    const uniquePortalUrls = Array.from(
+      new Set(allCerts.map((c) => getOfficialPortalInfo(c.markName, c.country).url))
+    );
+    for (const url of uniquePortalUrls) {
+      const w = window.open(url, "_blank", "noopener,noreferrer");
+      if (w) openedCount += 1;
+    }
+
+    setAutoApplyNotice(
+      openedCount > 0
+        ? `Downloaded your complete Govt Filing Packet (.html), copied factory/HS details to clipboard, and opened ${openedCount} official government portal tab(s). Sign in with your IEC/DSC on each portal, upload the downloaded packet, and attach your issued PDF below.`
+        : `Downloaded your complete Govt Filing Packet (.html) & copied factory/HS details to clipboard. Your browser blocked automatic tabs — click any "Apply on Govt Portal ↗" button below to open it directly.`
+    );
+
     try {
       await Promise.all(
-        certPlan.requiredCertificates
-          .filter((cert) => !autoApplications[cert.markName])
-          .map((cert) => handleAutoApplyCertificate(cert))
+        allCerts.map((cert) => handleAutoApplyCertificate(cert, true))
       );
     } finally {
       setAutoApplyingAll(false);
@@ -2198,6 +2295,11 @@ export default function DashboardPage() {
                               : "1-Click Auto-Apply All Govt Certificates →"}
                           </button>
                         </div>
+                        {autoApplyNotice && (
+                          <div className="p-3 rounded-xl bg-[#ebf7d9] border border-[#3f7308]/30 text-xs text-[#18280e] font-medium">
+                            ✓ {autoApplyNotice}
+                          </div>
+                        )}
                       </div>
 
                       {/* Required Country Certificates, Automated Govt Filing & Issued Certificate Attachment */}
