@@ -233,6 +233,10 @@ export default function DashboardPage() {
     packagingLabelSpecs: string[];
   } | null>(null);
   const [bookedCerts, setBookedCerts] = useState<Record<string, string>>({});
+  const [verifiedCerts, setVerifiedCerts] = useState<
+    Record<string, { certNumber: string; fileName: string; attachedAt: string }>
+  >({});
+  const [certNumberInputs, setCertNumberInputs] = useState<Record<string, string>>({});
   const [dossierCopied, setDossierCopied] = useState(false);
 
   // TradeOracle AI 2-Way Seller Translator (Dashboard + Buyer Requests)
@@ -344,7 +348,51 @@ export default function DashboardPage() {
         // Ignore invalid localStorage
       }
     }
+    const savedVerified = localStorage.getItem("truv_verified_certificates");
+    if (savedVerified) {
+      try {
+        setVerifiedCerts(JSON.parse(savedVerified));
+      } catch {
+        // Ignore invalid localStorage
+      }
+    }
   }, []);
+
+  const getOfficialPortalInfo = (markName: string, country: string) => {
+    const m = `${markName} ${country}`.toLowerCase();
+    if (m.includes("bis") || m.includes("isi") || m.includes("india")) {
+      return { label: "Apply on BIS Manakonline", url: "https://www.manakonline.in/" };
+    }
+    if (m.includes("saso") || m.includes("saber") || m.includes("saudi") || m.includes("uae")) {
+      return { label: "Apply on SASO SABER", url: "https://saber.sa/" };
+    }
+    if (m.includes("ul")) {
+      return { label: "Apply via UL Solutions", url: "https://www.ul.com/services/certification" };
+    }
+    if (m.includes("ce") || m.includes("tüv") || m.includes("tuv") || m.includes("european")) {
+      return { label: "Apply via TÜV / QIMA Lab", url: "https://www.qima.com/testing/ce-marking" };
+    }
+    if (m.includes("ukca") || m.includes("united kingdom")) {
+      return { label: "Apply via Intertek UKCA", url: "https://www.intertek.com/ukca-mark/" };
+    }
+    return { label: "Apply via QIMA / SGS Lab", url: "https://www.qima.com/" };
+  };
+
+  const handleAttachOfficialCertificate = (markName: string, fileName: string) => {
+    const certNumber = (certNumberInputs[markName] || "").trim() || `CERT-${Date.now().toString().slice(-6)}`;
+    const entry = {
+      certNumber,
+      fileName: fileName || "Official_Certificate.pdf",
+      attachedAt: new Date().toLocaleDateString(),
+    };
+    setVerifiedCerts((prev) => {
+      const next = { ...prev, [markName]: entry };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("truv_verified_certificates", JSON.stringify(next));
+      }
+      return next;
+    });
+  };
 
   const handleGenerateSellerQuote = async () => {
     setQuoteLoading(true);
@@ -1235,93 +1283,82 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* TOP 4 METRIC CARDS (With Kokonut UI / React Bits Spotlight Glow) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Metric 1 */}
+              {/* TOP 4 SELLER EXPORT KPI CARDS (Geist font-sans, Manufacturer-specific) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
                   <div className="flex justify-between items-center text-xs font-medium text-stone-500">
-                    <span>Page Views</span>
-                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
-                      <Eye className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      <CountUp to={16.431} decimals={3} />
-                    </span>
-                    <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                      15.5%
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">
-                    vs. 14,653 last period
-                  </span>
-                </SpotlightCard>
-
-                {/* Metric 2 */}
-                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
-                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
-                    <span>Visitors</span>
-                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
-                      <Users className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      <CountUp to={6.225} decimals={3} />
-                    </span>
-                    <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                      8.4%
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">
-                    vs. 5,732 last period
-                  </span>
-                </SpotlightCard>
-
-                {/* Metric 3 */}
-                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
-                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
-                    <span>Click</span>
-                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
-                      <MousePointer className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      <CountUp to={2.832} decimals={3} />
-                    </span>
-                    <span className="inline-flex items-center text-xs font-bold text-rose-600 font-mono">
-                      <ArrowDownRight className="w-3.5 h-3.5" />
-                      10.5%
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">
-                    vs. 3,294 last period
-                  </span>
-                </SpotlightCard>
-
-                {/* Metric 4 */}
-                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
-                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
-                    <span>Orders</span>
+                    <span>Active Foreign Orders</span>
                     <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
                       <ShoppingBag className="w-3.5 h-3.5" />
                     </div>
                   </div>
                   <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-[#18280e]">
-                      <CountUp to={1.224} decimals={3} />
+                    <span className="text-2xl font-bold tracking-tight text-[#18280e]">
+                      {LAYMAN_ORDERS.length} Orders
                     </span>
-                    <span className="inline-flex items-center text-xs font-bold text-emerald-700 font-mono">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                      4.4%
+                    <span className="text-xs font-bold text-[#3f7308]">
+                      $85,750 USD
                     </span>
                   </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">
-                    vs. 1,186 last period
+                  <span className="text-[11px] text-stone-500 block">
+                    USA, Germany &amp; UAE buyers
+                  </span>
+                </SpotlightCard>
+
+                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
+                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
+                    <span>30% Advance in PayPal</span>
+                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
+                      <CreditCard className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-2xl font-bold tracking-tight text-[#18280e]">
+                      $25,725
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700">
+                      ≈ ₹21.48L
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-stone-500 block">
+                    Held safely before shipping
+                  </span>
+                </SpotlightCard>
+
+                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
+                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
+                    <span>Official Certificates</span>
+                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-2xl font-bold tracking-tight text-[#18280e]">
+                      {Object.keys(verifiedCerts).length} Attached
+                    </span>
+                    <span className="text-xs font-bold text-[#3f7308]">
+                      {Object.keys(bookedCerts).length} Booked
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-stone-500 block">
+                    BIS, CE, UL, UKCA &amp; ISO 9001
+                  </span>
+                </SpotlightCard>
+
+                <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
+                  <div className="flex justify-between items-center text-xs font-medium text-stone-500">
+                    <span>Factory KYB Status</span>
+                    <div className="p-1.5 rounded-lg bg-[#ebf7d9] text-[#18280e]">
+                      <Users className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-2xl font-bold tracking-tight text-[#18280e]">
+                      Verified ✓
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-stone-500 block">
+                    DGFT IEC &amp; GSTIN Active
                   </span>
                 </SpotlightCard>
               </div>
@@ -2082,14 +2119,16 @@ export default function DashboardPage() {
                         <p className="text-xs text-[#18280e] leading-relaxed">{certPlan.nativeSummary}</p>
                       </div>
 
-                      {/* Required Country Certificates & One-Click Lab Booking */}
+                      {/* Required Country Certificates, Official Portal Links & Issued Certificate Attachment */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {certPlan.requiredCertificates.map((cert, idx) => {
                           const bookedStatus = bookedCerts[cert.markName];
+                          const verifiedInfo = verifiedCerts[cert.markName];
+                          const portal = getOfficialPortalInfo(cert.markName, cert.country);
                           return (
                             <div
                               key={idx}
-                              className="p-4 rounded-xl bg-white border border-stone-200 space-y-2 flex flex-col justify-between"
+                              className="p-4 rounded-xl bg-white border border-stone-200 space-y-3 flex flex-col justify-between"
                             >
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between gap-2">
@@ -2107,19 +2146,78 @@ export default function DashboardPage() {
                                 </div>
                               </div>
 
-                              {bookedStatus ? (
-                                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold">
-                                  ✓ {bookedStatus}
+                              <div className="space-y-2 pt-2 border-t border-stone-100">
+                                <div className="flex flex-wrap gap-2">
+                                  <a
+                                    href={portal.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1 text-center py-2 px-3 rounded-lg bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs transition-colors"
+                                  >
+                                    {portal.label} ↗
+                                  </a>
+                                  {!bookedStatus && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleBookLabCertificate(cert.markName, cert.labPartner)}
+                                      className="flex-1 py-2 px-3 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors"
+                                    >
+                                      Book Sample Pickup →
+                                    </button>
+                                  )}
                                 </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleBookLabCertificate(cert.markName, cert.labPartner)}
-                                  className="w-full py-2 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors"
-                                >
-                                  Book Lab Test &amp; Sample Pickup →
-                                </button>
-                              )}
+
+                                {bookedStatus && (
+                                  <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-xs text-stone-700 font-medium">
+                                    ✓ {bookedStatus}
+                                  </div>
+                                )}
+
+                                {verifiedInfo ? (
+                                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-0.5">
+                                    <div className="font-bold">
+                                      ✓ Official Certificate Attached ({verifiedInfo.certNumber})
+                                    </div>
+                                    <div className="text-[11px] text-emerald-700">
+                                      File: {verifiedInfo.fileName} · Added {verifiedInfo.attachedAt}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="p-2.5 rounded-lg bg-[#fbfdf9] border border-stone-200 space-y-1.5">
+                                    <span className="text-[11px] font-bold text-stone-700 block">
+                                      Once issued by {cert.labPartner} / Govt Portal, attach original certificate:
+                                    </span>
+                                    <div className="flex flex-col sm:flex-row gap-1.5">
+                                      <input
+                                        type="text"
+                                        placeholder="Official Cert / License No."
+                                        value={certNumberInputs[cert.markName] || ""}
+                                        onChange={(e) =>
+                                          setCertNumberInputs((prev) => ({
+                                            ...prev,
+                                            [cert.markName]: e.target.value,
+                                          }))
+                                        }
+                                        className="flex-1 px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 text-xs text-[#18280e] outline-none"
+                                      />
+                                      <label className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-xs font-bold cursor-pointer text-center hover:bg-[#253d16]">
+                                        Attach PDF
+                                        <input
+                                          type="file"
+                                          accept=".pdf,.png,.jpg,.jpeg"
+                                          className="hidden"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              handleAttachOfficialCertificate(cert.markName, file.name);
+                                            }
+                                          }}
+                                        />
+                                      </label>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
