@@ -494,21 +494,24 @@ export default function DashboardPage() {
   const getOfficialPortalInfo = (markName: string, country: string) => {
     const m = `${markName} ${country}`.toLowerCase();
     if (m.includes("bis") || m.includes("isi") || m.includes("india")) {
-      return { label: "Apply on BIS Manakonline", url: "https://www.manakonline.in/" };
+      return { label: "Apply on BIS Govt Portal (Manakonline)", url: "https://www.manakonline.in/" };
     }
     if (m.includes("saso") || m.includes("saber") || m.includes("saudi") || m.includes("uae")) {
-      return { label: "Apply on SASO SABER", url: "https://saber.sa/" };
+      return { label: "Apply on SASO SABER Govt Portal", url: "https://saber.sa/" };
     }
-    if (m.includes("ul")) {
-      return { label: "Apply via UL Solutions", url: "https://www.ul.com/services/certification" };
+    if (m.includes("usa") || m.includes("united states") || m.includes("fcc") || m.includes("cpsc") || m.includes("nist") || m.includes("astm")) {
+      return { label: "Apply on U.S. Govt Standards (NIST)", url: "https://www.nist.gov/standardsgov" };
     }
-    if (m.includes("ce") || m.includes("tüv") || m.includes("tuv") || m.includes("european")) {
-      return { label: "Apply via TÜV / QIMA Lab", url: "https://www.qima.com/testing/ce-marking" };
+    if (m.includes("ce") || m.includes("rohs") || m.includes("european")) {
+      return { label: "Apply on EU Commission CE Portal", url: "https://single-market-economy.ec.europa.eu/single-market/ce-marking_en" };
     }
     if (m.includes("ukca") || m.includes("united kingdom")) {
-      return { label: "Apply via Intertek UKCA", url: "https://www.intertek.com/ukca-mark/" };
+      return { label: "Apply on UK Govt (GOV.UK UKCA)", url: "https://www.gov.uk/guidance/using-the-ukca-marking" };
     }
-    return { label: "Apply via QIMA / SGS Lab", url: "https://www.qima.com/" };
+    if (m.includes("pse") || m.includes("jis") || m.includes("japan") || m.includes("meti")) {
+      return { label: "Apply on Japan Govt (METI PSE)", url: "https://www.meti.go.jp/english/policy/economy/consumer/pse/index.html" };
+    }
+    return { label: "Apply on Govt of India EIC Portal", url: "https://www.eicindia.gov.in/" };
   };
 
   const handleAttachOfficialCertificate = (markName: string, fileName: string) => {
@@ -2146,7 +2149,7 @@ export default function DashboardPage() {
                                 </div>
                                 <p className="text-xs text-stone-600">{cert.purpose}</p>
                                 <div className="text-xs text-stone-500">
-                                  Est. {cert.estimatedDays} days · Lab Fee: ${cert.estimatedFeeUSD} USD
+                                  Est. {cert.estimatedDays} · Govt Filing Est.: ${cert.estimatedFeeUSD} USD
                                 </div>
                               </div>
 
@@ -2156,26 +2159,11 @@ export default function DashboardPage() {
                                     href={portal.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex-1 text-center py-2 px-3 rounded-lg bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs transition-colors"
+                                    className="flex-1 text-center py-2 px-3 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs transition-colors"
                                   >
                                     {portal.label} ↗
                                   </a>
-                                  {!bookedStatus && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleBookLabCertificate(cert.markName, cert.labPartner)}
-                                      className="flex-1 py-2 px-3 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors"
-                                    >
-                                      Book Sample Pickup →
-                                    </button>
-                                  )}
                                 </div>
-
-                                {bookedStatus && (
-                                  <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-xs text-stone-700 font-medium">
-                                    ✓ {bookedStatus}
-                                  </div>
-                                )}
 
                                 {verifiedInfo ? (
                                   <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-0.5">
@@ -2189,7 +2177,7 @@ export default function DashboardPage() {
                                 ) : (
                                   <div className="p-2.5 rounded-lg bg-[#fbfdf9] border border-stone-200 space-y-1.5">
                                     <span className="text-[11px] font-bold text-stone-700 block">
-                                      Once issued by {cert.labPartner} / Govt Portal, attach original certificate:
+                                      Once issued by {cert.labPartner}, attach your official government certificate:
                                     </span>
                                     <div className="flex flex-col sm:flex-row gap-1.5">
                                       <input

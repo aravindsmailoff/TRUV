@@ -32,13 +32,13 @@ function buildFallbackPlan(
 ) {
   const certs: CertificateRequirement[] = [
     {
-      markName: "ISO 9001:2015",
+      markName: "Certificate of Origin & Quality (EIC)",
       country: "Global",
-      standardCode: "ISO 9001:2015 QMS",
-      purpose: "Factory quality management certification required by international buyers.",
-      labPartner: "QIMA / TÜV India",
-      estimatedDays: "7-10 days",
-      estimatedFeeUSD: 450,
+      standardCode: "EIC / DGFT Export Standard",
+      purpose: "Official Government of India export quality & origin certification required by foreign customs.",
+      labPartner: "Export Inspection Council (Govt. of India)",
+      estimatedDays: "5-7 days",
+      estimatedFeeUSD: 50,
     },
   ];
 
@@ -48,43 +48,43 @@ function buildFallbackPlan(
       markName: "CE Mark + RoHS",
       country: "European Union",
       standardCode: "EN / RoHS Directive 2011/65/EU",
-      purpose: "Mandatory European safety, material, and restricted-substance mark.",
-      labPartner: "TÜV Rheinland / SGS",
+      purpose: "Mandatory European Union statutory safety, material, and restricted-substance mark.",
+      labPartner: "European Commission (EU)",
       estimatedDays: "6-8 days",
-      estimatedFeeUSD: 320,
+      estimatedFeeUSD: 120,
     });
   }
   if (lowerCountries.some((c) => c.includes("usa") || c.includes("united states"))) {
     certs.push({
-      markName: "ASTM / ANSI Test Report",
+      markName: "US Statutory Standards & Customs Compliance",
       country: "United States",
-      standardCode: "ASTM B117 / ANSI Compliance",
-      purpose: "Corrosion, tensile, and material grade verification for US customs & buyers.",
-      labPartner: "QIMA / Intertek",
+      standardCode: "NIST / CPSC / CBP Import Compliance",
+      purpose: "U.S. federal material safety, labeling, and customs conformity verification.",
+      labPartner: "U.S. Govt (NIST / CPSC / CBP)",
       estimatedDays: "5-7 days",
-      estimatedFeeUSD: 280,
+      estimatedFeeUSD: 110,
     });
   }
   if (lowerCountries.some((c) => c.includes("uk") || c.includes("united kingdom"))) {
     certs.push({
       markName: "UKCA Mark",
       country: "United Kingdom",
-      standardCode: "UKCA / BS EN Standard",
-      purpose: "Mandatory UK market conformity marking for exported goods.",
-      labPartner: "Intertek UK / SGS",
+      standardCode: "UKCA / BS EN Statutory Standard",
+      purpose: "Mandatory UK Government market conformity marking for exported goods.",
+      labPartner: "UK Govt (GOV.UK / OPSS)",
       estimatedDays: "6-8 days",
-      estimatedFeeUSD: 290,
+      estimatedFeeUSD: 115,
     });
   }
   if (lowerCountries.some((c) => c.includes("uae") || c.includes("saudi") || c.includes("middle east"))) {
     certs.push({
       markName: "SASO / SABER",
       country: "Saudi Arabia / UAE",
-      standardCode: "SASO CoC / ESMA",
-      purpose: "Mandatory Gulf customs product conformity certificate.",
-      labPartner: "QIMA / SGS Gulf",
+      standardCode: "SASO CoC / MoIAT",
+      purpose: "Mandatory Gulf government customs product conformity certificate.",
+      labPartner: "SASO (Saudi Govt) / MoIAT (UAE Govt)",
       estimatedDays: "5 days",
-      estimatedFeeUSD: 260,
+      estimatedFeeUSD: 130,
     });
   }
   if (lowerCountries.some((c) => c.includes("india") || c.includes("bis"))) {
@@ -92,10 +92,10 @@ function buildFallbackPlan(
       markName: "BIS / ISI Mark",
       country: "India",
       standardCode: "IS / BIS Scheme-I",
-      purpose: "Bureau of Indian Standards mandatory quality mark.",
-      labPartner: "NABL / BIS Empanelled Lab",
+      purpose: "Bureau of Indian Standards statutory quality mark.",
+      labPartner: "Bureau of Indian Standards (Govt. of India)",
       estimatedDays: "10-14 days",
-      estimatedFeeUSD: 190,
+      estimatedFeeUSD: 90,
     });
   }
   if (lowerCountries.some((c) => c.includes("japan") || c.includes("pse"))) {
@@ -103,19 +103,19 @@ function buildFallbackPlan(
       markName: "PSE / JIS Conformity",
       country: "Japan",
       standardCode: "JIS / METI Export Standard",
-      purpose: "Japanese industrial & electrical/hardware conformity marking.",
-      labPartner: "TÜV Rheinland Japan / JET",
+      purpose: "Japanese Government industrial & product conformity marking.",
+      labPartner: "METI (Govt. of Japan)",
       estimatedDays: "8-12 days",
-      estimatedFeeUSD: 340,
+      estimatedFeeUSD: 140,
     });
   }
 
   return {
     poweredBy: "TradeOracle AI",
     hsCode: "8301.40 / 7318.15",
-    nativeSummary: `For ${productName} (${material}), TradeOracle AI has mapped ${certs.length} required quality certificates for ${countries.join(", ")}. All English paperwork is prepared automatically — you only need to ship 1-2 samples to the accredited lab.`,
+    nativeSummary: `For ${productName} (${material}), TradeOracle AI has mapped ${certs.length} official government certificates for ${countries.join(", ")}. All English Declaration of Conformity paperwork is prepared automatically so you can apply directly on each government portal.`,
     requiredCertificates: certs,
-    generatedDossier: `DECLARATION OF CONFORMITY & LAB TEST DOSSIER\nManufacturer: ${companyName}\nProduct: ${productName}\nDeclared Material: ${material}\nTarget Markets: ${countries.join(", ")}\nCompliance Scope: Batch traceability, chemical & mechanical grade verification, and export packaging markings.`,
+    generatedDossier: `OFFICIAL DECLARATION OF CONFORMITY & GOVT FILING DOSSIER\nManufacturer: ${companyName}\nProduct: ${productName}\nDeclared Material: ${material}\nTarget Markets: ${countries.join(", ")}\nCompliance Scope: Batch traceability, statutory material grade verification, and official export markings.`,
     packagingLabelSpecs: [
       `Origin: MADE IN INDIA`,
       `Product: ${productName}`,
@@ -145,10 +145,11 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPrompt = `You are TradeOracle AI's International Export Quality & Certification Assistant for Indian manufacturers.
-Given a product, raw material, and target export countries, return the exact required quality certificates and markings (such as ISO 9001:2015, CE Mark, UKCA, ASTM/UL/FCC, SASO/SABER, BIS/ISI, GOTS/OEKO-TEX depending on the product).
+Given a product, raw material, and target export countries, return ONLY the official government quality certificates, statutory markings, and government issuing authorities (such as BIS/ISI Govt of India, EIC/DGFT Govt of India, European Commission CE Mark, UK Govt UKCA/OPSS, U.S. Govt NIST/CPSC/FCC/CBP, Saudi Govt SASO/SABER, Japanese Govt METI PSE/JIS).
+NEVER recommend or name private corporate inspection/testing companies (do NOT mention QIMA, SGS, TÜV, Intertek, UL, Bureau Veritas, etc.). Every "labPartner" MUST be an official government ministry, statutory standards body, or government regulatory authority.
 Also generate:
-1. "nativeSummary": A clear, friendly 2-3 sentence summary in simple English explaining what certificates are needed and reassuring the seller that TradeOracle handles the English paperwork.
-2. "generatedDossier": A clean English Technical File & Declaration of Conformity draft ready for an accredited lab (QIMA, SGS, TÜV, Intertek, or NABL/BIS lab).
+1. "nativeSummary": A clear, friendly 2-3 sentence summary in simple English explaining what government certificates are needed and reassuring the seller that TradeOracle handles the English paperwork for direct government portal filing.
+2. "generatedDossier": A clean English Technical File & Declaration of Conformity draft ready for direct submission to the official government standards portal.
 3. "packagingLabelSpecs": 4 short strings to print on the export carton label.
 
 Respond ONLY with valid JSON matching this schema:
@@ -161,7 +162,7 @@ Respond ONLY with valid JSON matching this schema:
       "country": "string",
       "standardCode": "string",
       "purpose": "string",
-      "labPartner": "string",
+      "labPartner": "Official Government Authority Name (no private companies)",
       "estimatedDays": "string",
       "estimatedFeeUSD": number
     }
