@@ -14,7 +14,7 @@ interface MatchResultItem {
 }
 
 interface MatchResponsePayload {
-  poweredBy: "NVIDIA NIM AI" | "Catalog Fallback";
+  poweredBy: "TradeOracle AI" | "Catalog Fallback";
   model: string;
   extractedRequirements: {
     product: string;
@@ -257,8 +257,8 @@ export async function POST(req: NextRequest) {
 
     const ext = (parsed.extractedRequirements || {}) as Record<string, unknown>;
     const payload: MatchResponsePayload = {
-      poweredBy: "NVIDIA NIM AI",
-      model: NVIDIA_MODEL,
+      poweredBy: "TradeOracle AI",
+      model: "tradeoracle-matcher-v1",
       extractedRequirements: {
         product: String(ext.product || query),
         material: String(ext.material || "Not specified"),

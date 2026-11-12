@@ -50,7 +50,7 @@ interface AiMatchItem {
 }
 
 interface AiMatchResponse {
-  poweredBy: "NVIDIA NIM AI" | "Catalog Fallback";
+  poweredBy: "TradeOracle AI" | "Catalog Fallback";
   model: string;
   extractedRequirements: {
     product: string;
@@ -65,8 +65,11 @@ interface AiMatchResponse {
 
 interface BuyerConversationMessage {
   id: string;
-  sender: "buyer";
+  sender: "buyer" | "seller";
   text: string;
+  translatedText?: string;
+  sourceLang?: string;
+  targetLang?: string;
   sentAt: string;
 }
 
@@ -74,10 +77,23 @@ interface BuyerConversationThread {
   supplierId: string;
   supplierName: string;
   supplierCity: string;
+  preferredLanguage: string;
+  samplePriceUSD: number;
+  samplePaypalOrderId?: string;
+  samplePaypalUrl?: string;
   matchedProduct: string;
   matchedMaterial: string;
   samplePolicy: string;
   messages: BuyerConversationMessage[];
+}
+
+interface OrderAiVerification {
+  orderId: string;
+  status: "VERIFIED" | "WARNING";
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  specAlignmentSummary: string;
+  warnings: string[];
+  checks: string[];
 }
 
 export function TradeOracleBuyerApp() {
@@ -112,16 +128,22 @@ export function TradeOracleBuyerApp() {
   const [selectedOrder, setSelectedOrder] = useState<OrderWorkspaceItem>(orders[0]);
   const [compareQuotesForRfqId, setCompareQuotesForRfqId] = useState<string | null>(null);
 
-  // NVIDIA AI Exact Seller & Material Matcher
+  // TradeOracle AI Exact Seller & Material Matcher
   const [aiQuery, setAiQuery] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [aiResult, setAiResult] = useState<AiMatchResponse | null>(null);
 
-  // Clean Direct Seller Messaging (starts empty — never pre-seeded with a random seller)
+  // Clean Direct Seller Messaging + Auto-Translation & Sample PayPal
   const [conversations, setConversations] = useState<BuyerConversationThread[]>([]);
   const [activeThreadSupplierId, setActiveThreadSupplierId] = useState<string | null>(null);
   const [messageDraft, setMessageDraft] = useState("");
+  const [translatingMsg, setTranslatingMsg] = useState(false);
+  const [samplePaypalLoading, setSamplePaypalLoading] = useState(false);
+
+  // TradeOracle AI Pre-Payment Spec & Risk Verification
+  const [orderVerifyLoading, setOrderVerifyLoading] = useState(false);
+  const [orderVerification, setOrderVerification] = useState<OrderAiVerification | null>(null);
 
   // Supplier Search & Filters
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -455,6 +477,8 @@ export function TradeOracleBuyerApp() {
           supplierId: supplier.id,
           supplierName: supplier.name,
           supplierCity: `${supplier.city}, ${supplier.state}`,
+          preferredLanguage: supplier.preferredLanguage || "Hindi",
+          samplePriceUSD: supplier.samplePriceUSD || 150,
           matchedProduct: productLabel,
           matchedMaterial: materialLabel,
           samplePolicy:
@@ -473,11 +497,14 @@ export function TradeOracleBuyerApp() {
     setActiveTab("messages");
   };
 
-  const handleSendBuyerMessage = (e: React.FormEvent) => {
+  const handleSendBuyerMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = messageDraft.trim();
     if (!trimmed || !activeThreadSupplierId) return;
 
+    const currentThread = conversations.find((t) => t.supplierId === activeThreadSupplierId);
+    const targetLanguage = currentThread?.preferredLanguage || "Hindi";
+    const msgId = "msg_" + Date.now();
     const nowLabel = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -491,9 +518,11 @@ export function TradeOracleBuyerApp() {
               messages: [
                 ...thread.messages,
                 {
-                  id: "msg_" + Date.now(),
+                  id: msgId,
                   sender: "buyer",
                   text: trimmed,
+                  sourceLang: "English",
+                  targetLang: targetLanguage,
                   sentAt: `Today, ${nowLabel}`,
                 },
               ],
@@ -502,6 +531,179 @@ export function TradeOracleBuyerApp() {
       )
     );
     setMessageDraft("");
+
+    if (targetLanguage.toLowerCase() !== "english") {
+      setTranslatingMsg(true);
+      try {
+        const res = await fetch("/api/ai/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: trimmed,
+            sourceLanguage: "English",
+            targetLanguage,
+          }),
+        });
+        const data = await res.json();
+        if (data.translatedText) {
+          setConversations((prev) =>
+            prev.map((thread) =>
+              thread.supplierId === activeThreadSupplierId
+                ? {
+                    ...thread,
+                    messages: thread.messages.map((m) =>
+                      m.id === msgId
+                        ? { ...m, translatedText: data.translatedText, targetLang: targetLanguage }
+                        : m
+                    ),
+                  }
+                : thread
+            )
+          );
+        }
+      } catch {
+        // Keep English text if translation call fails
+      } finally {
+        setTranslatingMsg(false);
+      }
+    }
+  };
+
+  const handleSimulateSellerReply = async (thread: BuyerConversationThread) => {
+    setTranslatingMsg(true);
+    const nowLabel = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const englishReply = `Yes, we manufacture ${thread.matchedProduct} in ${thread.matchedMaterial}. Sample units are ready at $${thread.samplePriceUSD} USD including DHL courier. You can pay the sample fee here via PayPal and we will dispatch within 5 days.`;
+
+    try {
+      // First get the seller's native-language message, then show it alongside English translation
+      const toNativeRes = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: englishReply,
+          sourceLanguage: "English",
+          targetLanguage: thread.preferredLanguage,
+        }),
+      });
+      const toNativeData = await toNativeRes.json();
+      const nativeText = toNativeData.translatedText || englishReply;
+
+      const toEnglishRes = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: nativeText,
+          sourceLanguage: thread.preferredLanguage,
+          targetLanguage: "English",
+        }),
+      });
+      const toEnglishData = await toEnglishRes.json();
+
+      setConversations((prev) =>
+        prev.map((t) =>
+          t.supplierId === thread.supplierId
+            ? {
+                ...t,
+                messages: [
+                  ...t.messages,
+                  {
+                    id: "msg_seller_" + Date.now(),
+                    sender: "seller",
+                    text: nativeText,
+                    translatedText: toEnglishData.translatedText || englishReply,
+                    sourceLang: thread.preferredLanguage,
+                    targetLang: "English",
+                    sentAt: `Today, ${nowLabel}`,
+                  },
+                ],
+              }
+            : t
+        )
+      );
+    } catch {
+      // Fallback
+    } finally {
+      setTranslatingMsg(false);
+    }
+  };
+
+  const handlePaySampleViaPayPal = async (thread: BuyerConversationThread) => {
+    setSamplePaypalLoading(true);
+    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+    try {
+      const res = await fetch("/api/trade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_paypal_payment",
+          tradeId: `sample_${thread.supplierId}_${Date.now()}`,
+          orderNumber: `SMP-${thread.supplierId.slice(-4).toUpperCase()}`,
+          amountUSD: thread.samplePriceUSD,
+          description: `Sample Order: ${thread.matchedProduct} (${thread.matchedMaterial})`,
+          returnUrl: `${origin}/buyer?paypal=sample_approved`,
+          cancelUrl: `${origin}/buyer?paypal=sample_cancelled`,
+          isAdvance: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.paymentOrder) {
+        const approveUrl =
+          data.paymentOrder.links?.find((l: { rel: string; href: string }) => l.rel === "approve")
+            ?.href || `https://www.sandbox.paypal.com/checkoutnow?token=${data.paymentOrder.id}`;
+        setConversations((prev) =>
+          prev.map((t) =>
+            t.supplierId === thread.supplierId
+              ? {
+                  ...t,
+                  samplePaypalOrderId: data.paymentOrder.id,
+                  samplePaypalUrl: approveUrl,
+                }
+              : t
+          )
+        );
+      }
+    } catch {
+      // Ignore network error
+    } finally {
+      setSamplePaypalLoading(false);
+    }
+  };
+
+  const handleRunOrderVerification = async (order: OrderWorkspaceItem) => {
+    setOrderVerifyLoading(true);
+    try {
+      const res = await fetch("/api/ai/verify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber: order.orderNumber,
+          supplierId: order.supplierId,
+          supplierName: order.supplierName,
+          productOrServiceName: order.productOrServiceName,
+          specifications: order.productOrServiceName,
+          totalAmountUSD: order.totalAmountUSD,
+          advanceDepositUSD: order.advanceDepositUSD,
+        }),
+      });
+      const data = await res.json();
+      if (data.status) {
+        setOrderVerification({
+          orderId: order.id,
+          status: data.status,
+          riskLevel: data.riskLevel || "LOW",
+          specAlignmentSummary: data.specAlignmentSummary,
+          warnings: data.warnings || [],
+          checks: data.checks || [],
+        });
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setOrderVerifyLoading(false);
+    }
   };
 
   // Filtered Suppliers
@@ -862,7 +1064,7 @@ export function TradeOracleBuyerApp() {
                         AI Seller &amp; Material Finder
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-semibold">
-                        NVIDIA NIM AI
+                        TradeOracle AI
                       </span>
                     </div>
                     <span className="text-[11px] text-stone-400 hidden sm:inline">
@@ -1224,7 +1426,7 @@ export function TradeOracleBuyerApp() {
                   <Sparkles className="w-4 h-4 text-[#3f7308] shrink-0" />
                   <input
                     type="text"
-                    placeholder="Ask NVIDIA AI to find the exact seller by material, coating, or product specs..."
+                    placeholder="Ask TradeOracle AI to find the exact seller by material, coating, or product specs..."
                     value={aiQuery}
                     onChange={(e) => setAiQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -1675,6 +1877,54 @@ export function TradeOracleBuyerApp() {
                   </div>
                 </div>
 
+                {/* TradeOracle AI Pre-Payment Spec & Risk Guard */}
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2 font-mono text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 font-bold text-[#18280e]">
+                      <Sparkles className="w-4 h-4 text-[#3f7308]" />
+                      <span>TradeOracle AI Spec &amp; Risk Check</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={orderVerifyLoading}
+                      onClick={() => void handleRunOrderVerification(selectedOrder)}
+                      className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#f4faed] border border-stone-200 text-[#18280e] font-bold text-[11px] cursor-pointer transition-colors disabled:opacity-50"
+                    >
+                      {orderVerifyLoading
+                        ? "Checking Specs & Risk..."
+                        : orderVerification?.orderId === selectedOrder.id
+                          ? "Re-check Specs & Risk"
+                          : "Verify Specs & Risk Before Paying"}
+                    </button>
+                  </div>
+                  {orderVerification?.orderId === selectedOrder.id && (
+                    <div className="pt-2 border-t border-stone-200 space-y-1.5 text-[11px]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded font-bold ${
+                            orderVerification.status === "VERIFIED"
+                              ? "bg-[#ebf7d9] text-[#284905]"
+                              : "bg-amber-100 text-amber-900"
+                          }`}
+                        >
+                          {orderVerification.status} · Risk: {orderVerification.riskLevel}
+                        </span>
+                        <span className="text-stone-700">{orderVerification.specAlignmentSummary}</span>
+                      </div>
+                      {orderVerification.warnings.map((w, i) => (
+                        <div key={i} className="text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                          ⚠ {w}
+                        </div>
+                      ))}
+                      {orderVerification.checks.map((c, i) => (
+                        <div key={i} className="text-[#284905]">
+                          ✓ {c}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* PayPal Sandbox Escrow Action Box */}
                 <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
                   <div className="space-y-1">
@@ -1965,14 +2215,14 @@ export function TradeOracleBuyerApp() {
                               {activeThread.supplierName}
                             </h3>
                             <span className="text-xs font-mono text-stone-500">
-                              {activeThread.supplierCity}
+                              {activeThread.supplierCity} · Preferred Language: <strong>{activeThread.preferredLanguage}</strong>
                             </span>
                           </div>
                           <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
-                            Direct Sample Inquiry
+                            Auto-Translate: English ↔ {activeThread.preferredLanguage}
                           </span>
                         </div>
-                        <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-mono space-y-1">
+                        <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-mono space-y-1.5">
                           <div className="text-[#18280e]">
                             Product: <strong>{activeThread.matchedProduct}</strong>
                           </div>
@@ -1982,6 +2232,43 @@ export function TradeOracleBuyerApp() {
                           <div className="text-stone-600 text-[11px]">
                             Sample Terms: {activeThread.samplePolicy}
                           </div>
+                          <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-[#d8e5ca]">
+                            {activeThread.samplePaypalUrl ? (
+                              <a
+                                href={activeThread.samplePaypalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-[11px] font-bold hover:bg-[#253d16] inline-flex items-center gap-1"
+                              >
+                                <span>Pay Sample (${activeThread.samplePriceUSD}) via PayPal</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={samplePaypalLoading}
+                                onClick={() => void handlePaySampleViaPayPal(activeThread)}
+                                className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-[11px] font-bold hover:bg-[#253d16] inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                              >
+                                <CreditCard className="w-3 h-3" />
+                                <span>
+                                  {samplePaypalLoading
+                                    ? "Creating PayPal Link..."
+                                    : `Create Sample PayPal Link ($${activeThread.samplePriceUSD})`}
+                                </span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              disabled={translatingMsg}
+                              onClick={() => void handleSimulateSellerReply(activeThread)}
+                              className="px-3 py-1.5 rounded-lg bg-white border border-[#d8e5ca] text-[#18280e] text-[11px] font-bold hover:bg-[#ebf7d9] cursor-pointer disabled:opacity-50"
+                            >
+                              {translatingMsg
+                                ? "Translating..."
+                                : `Test Seller Reply (${activeThread.preferredLanguage} → English)`}
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -1989,21 +2276,56 @@ export function TradeOracleBuyerApp() {
                       <div className="space-y-3 min-h-[140px]">
                         {activeThread.messages.length === 0 ? (
                           <p className="text-xs font-mono text-stone-400 py-6 text-center">
-                            No message sent to {activeThread.supplierName} yet. Customize your sample request below and click Send.
+                            No message sent to {activeThread.supplierName} yet. Write in English below — TradeOracle AI translates automatically to {activeThread.preferredLanguage}.
                           </p>
                         ) : (
-                          activeThread.messages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className="p-4 rounded-2xl bg-[#18280e] text-white space-y-1.5 ml-auto max-w-xl"
-                            >
-                              <div className="flex justify-between items-center text-[10px] font-mono text-[#b2eb76]">
-                                <strong>Marcus Vance (You)</strong>
-                                <span>{msg.sentAt}</span>
+                          activeThread.messages.map((msg) =>
+                            msg.sender === "buyer" ? (
+                              <div
+                                key={msg.id}
+                                className="p-4 rounded-2xl bg-[#18280e] text-white space-y-2 ml-auto max-w-xl"
+                              >
+                                <div className="flex justify-between items-center text-[10px] font-mono text-[#b2eb76]">
+                                  <strong>Marcus Vance (You · English)</strong>
+                                  <span>{msg.sentAt}</span>
+                                </div>
+                                <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                                {msg.translatedText && (
+                                  <div className="pt-2 border-t border-white/15 space-y-0.5">
+                                    <span className="text-[10px] font-mono text-[#b2eb76] block">
+                                      Translated to {msg.targetLang} (sent to seller):
+                                    </span>
+                                    <p className="text-xs text-stone-200 leading-relaxed whitespace-pre-wrap">
+                                      {msg.translatedText}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
-                              <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                            </div>
-                          ))
+                            ) : (
+                              <div
+                                key={msg.id}
+                                className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-[#18280e] space-y-2 mr-auto max-w-xl"
+                              >
+                                <div className="flex justify-between items-center text-[10px] font-mono text-[#3f7308]">
+                                  <strong>{activeThread.supplierName} ({msg.sourceLang})</strong>
+                                  <span>{msg.sentAt}</span>
+                                </div>
+                                {msg.translatedText && (
+                                  <p className="text-xs font-medium leading-relaxed whitespace-pre-wrap">
+                                    {msg.translatedText}
+                                  </p>
+                                )}
+                                <div className="pt-2 border-t border-[#d8e5ca] space-y-0.5">
+                                  <span className="text-[10px] font-mono text-stone-500 block">
+                                    Original in {msg.sourceLang} (translated to English):
+                                  </span>
+                                  <p className="text-[11px] text-stone-600 leading-relaxed whitespace-pre-wrap">
+                                    {msg.text}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          )
                         )}
                       </div>
 

@@ -28,6 +28,8 @@ export interface SupplierItem {
   finishes?: string[];
   certifications?: string[];
   samplePolicy?: string;
+  samplePriceUSD?: number;
+  preferredLanguage?: string;
   moq: string;
   leadTime: string;
   rating: number;
@@ -174,6 +176,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["PVD Satin Gold", "Matte Black Lacquer", "Brushed Nickel"],
     certifications: ["ISO 9001:2015", "ASTM B117 Salt Spray", "DGFT IEC Verified"],
     samplePolicy: "1-3 finished hardware sample units shipped via DHL Express in 5 days",
+    samplePriceUSD: 145,
+    preferredLanguage: "Gujarati",
     moq: "1,000 pcs",
     leadTime: "22 days",
     rating: 4.9,
@@ -209,6 +213,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["12-15 Micron Zinc-Nickel Alkaline", "Zinc Flake Geomet", "Hot-Dip Galvanized"],
     certifications: ["ISO 9001:2015", "DIN EN ISO 898-1", "QIMA Factory Audited"],
     samplePolicy: "Sample box of 20 tested bolts with metallurgical certificate shipped in 4 days",
+    samplePriceUSD: 120,
+    preferredLanguage: "Punjabi",
     moq: "10,000 pcs",
     leadTime: "25 days",
     rating: 4.8,
@@ -244,6 +250,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["Aged Beeswax Patina", "Unlacquered Living Brass", "Oil-Rubbed Bronze"],
     certifications: ["ISO 9001:2015", "RoHS Compliant", "DGFT IEC Verified"],
     samplePolicy: "Custom patina finish swatch & 1-piece hardware sample ready in 6 days",
+    samplePriceUSD: 165,
+    preferredLanguage: "Hindi",
     moq: "500 pcs",
     leadTime: "28 days",
     rating: 4.9,
@@ -279,6 +287,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["Garment Bio-Wash", "Reactive Garment Dye", "Screen & Puff Print Ready"],
     certifications: ["GOTS Organic", "OEKO-TEX Standard 100 Class 1", "QIMA Factory Audited"],
     samplePolicy: "Pre-production GSM fabric swatches & 2 size-set garment samples in 7 days",
+    samplePriceUSD: 95,
+    preferredLanguage: "Tamil",
     moq: "1,500 pcs",
     leadTime: "30 days",
     rating: 4.95,
@@ -314,6 +324,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["SOC-2 Ready Architecture", "CI/CD Automated Test Suite", "Production API Integration"],
     certifications: ["SOC-2 Type II", "STPI Softex Exporter", "ISO 27001"],
     samplePolicy: "Free 3-day technical architecture spike / prototype proof-of-concept before sprint",
+    samplePriceUSD: 250,
+    preferredLanguage: "Kannada",
     moq: "2-Week Sprint",
     leadTime: "Immediate",
     rating: 5.0,
@@ -349,6 +361,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["Electropolished SS316", "Passivated ASTM A967", "Raw Precision Machined"],
     certifications: ["ISO 9001:2015", "CE Mark", "IATF 16949"],
     samplePolicy: "2 CNC first-article sample parts with CMM inspection readout in 6 days",
+    samplePriceUSD: 180,
+    preferredLanguage: "Gujarati",
     moq: "500 pcs",
     leadTime: "18 days",
     rating: 4.9,
@@ -384,6 +398,8 @@ export const INITIAL_SUPPLIERS: SupplierItem[] = [
     finishes: ["Type III Hard Anodized", "Mil-Spec Chem Film", "Bead Blasted Bare Titanium"],
     certifications: ["AS9100D", "ISO 9001:2015", "Nadcap NDT Certified"],
     samplePolicy: "First-article CMM-verified CNC sample part dispatched within 8 days",
+    samplePriceUSD: 220,
+    preferredLanguage: "Kannada",
     moq: "100 pcs",
     leadTime: "20 days",
     rating: 4.95,
