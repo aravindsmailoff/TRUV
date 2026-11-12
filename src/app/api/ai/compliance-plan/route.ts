@@ -98,6 +98,17 @@ function buildFallbackPlan(
       estimatedFeeUSD: 190,
     });
   }
+  if (lowerCountries.some((c) => c.includes("japan") || c.includes("pse"))) {
+    certs.push({
+      markName: "PSE / JIS Conformity",
+      country: "Japan",
+      standardCode: "JIS / METI Export Standard",
+      purpose: "Japanese industrial & electrical/hardware conformity marking.",
+      labPartner: "TÜV Rheinland Japan / JET",
+      estimatedDays: "8-12 days",
+      estimatedFeeUSD: 340,
+    });
+  }
 
   return {
     poweredBy: "TradeOracle AI",
@@ -165,28 +176,34 @@ Material: ${material}
 Target Countries: ${targetCountries.join(", ")}
 Seller Preferred Language: ${preferredLanguage}`;
 
-    const aiRes = await fetch(AI_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        temperature: 0.15,
-        max_tokens: 1100,
-        chat_template_kwargs: { enable_thinking: false },
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+    const fallback = buildFallbackPlan(productName, material, targetCountries, companyName);
+
+    let aiRes: Response;
+    try {
+      aiRes = await fetch(AI_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: AI_MODEL,
+          temperature: 0.15,
+          max_tokens: 2200,
+          chat_template_kwargs: { enable_thinking: false },
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch {
+      return NextResponse.json(fallback);
+    }
 
     if (!aiRes.ok) {
-      return NextResponse.json(
-        buildFallbackPlan(productName, material, targetCountries, companyName)
-      );
+      return NextResponse.json(fallback);
     }
 
     const aiJson = (await aiRes.json()) as {
@@ -196,20 +213,21 @@ Seller Preferred Language: ${preferredLanguage}`;
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
-      return NextResponse.json(
-        buildFallbackPlan(productName, material, targetCountries, companyName)
-      );
+      return NextResponse.json(fallback);
     }
 
-    const parsed = JSON.parse(jsonMatch[0]) as {
+    let parsed: {
       hsCode?: string;
       nativeSummary?: string;
       requiredCertificates?: CertificateRequirement[];
       generatedDossier?: string;
       packagingLabelSpecs?: string[];
     };
-
-    const fallback = buildFallbackPlan(productName, material, targetCountries, companyName);
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      return NextResponse.json(fallback);
+    }
     const englishSummary = parsed.nativeSummary || fallback.nativeSummary;
     const translatedSummary =
       preferredLanguage.toLowerCase() === "english"
