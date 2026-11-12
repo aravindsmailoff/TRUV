@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#F4FAED" rx="16"/>
+  <text 
+    x="50%" 
+    y="56%" 
+    dominant-baseline="middle" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+    font-size="64" 
+    font-weight="900" 
+    letter-spacing="-0.03em" 
+    fill="#18280E"
+  >TRUVX<tspan fill="#79A83E">.</tspan></text>
+</svg>
+
