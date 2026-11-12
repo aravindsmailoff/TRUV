@@ -29,14 +29,6 @@ const INDUSTRIES: IndustryItem[] = [
     position: "right",
     videoTime: 2.5,
   },
-  {
-    tag: "[SERVICES]",
-    title: "Support the trade journey",
-    description: "Connect expertise and services with businesses working across borders.",
-    href: "/solutions/service",
-    position: "left",
-    videoTime: 4.5,
-  },
 ];
 
 export function IndustriesGrid() {

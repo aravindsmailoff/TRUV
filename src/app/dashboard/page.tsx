@@ -202,8 +202,6 @@ export default function DashboardPage() {
       router.push("/signin?role=manufacturer");
     } else if (currentUser.role === "buyer") {
       router.push("/buyer");
-    } else if (currentUser.role === "service") {
-      router.push("/service");
     }
   }, [currentUser, isHydrated, router]);
 

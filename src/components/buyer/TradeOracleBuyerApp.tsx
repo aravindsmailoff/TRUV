@@ -106,8 +106,6 @@ export function TradeOracleBuyerApp() {
       router.push("/signin?role=buyer");
     } else if (currentUser.role === "manufacturer") {
       router.push("/dashboard");
-    } else if (currentUser.role === "service") {
-      router.push("/service");
     }
   }, [currentUser, isHydrated, router]);
 

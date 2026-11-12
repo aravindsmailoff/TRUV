@@ -130,27 +130,7 @@ export function Navbar() {
                       </div>
                     </Link>
 
-                    {/* 3. Freelancers & IT Agencies */}
-                    <Link
-                      href="/solutions/service"
-                      onClick={() => setSolutionsOpen(false)}
-                      className="group flex items-start gap-3.5 p-3 rounded-xl hover:bg-[#f4faed] transition-colors border border-transparent hover:border-[#d8e5ca]"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-800 group-hover:bg-[#18280e] group-hover:text-[#b2eb76] transition-all shrink-0 shadow-xs">
-                        <Code2 className="w-5 h-5 stroke-[1.75]" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-stone-900 group-hover:text-[#18280e] flex items-center gap-2">
-                          <span>Freelancers &amp; IT Agencies</span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold">
-                            Service Export
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-stone-500 leading-snug mt-0.5">
-                          Explore opportunities for international service providers.
-                        </p>
-                      </div>
-                    </Link>
+                    {/* 3. Freelancers & IT Agencies removed */}
                   </div>
                 )}
               </li>
@@ -303,16 +283,6 @@ export function Navbar() {
               <Globe className="w-3.5 h-3.5" />
             </div>
             <span>Foreign Buyers</span>
-          </Link>
-          <Link
-            href="/solutions/service"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 py-2 text-stone-800 font-bold hover:text-[#3f7308]"
-          >
-            <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-800">
-              <Code2 className="w-3.5 h-3.5" />
-            </div>
-            <span>Freelancers &amp; IT Agencies</span>
           </Link>
           <div className="pt-2 border-t border-stone-100">
             <Link href="/#customers" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-stone-600">

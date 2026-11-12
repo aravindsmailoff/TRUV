@@ -18,7 +18,6 @@ interface SmoothScrollProps {
 const NATIVE_SCROLL_PREFIXES = [
   "/dashboard",
   "/buyer",
-  "/service",
   "/admin",
   "/signin",
   "/signup",

@@ -97,16 +97,12 @@ function SignInContent() {
       text:
         res.user?.role === "buyer"
           ? "Foreign Buyer Account verified! Redirecting to Global Sourcing Portal..."
-          : res.user?.role === "service"
-          ? "Freelancer / Agency verified! Redirecting to Service Portal..."
           : "Indian Manufacturer Account verified! Redirecting to Factory Dashboard...",
     });
 
     setTimeout(() => {
       if (res.user?.role === "buyer") {
         router.push("/buyer");
-      } else if (res.user?.role === "service") {
-        router.push("/service");
       } else {
         router.push("/dashboard");
       }
@@ -140,18 +136,6 @@ function SignInContent() {
         >
           <Globe2 className="w-3.5 h-3.5" />
           <span>Foreign Buyer</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => handleRoleTabClick("service")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-[11px] font-mono font-semibold transition-all ${
-            activeRole === "service"
-              ? "bg-[#18280e] text-[#b2eb76] shadow-sm"
-              : "text-stone-600 hover:text-stone-900"
-          }`}
-        >
-          <Code2 className="w-3.5 h-3.5" />
-          <span>Freelancer</span>
         </button>
       </div>
 

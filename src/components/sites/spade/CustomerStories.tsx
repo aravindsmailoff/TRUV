@@ -11,7 +11,6 @@ export function CustomerStories() {
   const stories = [
     { company: "Buyers", bgClass: "bg-[#71552a] text-white", quote: "Start with your product requirements, compare manufacturer capabilities and follow your sourcing journey in one place.", author: "TRUVX", role: "Buyer workflow", stats: [{ value: "01", label: "Share your requirements and specifications" }, { value: "02", label: "Review suppliers and quotations" }], href: "/solutions/buyer" },
     { company: "Manufacturers", bgClass: "bg-[#18280E] text-white", quote: "Showcase your manufacturing capabilities and manage opportunities from international buyers through a single workspace.", author: "TRUVX", role: "Manufacturer workflow", stats: [{ value: "01", label: "Present your products and capabilities" }, { value: "02", label: "Follow orders and trade milestones" }], href: "/solutions/manufacturer" },
-    { company: "Service providers", bgClass: "bg-[#1f2833] text-white", quote: "Bring the expertise businesses need into the wider cross-border trade journey.", author: "TRUVX", role: "Service workflow", stats: [{ value: "01", label: "Connect your services to opportunities" }, { value: "02", label: "Collaborate across the trade journey" }], href: "/solutions/service" },
   ];
 
   const current = stories[activeSlide];

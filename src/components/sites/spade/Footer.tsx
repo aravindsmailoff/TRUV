@@ -86,7 +86,7 @@ export function Footer() {
             {/* Link Columns */}
             <nav aria-label="Footer navigation" className="w-full flex-1">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-10 lg:gap-14">
-                <div><h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-white/50 mb-4">Solutions</h3><ul className="space-y-3 text-sm text-stone-300"><li><Link href="/solutions/buyer">For buyers</Link></li><li><Link href="/solutions/manufacturer">For manufacturers</Link></li><li><Link href="/solutions/service">For service providers</Link></li></ul></div>
+                <div><h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-white/50 mb-4">Solutions</h3><ul className="space-y-3 text-sm text-stone-300"><li><Link href="/solutions/buyer">For buyers</Link></li><li><Link href="/solutions/manufacturer">For manufacturers</Link></li></ul></div>
                 <div><h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-white/50 mb-4">Explore</h3><ul className="space-y-3 text-sm text-stone-300"><li><Link href="/#trade-execution">How it works</Link></li><li><Link href="/#customers">Trade workflows</Link></li><li><Link href="/dashboard">Dashboard</Link></li></ul></div>
                 <div><h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-white/50 mb-4">Account</h3><ul className="space-y-3 text-sm text-stone-300"><li><Link href="/signin">Sign in</Link></li><li><Link href="/signup">Request access</Link></li></ul></div>
               </div>
