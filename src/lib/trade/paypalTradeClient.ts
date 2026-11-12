@@ -63,14 +63,19 @@ export class PayPalTradeClient {
     amountUSD: number;
     description: string;
     payeeEmail?: string;
+    returnUrl?: string;
+    cancelUrl?: string;
   }) {
-    const { tradeOrder, amountUSD, description, payeeEmail } = params;
+    const { tradeOrder, amountUSD, description, payeeEmail, returnUrl, cancelUrl } = params;
 
     if (!this.isConfigured) {
       throw new Error("PayPal is not configured. Set sandbox credentials before creating a payment.");
     }
 
     const token = await this.getAccessToken();
+    const isValidSandboxPayee = Boolean(
+      payeeEmail && payeeEmail.endsWith("@business.example.com")
+    );
     const payload = {
       intent: "CAPTURE",
       purchase_units: [
@@ -82,7 +87,7 @@ export class PayPalTradeClient {
             currency_code: "USD",
             value: amountUSD.toFixed(2),
           },
-          ...(payeeEmail
+          ...(isValidSandboxPayee
             ? {
                 payee: {
                   email_address: payeeEmail,
@@ -92,11 +97,11 @@ export class PayPalTradeClient {
         },
       ],
       application_context: {
-        brand_name: "Global Trade Execution Network",
-        landing_page: "BILLING",
+        brand_name: "TradeOracle",
+        landing_page: "LOGIN",
         user_action: "PAY_NOW",
-        return_url: "http://localhost:3000/use-case/risk-authorization?payment=success",
-        cancel_url: "http://localhost:3000/use-case/risk-authorization?payment=cancelled",
+        return_url: returnUrl || "http://localhost:3000/buyer?paypal=approved",
+        cancel_url: cancelUrl || "http://localhost:3000/buyer?paypal=cancelled",
       },
     };
 
@@ -123,7 +128,8 @@ export const payPalTradeClient = new PayPalTradeClient();
 export async function createPayPalOrderForTrade(
   trade: CommercialTradeOrder,
   mfg?: IndianManufacturer,
-  isAdvance: boolean = true
+  isAdvance: boolean = true,
+  urls?: { returnUrl?: string; cancelUrl?: string }
 ) {
   const amount = isAdvance ? trade.advanceDepositRequiredUSD : trade.balanceDueUSD;
   const description = isAdvance
@@ -135,6 +141,8 @@ export async function createPayPalOrderForTrade(
     amountUSD: amount,
     description,
     payeeEmail: mfg?.paypalEmail,
+    returnUrl: urls?.returnUrl,
+    cancelUrl: urls?.cancelUrl,
   });
 }
 

@@ -587,7 +587,6 @@ export const INITIAL_ORDERS: OrderWorkspaceItem[] = [
       status: "ADVANCE_HELD_ESCROW",
       paidAdvanceUSD: 25725,
       paidBalanceUSD: 0,
-      approvalUrl: "https://www.sandbox.paypal.com/checkoutnow?token=6XJ491024PL",
       lastUpdated: "2026-01-12T14:30:00Z",
     },
     disputeEvidence: {
@@ -646,7 +645,6 @@ export const INITIAL_ORDERS: OrderWorkspaceItem[] = [
       status: "ADVANCE_HELD_ESCROW",
       paidAdvanceUSD: 1500,
       paidBalanceUSD: 0,
-      approvalUrl: "https://www.sandbox.paypal.com/checkoutnow?token=8PL2049182K",
       lastUpdated: "2026-01-22T10:15:00Z",
     },
     disputeEvidence: {

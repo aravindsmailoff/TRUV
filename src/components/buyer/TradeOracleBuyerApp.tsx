@@ -328,13 +328,23 @@ export function TradeOracleBuyerApp() {
   const handleExecutePayPalPayment = async (orderId: string, isAdvance: boolean) => {
     setPaypalLoading(true);
     setPaypalSuccessMsg(null);
+    const targetOrder = orders.find((o) => o.id === orderId) || selectedOrder;
+    const amountUSD = isAdvance ? targetOrder.advanceDepositUSD : targetOrder.balanceUSD;
+    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
     try {
       const res = await fetch("/api/trade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "create_paypal_payment",
-          tradeId: "trade_live_7719",
+          tradeId: targetOrder.id,
+          orderNumber: targetOrder.orderNumber,
+          amountUSD,
+          description: isAdvance
+            ? `30% Advance Deposit for ${targetOrder.productOrServiceName} (PO: ${targetOrder.orderNumber})`
+            : `70% Balance Payment for ${targetOrder.productOrServiceName} (PO: ${targetOrder.orderNumber})`,
+          returnUrl: `${origin}/buyer?paypal=approved`,
+          cancelUrl: `${origin}/buyer?paypal=cancelled`,
           isAdvance,
         }),
       });
@@ -384,7 +394,7 @@ export function TradeOracleBuyerApp() {
 
         setPaypalSuccessMsg({
           orderId: data.paymentOrder.id,
-          amount: isAdvance ? `$${selectedOrder.advanceDepositUSD.toLocaleString()} USD (30% Advance)` : `$${selectedOrder.balanceUSD.toLocaleString()} USD (70% Balance)`,
+          amount: isAdvance ? `$${targetOrder.advanceDepositUSD.toLocaleString()} USD (30% Advance)` : `$${targetOrder.balanceUSD.toLocaleString()} USD (70% Balance)`,
         });
       }
     } catch {
@@ -1695,16 +1705,26 @@ export function TradeOracleBuyerApp() {
                         <Check className="w-4 h-4" />
                         <span>Advance Held (Ref: {selectedOrder.paypalTransaction.orderId})</span>
                       </span>
-                      {selectedOrder.paypalTransaction.approvalUrl && (
+                      {selectedOrder.paypalTransaction.approvalUrl ? (
                         <a
                           href={selectedOrder.paypalTransaction.approvalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-xs font-bold hover:bg-[#253d16] flex items-center gap-1"
                         >
-                          <span>Checkout Receipt</span>
+                          <span>Open PayPal Checkout</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={paypalLoading}
+                          onClick={() => handleExecutePayPalPayment(selectedOrder.id, true)}
+                          className="px-3 py-1.5 rounded-lg bg-[#18280e] text-[#b2eb76] text-xs font-bold hover:bg-[#253d16] flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{paypalLoading ? "Connecting..." : "Create Live PayPal Checkout"}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </button>
                       )}
                     </div>
                   )}

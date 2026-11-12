@@ -130,14 +130,33 @@ export async function POST(req: NextRequest) {
 
     // 4. Create PayPal Direct Commercial Payment (Uses User's Sandbox Account)
     if (action === "create_paypal_payment") {
-      const { tradeId, isAdvance = true } = body;
+      const { tradeId, isAdvance = true, amountUSD, description, orderNumber, returnUrl, cancelUrl } = body;
       const trade = tradeStore.getTrade(tradeId);
+
+      if (typeof amountUSD === "number" && amountUSD > 0) {
+        const paymentOrder = await payPalTradeClient.createTradePaymentOrder({
+          tradeOrder: {
+            ...(trade || tradeStore.getTrades()[0]),
+            id: tradeId || `ord_${Date.now()}`,
+            orderNumber: orderNumber || trade?.orderNumber || "PO-TRADE",
+          },
+          amountUSD,
+          description: description || `TradeOracle Order Payment (${orderNumber || tradeId})`,
+          returnUrl,
+          cancelUrl,
+        });
+        return NextResponse.json({ success: true, paymentOrder, paymentState: "awaiting_approval" });
+      }
+
       if (!trade) {
         return NextResponse.json({ error: "Trade not found" }, { status: 404 });
       }
 
       const mfg = tradeStore.getManufacturer(trade.manufacturerId);
-      const paymentOrder = await createPayPalOrderForTrade(trade, mfg, isAdvance);
+      const paymentOrder = await createPayPalOrderForTrade(trade, mfg, isAdvance, {
+        returnUrl,
+        cancelUrl,
+      });
 
       // An order is only a request for approval. No payment has been captured yet.
       return NextResponse.json({ success: true, paymentOrder, paymentState: "awaiting_approval" });
