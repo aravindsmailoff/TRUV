@@ -386,6 +386,31 @@ export function TradeOracleBuyerApp() {
     setIsRfqModalOpen(false);
     setActiveTab("orders");
 
+    // Persist RFQ to live backend tradeStore so Seller Portal sees it immediately
+    const qty = Number(rfqForm.quantity) || 1;
+    void fetch("/api/trade", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "submit_rfq",
+        buyerName: "Marcus Vance",
+        buyerCompany: "Pacific Architectural Hardware LLC",
+        buyerCountry: "United States",
+        buyerEmail: "m.vance@pacificarchhardware.com",
+        productCategory: rfqForm.category || "Architectural Brass Hardware",
+        productName: productTitle,
+        technicalSpecifications: (rfqForm.specifications || "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        targetQuantity: qty,
+        targetPricePerUnit: Number((totalAmount / qty).toFixed(2)),
+        currency: "USD",
+        targetDeliveryDate: rfqForm.deliveryDate || "2026-07-30",
+        destinationPort: rfqForm.destinationPort || "Port of Los Angeles (USLAX)",
+      }),
+    }).catch(() => {});
+
     // Auto-dispatch real WhatsApp alerts to both Manufacturer and Buyer
     void triggerAutomatedWhatsAppAlert({
       role: "manufacturer",

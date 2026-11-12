@@ -257,6 +257,88 @@ export default function DashboardPage() {
     buyerReassuranceNote: string;
     updatedAt: string;
   } | null>(null);
+
+  // Live Backend Engine State (from /api/trade)
+  const [liveTrades, setLiveTrades] = useState<
+    Array<{
+      id: string;
+      orderNumber: string;
+      buyerCompany: string;
+      buyerCountry: string;
+      productName: string;
+      quantityUnits: number;
+      totalAmountUSD: number;
+      advanceDepositRequiredUSD: number;
+      currentStage: string;
+      sellerDispatchUpdate?: {
+        packingStatus: string;
+        govtCargoService: string;
+        trackingNumber: string;
+        buyerReassuranceNote: string;
+      };
+    }>
+  >([]);
+  const [liveRfqs, setLiveRfqs] = useState<
+    Array<{
+      id: string;
+      rfqNumber: string;
+      buyerCompany: string;
+      buyerCountry: string;
+      productName: string;
+      targetQuantity: number;
+      targetPricePerUnit: number;
+      destinationPort: string;
+      status: string;
+    }>
+  >([]);
+  const [acceptingRfqId, setAcceptingRfqId] = useState<string | null>(null);
+
+  const fetchLiveEngineState = async () => {
+    try {
+      const res = await fetch("/api/trade");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data.trades)) {
+        setLiveTrades(data.trades);
+        if (data.trades.length > 0 && !cargoOrderNumber) {
+          setCargoOrderNumber(data.trades[0].orderNumber);
+        }
+      }
+      if (Array.isArray(data.rfqs)) {
+        setLiveRfqs(data.rfqs);
+      }
+    } catch {
+      // Ignore network error
+    }
+  };
+
+  useEffect(() => {
+    void fetchLiveEngineState();
+  }, []);
+
+  const handleAcceptBuyerRfq = async (rfqId: string) => {
+    setAcceptingRfqId(rfqId);
+    try {
+      const res = await fetch("/api/trade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "seller_accept_rfq",
+          rfqId,
+          manufacturerName: currentUser?.companyName || "Moradabad Precision Foundry & Castings LLP",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.trade) {
+        setCargoOrderNumber(data.trade.orderNumber);
+        await fetchLiveEngineState();
+      }
+    } catch {
+      // Ignore network error
+    } finally {
+      setAcceptingRfqId(null);
+    }
+  };
   const [autoApplications, setAutoApplications] = useState<
     Record<
       string,
@@ -836,6 +918,7 @@ export default function DashboardPage() {
           orderNumber: cargoOrderNumber,
           ...data.trade.sellerDispatchUpdate,
         });
+        void fetchLiveEngineState();
       }
     } catch {
       // Ignore network error
@@ -1965,6 +2048,64 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
+                {liveRfqs.length > 0 && (
+                  <div className="space-y-2.5">
+                    {liveRfqs.map((rfq) => {
+                      const totalUSD = Math.round(rfq.targetQuantity * rfq.targetPricePerUnit);
+                      const isContracted = rfq.status === "contracted";
+                      return (
+                        <div
+                          key={rfq.id}
+                          className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+                        >
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                                LIVE RFQ · {rfq.rfqNumber}
+                              </span>
+                              <strong className="text-[#18280e] text-sm">{rfq.productName}</strong>
+                            </div>
+                            <p className="text-stone-700 text-xs mt-1">
+                              Buyer: <strong>{rfq.buyerCompany}</strong> ({rfq.buyerCountry}) • Qty:{" "}
+                              <strong>{rfq.targetQuantity.toLocaleString()} pcs</strong> • Port: {rfq.destinationPort}
+                            </p>
+                          </div>
+                          <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end gap-2">
+                            <div>
+                              <span className="font-bold text-sm text-[#18280e] block">
+                                ${totalUSD.toLocaleString()} USD
+                              </span>
+                              <span className="text-xs text-[#3f7308] font-bold">
+                                ≈ ₹{((totalUSD * 83.5) / 100000).toFixed(2)} Lakhs
+                              </span>
+                            </div>
+                            {isContracted ? (
+                              <button
+                                type="button"
+                                onClick={() => setActiveNav("customs_bl")}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold cursor-pointer"
+                              >
+                                Accepted ✓ · Pack &amp; Ship →
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={acceptingRfqId === rfq.id}
+                                onClick={() => void handleAcceptBuyerRfq(rfq.id)}
+                                className="px-3 py-1.5 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+                              >
+                                {acceptingRfqId === rfq.id
+                                  ? "Accepting & Notifying Buyer..."
+                                  : "Accept Order & Notify Buyer →"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {LAYMAN_ORDERS.map((ord) => (
                   <div
                     key={ord.id}
@@ -2517,7 +2658,14 @@ export default function DashboardPage() {
                       onChange={(e) => setCargoOrderNumber(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
                     >
-                      {LAYMAN_ORDERS.map((ord) => (
+                      {liveTrades.map((tr) => (
+                        <option key={tr.id} value={tr.orderNumber}>
+                          {tr.orderNumber} — {tr.productName} ({tr.buyerCompany})
+                        </option>
+                      ))}
+                      {LAYMAN_ORDERS.filter(
+                        (ord) => !liveTrades.some((t) => t.orderNumber === ord.orderNumber)
+                      ).map((ord) => (
                         <option key={ord.id} value={ord.orderNumber}>
                           {ord.orderNumber} — {ord.productName} ({ord.foreignBuyer.company})
                         </option>

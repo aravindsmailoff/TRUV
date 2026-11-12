@@ -258,6 +258,32 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // 7. Seller Accepts Live Buyer RFQ -> Creates Order + Notifies Buyer
+    if (action === "seller_accept_rfq") {
+      const { rfqId, manufacturerName } = body;
+      const trade = tradeStore.acceptRFQAndCreateOrder({ rfqId, manufacturerName });
+
+      const aiMsg = await notificationEngine.generateAIReassurance({
+        orderNumber: trade.orderNumber,
+        productName: trade.productName,
+        packingStatus: "accepted",
+        govtCargoService: trade.freightForwarder.name,
+        trackingNumber: "PENDING-PACKING",
+        buyerCompany: trade.buyerCompany,
+        buyerCountry: trade.buyerCountry,
+        sellerNote: "Manufacturer accepted your RFQ and started production & export packing.",
+      });
+
+      const notification = await notificationEngine.emitBuyerNotification({
+        orderNumber: trade.orderNumber,
+        eventType: "milestone_completed",
+        title: `Order Accepted by ${trade.manufacturerName}`,
+        message: aiMsg,
+      });
+
+      return NextResponse.json({ success: true, trade, notification });
+    }
+
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (err) {
     return NextResponse.json(

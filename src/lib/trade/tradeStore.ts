@@ -569,6 +569,62 @@ class TradeStore {
     this.saveToDisk();
     return { trade, milestone };
   }
+
+  public acceptRFQAndCreateOrder(params: {
+    rfqId: string;
+    manufacturerName?: string;
+  }): CommercialTradeOrder {
+    const rfq = this.rfqs.find((r) => r.id === params.rfqId);
+    if (!rfq) {
+      throw new Error("RFQ not found");
+    }
+    rfq.status = "contracted";
+
+    const totalUSD = Math.round(rfq.targetQuantity * rfq.targetPricePerUnit);
+    const advanceUSD = Math.round(totalUSD * 0.3);
+    const balanceUSD = totalUSD - advanceUSD;
+
+    const newTrade: CommercialTradeOrder = {
+      id: `trade_${Date.now()}`,
+      orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
+      rfqId: rfq.id,
+      buyerCompany: rfq.buyerCompany,
+      buyerCountry: rfq.buyerCountry,
+      manufacturerId: "mfg_brass_moradabad",
+      manufacturerName: params.manufacturerName || "Moradabad Precision Foundry & Castings LLP",
+      productName: rfq.productName,
+      quantityUnits: rfq.targetQuantity,
+      totalAmountUSD: totalUSD,
+      advanceDepositRequiredUSD: advanceUSD,
+      balanceDueUSD: balanceUSD,
+      currentStage: "advance_payment_pending",
+      inspectionAgency: {
+        name: "QIMA Inspection India",
+        status: "pending",
+      },
+      freightForwarder: {
+        name: "CONCOR (Container Corp of India - Govt. of India)",
+        portOfLoading: "Port of Mundra (INMUN)",
+        portOfDischarge: rfq.destinationPort,
+      },
+      customsBroker: {
+        brokerLicense: "CHA-MUNDRA-R-8841",
+        letExportOrderGranted: false,
+      },
+      financialPayment: {
+        advancePaymentStatus: "unpaid",
+        balancePaymentStatus: "unpaid",
+        reconciled: false,
+        directPayeeMerchantId: "PP_MERCHANT_MORADABAD",
+      },
+      createdAt: new Date().toISOString(),
+      estimatedDeliveryDate: rfq.targetDeliveryDate,
+    };
+
+    this.trades.unshift(newTrade);
+    this.saveToDisk();
+    return newTrade;
+  }
 }
 
 export const tradeStore = new TradeStore();
