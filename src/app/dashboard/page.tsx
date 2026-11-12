@@ -1432,24 +1432,6 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Date Range Selector */}
-            <div className="hidden 2xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
-              <Calendar className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
-              <span>Jan 1 – Feb 1, 2026</span>
-              <span className="text-[#d8e5ca]">|</span>
-              <span className="font-semibold">30d ∨</span>
-            </div>
-
-            {/* Add Widget Button */}
-            <button
-              type="button"
-              className="hidden 2xl:flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-stone-200 bg-white hover:bg-[#f4faed] text-xs font-sans font-medium text-[#18280e] transition-colors shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
-              onClick={() => alert("Customize Dashboard Widgets: Added payment monitor")}
-            >
-              <LayoutDashboard className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-              <span>Add widget</span>
-            </button>
-
             {/* WhatsApp Automation Center */}
             <WhatsAppNotificationCenter role="manufacturer" compact={true} />
 
@@ -1465,11 +1447,6 @@ export default function DashboardPage() {
 
             {/* Sign Out */}
             <div className="flex items-center gap-2 pl-2.5 border-l border-stone-200 shrink-0">
-              {currentUser && (
-                <span className="text-xs font-sans text-stone-500 hidden 2xl:inline px-1 whitespace-nowrap">
-                  {currentUser.email}
-                </span>
-              )}
               <button
                 type="button"
                 onClick={() => {
@@ -1799,10 +1776,99 @@ export default function DashboardPage() {
 
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-mono px-3.5 py-1.5 rounded-full bg-[#ebf7d9] text-[#18280e] font-bold border border-[#d8e5ca]">
-                    3 Verified Foreign RFQs
+                    {liveRfqs.length > 0 ? `${liveRfqs.length} Live + ` : ""}3 Verified Foreign RFQs
                   </span>
                 </div>
               </div>
+
+              {/* Live Incoming Buyer RFQs from /buyer Portal */}
+              {liveRfqs.length > 0 && (
+                <div className="bg-[#f4faed] border border-[#3f7308]/30 rounded-3xl p-5 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-[#3f7308] block">
+                        LIVE ENGINE • REAL BUYER REQUESTS
+                      </span>
+                      <h3 className="text-base font-bold text-[#18280e]">
+                        Live Orders Placed from Buyer Portal ({liveRfqs.length})
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void fetchLiveEngineState()}
+                      className="text-xs font-mono font-bold text-[#3f7308] hover:underline cursor-pointer"
+                    >
+                      Refresh Live Feed
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {liveRfqs.map((rfq) => {
+                      const totalUSD = Math.round(rfq.targetQuantity * rfq.targetPricePerUnit);
+                      const isContracted = rfq.status === "contracted";
+                      return (
+                        <div
+                          key={rfq.id}
+                          className="bg-white rounded-2xl border border-[#d8e5ca] p-4 flex flex-col justify-between gap-3"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className="font-bold text-sm text-[#18280e] block">{rfq.productName}</span>
+                              <span className="text-xs text-stone-600 block">
+                                {rfq.buyerCompany} ({rfq.buyerCountry}) • {rfq.targetQuantity.toLocaleString()} units @ ${rfq.targetPricePerUnit}
+                              </span>
+                              <span className="text-xs font-mono font-bold text-[#3f7308] block mt-0.5">
+                                Total: ${totalUSD.toLocaleString()} USD
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#18280e] font-bold shrink-0">
+                              {isContracted ? "Accepted" : "New RFQ"}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {!isContracted ? (
+                              <button
+                                type="button"
+                                disabled={acceptingRfqId === rfq.id}
+                                onClick={() => void handleAcceptBuyerRfq(rfq.id)}
+                                className="px-3.5 py-2 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-bold cursor-pointer disabled:opacity-50"
+                              >
+                                {acceptingRfqId === rfq.id ? "Accepting & Notifying Buyer..." : "Accept Order & Notify Buyer →"}
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCertProduct(rfq.productName);
+                                    setActiveNav("quality_qima");
+                                  }}
+                                  className="px-3 py-1.5 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] text-xs font-bold cursor-pointer"
+                                >
+                                  Get Govt Certs →
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const matchingTrade = liveTrades.find(
+                                      (t) => t.productName === rfq.productName && t.buyerCompany === rfq.buyerCompany
+                                    );
+                                    if (matchingTrade) setCargoOrderNumber(matchingTrade.orderNumber);
+                                    setActiveNav("customs_bl");
+                                  }}
+                                  className="px-3 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[#b2eb76] text-xs font-bold cursor-pointer"
+                                >
+                                  Pack &amp; Govt Cargo →
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* 3 E-Commerce Style Product / Buyer Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1893,17 +1959,17 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      {/* Kokonut UI SlideToConfirm Button (Replacing the Ugly Buttons) */}
-                      <div className="pt-2 space-y-2">
+                      {/* Actionable SlideToConfirm + Real Workflow Shortcuts */}
+                      <div className="pt-2 space-y-2.5" onClick={(e) => e.stopPropagation()}>
                         {isLocked ? (
                           <div className="h-11 rounded-xl bg-[#18280e] text-[#b2eb76] font-mono text-xs font-bold flex items-center justify-center gap-2 shadow-xs">
                             <Check className="w-4 h-4" />
-                            <span>Deal marked as reviewed</span>
+                            <span>Deal Accepted &amp; Buyer Notified</span>
                           </div>
                         ) : (
                           <SlideToConfirm
-                            text="Slide to mark deal as reviewed"
-                            confirmedText="Deal marked as reviewed"
+                            text="Slide to Accept & Notify Buyer"
+                            confirmedText="Deal Accepted & Buyer Notified"
                             onConfirm={() => {
                               setLockedOrderIds((prev) => ({ ...prev, [order.id]: true }));
                               setSelectedLaymanOrder(order);
@@ -1917,20 +1983,51 @@ export default function DashboardPage() {
                                 quantity: order.quantityUnits,
                                 amountUSD: order.totalDealUSD,
                               });
+                              void fetch("/api/trade", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  action: "seller_update_packing_cargo",
+                                  orderNumber: order.orderNumber,
+                                  packingStatus: "accepted",
+                                  buyerEmail: "buyer@tradeoracle.demo",
+                                  sellerNote: `Accepted ${order.productName} (${order.quantityUnits.toLocaleString()} units) and started factory preparation.`,
+                                }),
+                              }).then(() => fetchLiveEngineState());
                             }}
                           />
                         )}
 
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCertProduct(order.productName);
+                              setActiveNav("quality_qima");
+                            }}
+                            className="py-2 px-2.5 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-[11px] font-bold text-[#18280e] transition-colors cursor-pointer"
+                          >
+                            Get Govt Certs →
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCargoOrderNumber(order.orderNumber);
+                              setActiveNav("customs_bl");
+                            }}
+                            className="py-2 px-2.5 rounded-xl bg-[#18280e] hover:bg-[#284905] text-[11px] font-bold text-[#b2eb76] transition-colors cursor-pointer"
+                          >
+                            Pack &amp; Govt Cargo →
+                          </button>
+                        </div>
+
                         <div className="flex justify-end">
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedLaymanOrder(order);
-                            }}
-                            className="text-[11px] font-mono text-[#3f7308] hover:underline font-bold"
+                            onClick={() => setSelectedLaymanOrder(order)}
+                            className="text-[11px] font-mono text-[#3f7308] hover:underline font-bold cursor-pointer"
                           >
-                            Inspect Full Statutory Details →
+                            Inspect Full Statutory Details ↓
                           </button>
                         </div>
                       </div>
@@ -1975,9 +2072,9 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1">
-                    <span className="text-stone-400 block text-[10px] uppercase font-bold">Inspection Agency</span>
-                    <strong className="text-[#18280e] block">{selectedLaymanOrder.inspectionAgency}</strong>
-                    <span className="text-[11px] text-stone-500 block">Audited prior to ship loading</span>
+                    <span className="text-stone-400 block text-[10px] uppercase font-bold">Govt Cargo &amp; Certification</span>
+                    <strong className="text-[#18280e] block">CONCOR / SCI Govt. Freight</strong>
+                    <span className="text-[11px] text-stone-500 block">BIS / EIC Govt Certs &amp; ICEGATE</span>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-1">
@@ -1999,10 +2096,37 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <span className="text-xs font-mono text-stone-500">
-                    Statutory Verification: DGFT IEC, GSTIN, and ICEGATE clearance active.
-                  </span>
+                <div className="pt-2 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={triggerPayPalEscrow}
+                      disabled={paypalLoading}
+                      className="px-4 py-2 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-xs font-bold text-[#18280e] transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance (PayPal)"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCertProduct(selectedLaymanOrder.productName);
+                        setActiveNav("quality_qima");
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-xs font-bold text-[#18280e] transition-colors cursor-pointer"
+                    >
+                      Get Govt Certs →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCargoOrderNumber(selectedLaymanOrder.orderNumber);
+                        setActiveNav("customs_bl");
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#284905] text-xs font-bold text-[#b2eb76] transition-colors cursor-pointer"
+                    >
+                      Pack &amp; Ship Govt Cargo →
+                    </button>
+                  </div>
                   <HoldToConfirm
                     onConfirm={() => {
                       void triggerAutomatedWhatsAppAlert({
