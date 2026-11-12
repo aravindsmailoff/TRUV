@@ -1837,16 +1837,10 @@ export default function DashboardPage() {
                               </button>
                             ) : (
                               <>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCertProduct(rfq.productName);
-                                    setActiveNav("quality_qima");
-                                  }}
-                                  className="px-3 py-1.5 rounded-xl bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] text-xs font-bold cursor-pointer"
-                                >
-                                  Get Govt Certs →
-                                </button>
+                                <span className="px-3 py-1.5 rounded-xl bg-[#ebf7d9] text-[#3f7308] text-xs font-bold inline-flex items-center gap-1">
+                                  <Check className="w-3.5 h-3.5" />
+                                  Govt Certs Verified (Onboarding)
+                                </span>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -2001,13 +1995,11 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              setCertProduct(order.productName);
-                              setActiveNav("quality_qima");
-                            }}
-                            className="py-2 px-2.5 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-[11px] font-bold text-[#18280e] transition-colors cursor-pointer"
+                            onClick={triggerPayPalEscrow}
+                            disabled={paypalLoading}
+                            className="py-2 px-2.5 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-[11px] font-bold text-[#18280e] transition-colors cursor-pointer disabled:opacity-50"
                           >
-                            Get Govt Certs →
+                            {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance"}
                           </button>
                           <button
                             type="button"
@@ -2074,7 +2066,7 @@ export default function DashboardPage() {
                   <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1">
                     <span className="text-stone-400 block text-[10px] uppercase font-bold">Govt Cargo &amp; Certification</span>
                     <strong className="text-[#18280e] block">CONCOR / SCI Govt. Freight</strong>
-                    <span className="text-[11px] text-stone-500 block">BIS / EIC Govt Certs &amp; ICEGATE</span>
+                    <span className="text-[11px] text-[#3f7308] font-semibold block">✓ BIS / EIC / IEC Verified at Onboarding</span>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#ebf7d9] border border-[#d8e5ca] space-y-1">
@@ -2105,16 +2097,6 @@ export default function DashboardPage() {
                       className="px-4 py-2 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-xs font-bold text-[#18280e] transition-colors cursor-pointer disabled:opacity-50"
                     >
                       {paypalLoading ? "Opening PayPal..." : "Collect 30% Advance (PayPal)"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCertProduct(selectedLaymanOrder.productName);
-                        setActiveNav("quality_qima");
-                      }}
-                      className="px-4 py-2 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-xs font-bold text-[#18280e] transition-colors cursor-pointer"
-                    >
-                      Get Govt Certs →
                     </button>
                     <button
                       type="button"
