@@ -1114,7 +1114,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Group 2: Step-by-Step Order Stages (Plain English, Never Truncated) */}
+            {/* Group 2: Core Export Workflow (Clean & Essential) */}
             <div className="pt-2 border-t border-stone-100">
               <button
                 type="button"
@@ -1123,14 +1123,13 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Order Progress Steps</span>
+                  <span>Export Workflow</span>
                 </div>
                 {tradeRailsOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </button>
 
               {tradeRailsOpen && (
                 <div className="mt-1 space-y-0.5 border-l-2 border-[#d8e5ca]/60 ml-4 pl-2">
-                  {/* Step 1 */}
                   <button
                     type="button"
                     onClick={() => setActiveNav("rfq_demand")}
@@ -1140,7 +1139,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs">1. Buyer Requests</span>
+                    <span className="text-xs">Buyer Requests</span>
                     <span
                       className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "rfq_demand"
@@ -1152,73 +1151,6 @@ export default function DashboardPage() {
                     </span>
                   </button>
 
-                  {/* Step 2 */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav("msme_vetting")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
-                      activeNav === "msme_vetting"
-                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
-                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                    }`}
-                  >
-                    <span className="text-xs">2. Factory Verified</span>
-                    <span
-                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                        activeNav === "msme_vetting"
-                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-emerald-100 text-emerald-800"
-                      }`}
-                    >
-                      Done ✓
-                    </span>
-                  </button>
-
-                  {/* Step 3 */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav("commercial_ai")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
-                      activeNav === "commercial_ai"
-                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
-                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                    }`}
-                  >
-                    <span className="text-xs">3. Price Agreed</span>
-                    <span
-                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                        activeNav === "commercial_ai"
-                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-stone-100 text-stone-600"
-                      }`}
-                    >
-                      Signed ✓
-                    </span>
-                  </button>
-
-                  {/* Step 4 */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav("paypal_escrow")}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
-                      activeNav === "paypal_escrow"
-                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
-                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                    }`}
-                  >
-                    <span className="text-xs">4. Advance Money</span>
-                    <span
-                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                        activeNav === "paypal_escrow"
-                          ? "bg-[#b2eb76]/20 text-[#b2eb76]"
-                          : "bg-[#ebf7d9] text-[#284905]"
-                      }`}
-                    >
-                      30% Paid
-                    </span>
-                  </button>
-
-                  {/* Step 5 */}
                   <button
                     type="button"
                     onClick={() => setActiveNav("quality_qima")}
@@ -1228,7 +1160,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs">5. Quality Check</span>
+                    <span className="text-xs">Govt Certificates</span>
                     <span
                       className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "quality_qima"
@@ -1236,11 +1168,10 @@ export default function DashboardPage() {
                           : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      Passed ✓
+                      AI
                     </span>
                   </button>
 
-                  {/* Step 6 */}
                   <button
                     type="button"
                     onClick={() => setActiveNav("customs_bl")}
@@ -1250,7 +1181,7 @@ export default function DashboardPage() {
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    <span className="text-xs">6. Shipped &amp; Paid</span>
+                    <span className="text-xs">Packed &amp; Govt Cargo</span>
                     <span
                       className={`text-[10px] font-sans px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
                         activeNav === "customs_bl"
@@ -1258,61 +1189,20 @@ export default function DashboardPage() {
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      Sent
+                      Live
                     </span>
                   </button>
-                </div>
-              )}
-            </div>
 
-            {/* Group 3: Payments & Bank Payouts Accordion */}
-            <div className="pt-2 border-t border-stone-100">
-              <button
-                type="button"
-                onClick={() => setFinancesOpen(!financesOpen)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-sans uppercase tracking-wider text-stone-400 font-bold hover:text-[#18280e] cursor-pointer transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Receipt className="w-3.5 h-3.5 text-[#3f7308]" />
-                  <span>Money &amp; Receipts</span>
-                </div>
-                {financesOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              </button>
-
-              {financesOpen && (
-                <div className="mt-1 space-y-0.5 border-l-2 border-[#d8e5ca]/60 ml-4 pl-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav("invoices")}
-                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                      activeNav === "invoices"
-                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
-                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                    }`}
-                  >
-                    Bills &amp; Invoices
-                  </button>
                   <button
                     type="button"
                     onClick={() => setActiveNav("transactions")}
-                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer gap-2 ${
                       activeNav === "transactions"
                         ? "bg-[#18280e] text-[#b2eb76] font-semibold"
                         : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
                     }`}
                   >
-                    Bank Deposits
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveNav("reports")}
-                    className={`w-full text-left py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                      activeNav === "reports"
-                        ? "bg-[#18280e] text-[#b2eb76] font-semibold"
-                        : "text-stone-600 hover:bg-[#ebf7d9]/60 hover:text-[#18280e]"
-                    }`}
-                  >
-                    Tax Receipts
+                    <span className="text-xs">Bank Deposits</span>
                   </button>
                 </div>
               )}
