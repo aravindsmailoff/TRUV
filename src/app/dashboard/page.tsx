@@ -967,11 +967,24 @@ export default function DashboardPage() {
     amount?: string;
   } | null>(null);
 
-  const triggerPayPalEscrow = async () => {
+  const triggerPayPalEscrow = async (opts?: {
+    amountUSD?: number;
+    orderNumber?: string;
+    description?: string;
+  } | React.MouseEvent) => {
+    const customOpts = opts && "amountUSD" in opts ? opts : undefined;
+    const targetOrder = selectedLaymanOrder;
+    const amountUSD = customOpts?.amountUSD ?? targetOrder.paymentMilestones.advanceUSD;
+    const orderNumber = customOpts?.orderNumber ?? targetOrder.orderNumber;
+    const description =
+      customOpts?.description ??
+      `30% Advance for ${targetOrder.productName} (${orderNumber})`;
+
     setPaypalLoading(true);
     setPaypalError("");
     setPaypalResult(null);
     try {
+      const originUrl = typeof window !== "undefined" ? window.location.href : undefined;
       const res = await fetch("/api/trade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -979,16 +992,24 @@ export default function DashboardPage() {
           action: "create_paypal_payment",
           tradeId: "trade_live_7719",
           isAdvance: true,
+          amountUSD,
+          orderNumber,
+          description,
+          returnUrl: originUrl,
+          cancelUrl: originUrl,
         }),
       });
       const data = await res.json();
       if (data.success && data.paymentOrder) {
         const approveLink = data.paymentOrder.links?.find((l: { rel: string; href: string }) => l.rel === "approve")?.href;
+        if (approveLink && typeof window !== "undefined") {
+          window.open(approveLink, "_blank", "noopener,noreferrer");
+        }
         setPaypalResult({
           id: data.paymentOrder.id,
           status: data.paymentOrder.status,
           approveUrl: approveLink,
-          amount: "Advance payment — awaiting buyer approval",
+          amount: `$${amountUSD.toLocaleString()} USD (30% Advance for ${orderNumber}) — awaiting buyer approval`,
         });
       } else {
         setPaypalError(data.details || data.error || "Unable to create the PayPal order.");
@@ -1467,6 +1488,38 @@ export default function DashboardPage() {
         <main className="p-6 md:p-8 space-y-6 max-w-[88rem] w-full mx-auto">
           <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Demo workspace: sample orders and payment statuses are illustrative, not verified transactions. PayPal order creation is not payment confirmation or escrow.</div>
           {paypalError && <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">{paypalError}</div>}
+          {paypalResult && (
+            <div className="rounded-2xl border border-[#3f7308]/40 bg-[#ebf7d9] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="space-y-0.5 text-xs font-sans text-[#18280e]">
+                <div className="font-bold text-sm flex items-center gap-2">
+                  <span>PayPal Order Created: {paypalResult.id}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white text-[#3f7308] border border-[#d8e5ca]">
+                    {paypalResult.status || "CREATED"}
+                  </span>
+                </div>
+                {paypalResult.amount && <p className="text-stone-700 font-mono">{paypalResult.amount}</p>}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {paypalResult.approveUrl && (
+                  <a
+                    href={paypalResult.approveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-xl bg-[#003087] hover:bg-[#001f5c] text-white text-xs font-bold transition-colors shadow-xs"
+                  >
+                    Open PayPal Checkout →
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setPaypalResult(null)}
+                  className="px-3 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-xs font-semibold text-stone-700 cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
           {/* ========================================================================= */}
           {/* VIEW 0: TRANSACTION STORYLINE (The Heart of the Project)                 */}
           {/* ========================================================================= */}
@@ -1995,7 +2048,13 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            onClick={triggerPayPalEscrow}
+                            onClick={() =>
+                              void triggerPayPalEscrow({
+                                amountUSD: order.paymentMilestones.advanceUSD,
+                                orderNumber: order.orderNumber,
+                                description: `30% Advance for ${order.productName} (${order.orderNumber})`,
+                              })
+                            }
                             disabled={paypalLoading}
                             className="py-2 px-2.5 rounded-xl bg-[#f4faed] hover:bg-[#ebf7d9] border border-[#d8e5ca] text-[11px] font-bold text-[#18280e] transition-colors cursor-pointer disabled:opacity-50"
                           >
