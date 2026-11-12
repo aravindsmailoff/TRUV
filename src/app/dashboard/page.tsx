@@ -387,7 +387,7 @@ export default function DashboardPage() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [portalLanguage, activeNav]);
+  }, [portalLanguage, activeNav, certPlan, autoApplications, autoApplyNotice, verifiedCerts]);
 
   // TradeOracle AI 2-Way Seller Translator (Dashboard + Buyer Requests)
   const [sellerAiInput, setSellerAiInput] = useState(
