@@ -1486,7 +1486,6 @@ export default function DashboardPage() {
 
         {/* Dashboard Main Grid Body */}
         <main className="p-6 md:p-8 space-y-6 max-w-[88rem] w-full mx-auto">
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Demo workspace: sample orders and payment statuses are illustrative, not verified transactions. PayPal order creation is not payment confirmation or escrow.</div>
           {paypalError && <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">{paypalError}</div>}
           {paypalResult && (
             <div className="rounded-2xl border border-[#3f7308]/40 bg-[#ebf7d9] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
