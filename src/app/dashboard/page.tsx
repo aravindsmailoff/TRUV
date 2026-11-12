@@ -237,6 +237,65 @@ export default function DashboardPage() {
   const [bookedCerts, setBookedCerts] = useState<Record<string, string>>({});
   const [dossierCopied, setDossierCopied] = useState(false);
 
+  // TradeOracle AI 2-Way Seller Translator (Dashboard + Buyer Requests)
+  const [sellerAiInput, setSellerAiInput] = useState(
+    "Buyer: Please confirm if you can ship 2,000 CW617N solid brass mortise locksets with PVD satin gold finish and ASTM B117 salt spray report."
+  );
+  const [sellerAiDirection, setSellerAiDirection] = useState<"toNative" | "toEnglish">("toNative");
+  const [sellerAiOutput, setSellerAiOutput] = useState("");
+  const [sellerAiTranslating, setSellerAiTranslating] = useState(false);
+  const [rfqTranslations, setRfqTranslations] = useState<Record<string, string>>({});
+  const [translatingRfqId, setTranslatingRfqId] = useState<string | null>(null);
+
+  const handleSellerAiTranslate = async () => {
+    if (!sellerAiInput.trim()) return;
+    setSellerAiTranslating(true);
+    try {
+      const targetLang = sellerAiDirection === "toNative" ? certLanguage : "English";
+      const sourceLang = sellerAiDirection === "toNative" ? "English" : certLanguage;
+      const res = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: sellerAiInput,
+          sourceLanguage: sourceLang,
+          targetLanguage: targetLang,
+        }),
+      });
+      const data = await res.json();
+      if (data.translatedText) {
+        setSellerAiOutput(data.translatedText);
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setSellerAiTranslating(false);
+    }
+  };
+
+  const handleTranslateRfqCard = async (ordId: string, textToTranslate: string) => {
+    setTranslatingRfqId(ordId);
+    try {
+      const res = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: textToTranslate,
+          sourceLanguage: "English",
+          targetLanguage: certLanguage,
+        }),
+      });
+      const data = await res.json();
+      if (data.translatedText) {
+        setRfqTranslations((prev) => ({ ...prev, [ordId]: data.translatedText }));
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setTranslatingRfqId(null);
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("truv_seller_onboarding_compliance");
@@ -908,6 +967,107 @@ export default function DashboardPage() {
           {/* ========================================================================= */}
           {activeNav === "dashboard" && (
             <>
+              {/* TRADEORACLE AI: MANUFACTURER EXPORT & TRANSLATION ASSISTANT */}
+              <div className="bg-white p-5 md:p-6 rounded-3xl border border-[#d8e5ca] shadow-xs space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                        TradeOracle AI
+                      </span>
+                      <span className="text-xs font-bold text-[#18280e]">
+                        Factory Export, Translation &amp; Certification Assistant
+                      </span>
+                    </div>
+                    <p className="text-xs text-stone-600">
+                      Read foreign buyer requests in your own language, reply in export English, and get BIS / CE / UL / ISO certificates.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select
+                      value={certLanguage}
+                      onChange={(e) => setCertLanguage(e.target.value)}
+                      className="px-3 py-1.5 rounded-xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-bold text-[#18280e] outline-none"
+                    >
+                      <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                      <option value="Hindi">Hindi (हिन्दी)</option>
+                      <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                      <option value="Tamil">Tamil (தமிழ்)</option>
+                      <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                      <option value="English">English</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setActiveNav("quality_qima")}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      Get BIS / CE / UL Certificates →
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#18280e]">
+                      Two-Way Buyer Message Translator
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono">
+                      <button
+                        type="button"
+                        onClick={() => setSellerAiDirection("toNative")}
+                        className={`px-2.5 py-1 rounded-lg font-bold cursor-pointer ${
+                          sellerAiDirection === "toNative"
+                            ? "bg-[#18280e] text-[#b2eb76]"
+                            : "bg-white text-stone-700 border border-[#d8e5ca]"
+                        }`}
+                      >
+                        English → {certLanguage}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSellerAiDirection("toEnglish")}
+                        className={`px-2.5 py-1 rounded-lg font-bold cursor-pointer ${
+                          sellerAiDirection === "toEnglish"
+                            ? "bg-[#18280e] text-[#b2eb76]"
+                            : "bg-white text-stone-700 border border-[#d8e5ca]"
+                        }`}
+                      >
+                        {certLanguage} → English
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={sellerAiInput}
+                      onChange={(e) => setSellerAiInput(e.target.value)}
+                      placeholder={
+                        sellerAiDirection === "toNative"
+                          ? "Paste foreign buyer message in English..."
+                          : `Type your reply in ${certLanguage} to send in English...`
+                      }
+                      className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e] outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={sellerAiTranslating}
+                      onClick={() => void handleSellerAiTranslate()}
+                      className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
+                    >
+                      {sellerAiTranslating ? "Translating..." : "Translate Now"}
+                    </button>
+                  </div>
+                  {sellerAiOutput && (
+                    <div className="p-3 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e] space-y-1">
+                      <span className="text-[10px] font-mono text-[#3f7308] font-bold block">
+                        Translated to {sellerAiDirection === "toNative" ? certLanguage : "English"}:
+                      </span>
+                      <p className="leading-relaxed">{sellerAiOutput}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* TOP 4 METRIC CARDS (With Kokonut UI / React Bits Spotlight Glow) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Metric 1 */}
@@ -1459,23 +1619,50 @@ export default function DashboardPage() {
                 {LAYMAN_ORDERS.map((ord) => (
                   <div
                     key={ord.id}
-                    className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+                    className="p-4 rounded-2xl bg-[#fbfdf9] border border-stone-200 space-y-2.5"
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{ord.foreignBuyer.flag}</span>
-                        <strong className="text-[#18280e] text-sm">{ord.productName}</strong>
-                        <span className="text-xs text-stone-400">({ord.orderNumber})</span>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{ord.foreignBuyer.flag}</span>
+                          <strong className="text-[#18280e] text-sm">{ord.productName}</strong>
+                          <span className="text-xs text-stone-400">({ord.orderNumber})</span>
+                        </div>
+                        <p className="text-stone-600 text-xs mt-1">
+                          Buyer: <strong>{ord.foreignBuyer.company}</strong> ({ord.foreignBuyer.city}) • Quantity:{" "}
+                          <strong>{ord.quantityUnits.toLocaleString()} pieces</strong>
+                        </p>
                       </div>
-                      <p className="text-stone-600 text-xs mt-1">
-                        Buyer: <strong>{ord.foreignBuyer.company}</strong> ({ord.foreignBuyer.city}) • Quantity:{" "}
-                        <strong>{ord.quantityUnits.toLocaleString()} pieces</strong>
-                      </p>
+                      <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end gap-2">
+                        <div>
+                          <span className="font-bold text-sm text-[#18280e] block">${ord.totalDealUSD.toLocaleString()} USD</span>
+                          <span className="text-xs text-[#3f7308] font-bold">≈ ₹{ord.approxInrLakhs} Lakhs</span>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={translatingRfqId === ord.id}
+                          onClick={() =>
+                            void handleTranslateRfqCard(
+                              ord.id,
+                              `Order ${ord.orderNumber}: ${ord.productName}, Quantity ${ord.quantityUnits} pieces for ${ord.foreignBuyer.company} (${ord.foreignBuyer.city}). Total $${ord.totalDealUSD} USD.`
+                            )
+                          }
+                          className="px-2.5 py-1 rounded-lg bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#284905] text-[11px] font-bold cursor-pointer transition-colors"
+                        >
+                          {translatingRfqId === ord.id
+                            ? "Translating..."
+                            : `Translate to ${certLanguage}`}
+                        </button>
+                      </div>
                     </div>
-                    <div className="sm:text-right shrink-0">
-                      <span className="font-bold text-sm text-[#18280e] block">${ord.totalDealUSD.toLocaleString()} USD</span>
-                      <span className="text-xs text-[#3f7308] font-bold">≈ ₹{ord.approxInrLakhs} Lakhs</span>
-                    </div>
+                    {rfqTranslations[ord.id] && (
+                      <div className="p-3 rounded-xl bg-[#f4faed] border border-[#d8e5ca] text-xs text-[#18280e]">
+                        <span className="text-[10px] font-mono text-[#3f7308] font-bold block mb-0.5">
+                          TradeOracle AI ({certLanguage}):
+                        </span>
+                        {rfqTranslations[ord.id]}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

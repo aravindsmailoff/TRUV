@@ -76,6 +76,74 @@ export function FreelancerServicePortal() {
     amount?: string;
   } | null>(null);
 
+  // TradeOracle AI Service Scope & Translation Assistant
+  const [serviceAiCheckLoading, setServiceAiCheckLoading] = useState(false);
+  const [serviceAiCheck, setServiceAiCheck] = useState<{
+    status: string;
+    riskLevel: string;
+    specAlignmentSummary: string;
+  } | null>(null);
+  const [serviceTranslateText, setServiceTranslateText] = useState(
+    "Bitte liefern Sie die PayPal Webhook-Integration mit automatisierten Tests bis Freitag."
+  );
+  const [serviceTargetLang, setServiceTargetLang] = useState("English");
+  const [serviceTranslatedOut, setServiceTranslatedOut] = useState("");
+  const [serviceTranslating, setServiceTranslating] = useState(false);
+
+  const handleRunServiceScopeCheck = async () => {
+    setServiceAiCheckLoading(true);
+    try {
+      const res = await fetch("/api/ai/verify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber: selectedProject.contractNumber,
+          supplierId: "sup_bangalore_05",
+          supplierName: "ApexCloud Software Labs LLP",
+          productOrServiceName: selectedProject.projectTitle,
+          specifications: `${selectedMilestone.title}: ${selectedMilestone.description}`,
+          totalAmountUSD: selectedProject.totalContractUSD,
+          advanceDepositUSD: selectedMilestone.amountUSD || 1500,
+        }),
+      });
+      const data = await res.json();
+      if (data.status) {
+        setServiceAiCheck({
+          status: data.status,
+          riskLevel: data.riskLevel,
+          specAlignmentSummary: data.specAlignmentSummary,
+        });
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setServiceAiCheckLoading(false);
+    }
+  };
+
+  const handleTranslateServiceBrief = async () => {
+    if (!serviceTranslateText.trim()) return;
+    setServiceTranslating(true);
+    try {
+      const res = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: serviceTranslateText,
+          targetLanguage: serviceTargetLang,
+        }),
+      });
+      const data = await res.json();
+      if (data.translatedText) {
+        setServiceTranslatedOut(data.translatedText);
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setServiceTranslating(false);
+    }
+  };
+
   const handleTriggerPayPalMilestone = async () => {
     setPaypalLoading(true);
     try {
@@ -461,6 +529,88 @@ export function FreelancerServicePortal() {
           {/* ========================================================================= */}
           {activeTab === "dashboard" && (
             <div className="space-y-6 animate-in fade-in">
+              {/* TradeOracle AI Service Scope, Milestone Risk & Client Translator */}
+              <div className="bg-white p-5 md:p-6 rounded-3xl border border-[#d8e5ca] shadow-xs space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                        TradeOracle AI
+                      </span>
+                      <span className="text-xs font-bold text-[#18280e]">
+                        Engineering Scope Guard &amp; Client Translator
+                      </span>
+                    </div>
+                    <p className="text-xs text-stone-600 mt-0.5">
+                      Verify sprint deliverables before PayPal milestone payout and translate international client specs.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={serviceAiCheckLoading}
+                    onClick={() => void handleRunServiceScopeCheck()}
+                    className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+                  >
+                    {serviceAiCheckLoading
+                      ? "Verifying Scope..."
+                      : "Verify Active Sprint Scope & Risk →"}
+                  </button>
+                </div>
+
+                {serviceAiCheck && (
+                  <div className="p-3 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-mono flex flex-wrap items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                      {serviceAiCheck.status} · Risk: {serviceAiCheck.riskLevel}
+                    </span>
+                    <span className="text-[#18280e]">{serviceAiCheck.specAlignmentSummary}</span>
+                  </div>
+                )}
+
+                <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#18280e]">
+                      Client Brief &amp; Message Translator
+                    </span>
+                    <select
+                      value={serviceTargetLang}
+                      onChange={(e) => setServiceTargetLang(e.target.value)}
+                      className="px-2.5 py-1 rounded-lg bg-white border border-[#d8e5ca] text-xs font-bold text-[#18280e] outline-none"
+                    >
+                      <option value="English">Translate to English</option>
+                      <option value="Hindi">Translate to Hindi</option>
+                      <option value="Kannada">Translate to Kannada</option>
+                      <option value="Tamil">Translate to Tamil</option>
+                      <option value="German">Translate to German</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={serviceTranslateText}
+                      onChange={(e) => setServiceTranslateText(e.target.value)}
+                      placeholder="Paste client message or technical brief in any language..."
+                      className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e] outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={serviceTranslating}
+                      onClick={() => void handleTranslateServiceBrief()}
+                      className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
+                    >
+                      {serviceTranslating ? "Translating..." : "Translate"}
+                    </button>
+                  </div>
+                  {serviceTranslatedOut && (
+                    <div className="p-3 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e]">
+                      <span className="text-[10px] font-mono text-[#3f7308] font-bold block mb-0.5">
+                        Translated ({serviceTargetLang}):
+                      </span>
+                      {serviceTranslatedOut}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Top 4 KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <SpotlightCard className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-2 hover:-translate-y-0.5 transition-transform">
