@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const AI_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b";
@@ -26,13 +26,13 @@ function buildFallbackProcess(body: ApplyCertificateRequest, appRef: string) {
   const portalUrl = body.portalUrl || "https://www.manakonline.in/";
 
   return {
-    poweredBy: "TradeOracle AI",
+    poweredBy: "TRUVX AI",
     applicationRef: appRef,
     status: "Auto-Filed · Dossier & Declaration Prepared",
     submittedAt: new Date().toLocaleString(),
     authorityName: authority,
     portalUrl,
-    summaryForSeller: `TradeOracle AI has automatically compiled your ${company} factory profile (GSTIN & IEC), product specifications for ${product}, and English Declaration of Conformity into a ready-to-submit ${mark} packet for ${authority} (${country}).`,
+    summaryForSeller: `TRUVX AI has automatically compiled your ${company} factory profile (GSTIN & IEC), product specifications for ${product}, and English Declaration of Conformity into a ready-to-submit ${mark} packet for ${authority} (${country}).`,
     stepsDone: [
       `Attached verified factory GSTIN (${body.gstin || "Active"}) & IEC (${body.iecCode || "Active"})`,
       `Generated English Technical File & Declaration of Conformity (${body.standardCode || mark})`,
@@ -58,11 +58,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(fallback);
     }
 
-    const systemPrompt = `You are TradeOracle AI's Government Export Certification Automation Assistant for Indian manufacturers.
+    const systemPrompt = `You are TRUVX AI's Government Export Certification Automation Assistant for Indian manufacturers.
 The manufacturer just clicked "1-Click Auto-Apply" for an official government export certificate.
 Never mention private corporate agencies (no QIMA, SGS, TÜV, Intertek, UL). Only reference the official government authority and portal.
 Explain clearly in simple English:
-1. "summaryForSeller": 2 sentences telling the manufacturer what TradeOracle AI just automated for this application.
+1. "summaryForSeller": 2 sentences telling the manufacturer what TRUVX AI just automated for this application.
 2. "stepsDone": 3-4 short bullet strings of what was automatically prepared & filed.
 3. "nextManufacturerSteps": 3 short, practical bullet strings telling the manufacturer what the government portal does next and what simple action (if any) they take.
 

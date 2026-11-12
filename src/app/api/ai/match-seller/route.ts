@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { INITIAL_SUPPLIERS, SupplierItem } from "@/lib/buyer/buyerStore";
 
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ interface MatchResultItem {
 }
 
 interface MatchResponsePayload {
-  poweredBy: "TradeOracle AI" | "Catalog Fallback";
+  poweredBy: "TRUVX AI" | "Catalog Fallback";
   model: string;
   extractedRequirements: {
     product: string;
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
     }));
 
     const systemPrompt = [
-      "You are the TradeOracle Sourcing AI.",
+      "You are the TRUVX Sourcing AI.",
       "Your job is to match a buyer's product & material description ONLY to the exact verified Indian seller(s) from the provided catalog who actually manufacture that exact material, finish, grade, or capability.",
       "Do NOT force a match if no seller makes that material/product (for example, do not match a clothing seller for stainless steel valves).",
       "Return ONLY valid JSON matching this exact shape (no markdown, no extra prose):",
@@ -257,8 +257,8 @@ export async function POST(req: NextRequest) {
 
     const ext = (parsed.extractedRequirements || {}) as Record<string, unknown>;
     const payload: MatchResponsePayload = {
-      poweredBy: "TradeOracle AI",
-      model: "tradeoracle-matcher-v1",
+      poweredBy: "TRUVX AI",
+      model: "truvx-matcher-v1",
       extractedRequirements: {
         product: String(ext.product || query),
         material: String(ext.material || "Not specified"),

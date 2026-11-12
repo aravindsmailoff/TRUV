@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { INITIAL_SUPPLIERS } from "@/lib/buyer/buyerStore";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.NVIDIA_API_KEY?.trim();
     if (!apiKey) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         status: warnings.length > 0 ? "WARNING" : "VERIFIED",
         riskLevel: warnings.length > 0 ? "MEDIUM" : "LOW",
         specAlignmentSummary: supplier
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemPrompt = `You are TradeOracle AI's Pre-Payment Order & Spec Guard.
+    const systemPrompt = `You are TRUVX AI's Pre-Payment Order & Spec Guard.
 Compare the buyer's order details against the verified supplier's registered materials, finishes, and capabilities.
 Flag any material substitution risk, grade mismatch, or missing spec clarity BEFORE the buyer authorizes PayPal payment.
 Respond ONLY with valid JSON:
@@ -95,7 +95,7 @@ Supplier Verified Finishes: ${(supplier?.finishes || []).join("; ")}`;
 
     if (!aiRes.ok) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         status: warnings.length > 0 ? "WARNING" : "VERIFIED",
         riskLevel: warnings.length > 0 ? "MEDIUM" : "LOW",
         specAlignmentSummary: supplier
@@ -114,7 +114,7 @@ Supplier Verified Finishes: ${(supplier?.finishes || []).join("; ")}`;
 
     if (!jsonMatch) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         status: warnings.length > 0 ? "WARNING" : "VERIFIED",
         riskLevel: warnings.length > 0 ? "MEDIUM" : "LOW",
         specAlignmentSummary: "Order specifications verified against supplier profile.",
@@ -136,7 +136,7 @@ Supplier Verified Finishes: ${(supplier?.finishes || []).join("; ")}`;
     ];
 
     return NextResponse.json({
-      poweredBy: "TradeOracle AI",
+      poweredBy: "TRUVX AI",
       status: combinedWarnings.length > 0 ? "WARNING" : parsed.status || "VERIFIED",
       riskLevel:
         combinedWarnings.length > 0 && parsed.riskLevel === "LOW"

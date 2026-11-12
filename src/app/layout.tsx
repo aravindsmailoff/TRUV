@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 
 export const metadata: Metadata = {
-  title: "TradeOracle — International Trade Platform",
+  title: "TRUVX — International Trade Platform",
   description:
     "Connect what was promised, what was paid, and what was delivered across global buyers, Indian manufacturers, and service exporters.",
 };

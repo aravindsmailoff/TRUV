@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { tradeStore } from "@/lib/trade/tradeStore";
 import { createPayPalOrderForTrade, payPalTradeClient } from "@/lib/trade/paypalTradeClient";
 import { elasticSearchEngine } from "@/lib/trade/elasticSearchEngine";
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
             orderNumber: orderNumber || trade?.orderNumber || "PO-TRADE",
           },
           amountUSD,
-          description: description || `TradeOracle Order Payment (${orderNumber || tradeId})`,
+          description: description || `TRUVX Order Payment (${orderNumber || tradeId})`,
           returnUrl,
           cancelUrl,
         });

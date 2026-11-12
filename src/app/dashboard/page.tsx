@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -39,7 +39,7 @@ import { KokonutButton } from "@/components/kokonutui/KokonutButton";
 import { HoldToConfirm } from "@/components/kokonutui/HoldToConfirm";
 import { ActiveDayChart } from "@/components/kokonutui/ActiveDayChart";
 import { TotalProfitChart } from "@/components/kokonutui/TotalProfitChart";
-import { TradeOracleStoryline } from "@/components/kokonutui/TradeOracleStoryline";
+import { TRUVXStoryline } from "@/components/kokonutui/TRUVXStoryline";
 import { ForeignBuyerPortal } from "@/components/kokonutui/ForeignBuyerPortal";
 import { WhatsAppNotificationCenter } from "@/components/whatsapp/WhatsAppNotificationCenter";
 import { triggerAutomatedWhatsAppAlert } from "@/lib/whatsapp/clientTrigger";
@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
   const [financesOpen, setFinancesOpen] = useState(true);
 
-  // TradeOracle AI International Quality & Markings Assistant (Seller Onboarding & Export Compliance)
+  // TRUVX AI International Quality & Markings Assistant (Seller Onboarding & Export Compliance)
   const [certProduct, setCertProduct] = useState("Solid Brass Door Handles");
   const [certMaterial, setCertMaterial] = useState("CW617N Solid Brass, PVD Satin Gold");
   const [certLanguage, setCertLanguage] = useState("Gujarati");
@@ -505,7 +505,7 @@ export default function DashboardPage() {
     };
   }, [portalLanguage, activeNav, certPlan, autoApplications, autoApplyNotice, verifiedCerts]);
 
-  // TradeOracle AI 2-Way Seller Translator (Dashboard + Buyer Requests)
+  // TRUVX AI 2-Way Seller Translator (Dashboard + Buyer Requests)
   const [sellerAiInput, setSellerAiInput] = useState(
     "Buyer: Please confirm if you can ship 2,000 CW617N solid brass mortise locksets with PVD satin gold finish and ASTM B117 salt spray report."
   );
@@ -770,7 +770,7 @@ export default function DashboardPage() {
 <body style="font-family:Arial,sans-serif;max-width:820px;margin:32px auto;color:#18280e;line-height:1.5;">
   <div style="border-bottom:3px solid #18280e;padding-bottom:12px;margin-bottom:20px;">
     <h1 style="margin:0;font-size:20px;">OFFICIAL EXPORT DECLARATION OF CONFORMITY &amp; GOVT FILING PACKET</h1>
-    <p style="margin:4px 0 0;font-size:12px;color:#3f7308;">Prepared by TradeOracle AI · Ready for Official Government Portal Upload</p>
+    <p style="margin:4px 0 0;font-size:12px;color:#3f7308;">Prepared by TRUVX AI · Ready for Official Government Portal Upload</p>
   </div>
   <p><strong>Manufacturer:</strong> ${company}<br/>
   <strong>Product:</strong> ${certProduct}<br/>
@@ -1045,7 +1045,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-base tracking-tight text-[#18280e] font-sans group-hover:text-[#3f7308] transition-colors leading-none">
-                  TradeOracle<span className="text-[#3f7308]">.</span>
+                  TRUVX<span className="text-[#3f7308]">.</span>
                 </span>
                 <span className="text-[10px] font-sans text-stone-500 font-semibold mt-1">
                   Factory Export Desk
@@ -1475,7 +1475,7 @@ export default function DashboardPage() {
                   router.push("/signin");
                 }}
                 className="h-9 text-xs font-sans font-medium text-stone-700 hover:text-rose-700 bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-200 px-3 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0"
-                title="Sign out of TradeOracle session"
+                title="Sign out of TRUVX session"
               >
                 <LogOut className="w-3.5 h-3.5 shrink-0" />
                 <span>Sign Out</span>
@@ -1522,7 +1522,7 @@ export default function DashboardPage() {
           {/* ========================================================================= */}
           {/* VIEW 0: TRANSACTION STORYLINE (The Heart of the Project)                 */}
           {/* ========================================================================= */}
-          {activeNav === "storyline" && <TradeOracleStoryline />}
+          {activeNav === "storyline" && <TRUVXStoryline />}
 
           {/* ========================================================================= */}
           {/* VIEW: FOREIGN BUYER DISCOVERY & AI MATCHING PORTAL                       */}
@@ -2036,7 +2036,7 @@ export default function DashboardPage() {
                                   action: "seller_update_packing_cargo",
                                   orderNumber: order.orderNumber,
                                   packingStatus: "accepted",
-                                  buyerEmail: "buyer@tradeoracle.demo",
+                                  buyerEmail: "buyer@truvx.demo",
                                   sellerNote: `Accepted ${order.productName} (${order.quantityUnits.toLocaleString()} units) and started factory preparation.`,
                                 }),
                               }).then(() => fetchLiveEngineState());
@@ -2312,7 +2312,7 @@ export default function DashboardPage() {
                     {rfqTranslations[ord.id] && (
                       <div className="p-3 rounded-xl bg-[#f4faed] border border-[#d8e5ca] text-xs text-[#18280e]">
                         <span className="text-[10px] font-mono text-[#3f7308] font-bold block mb-0.5">
-                          TradeOracle AI ({certLanguage}):
+                          TRUVX AI ({certLanguage}):
                         </span>
                         {rfqTranslations[ord.id]}
                       </div>
@@ -2475,12 +2475,12 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                {/* TradeOracle AI Certification & Country Markings Builder */}
+                {/* TRUVX AI Certification & Country Markings Builder */}
                 <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
-                        TradeOracle AI
+                        TRUVX AI
                       </span>
                       <h3 className="font-bold text-base text-[#18280e] mt-1">
                         Get International Quality Certificates for Your Products
@@ -2652,7 +2652,7 @@ export default function DashboardPage() {
                                     <p className="text-stone-700 leading-relaxed">{appInfo.summaryForSeller}</p>
                                     <div>
                                       <span className="text-[11px] font-bold text-[#3f7308] block mb-1">
-                                        What TradeOracle AI Automated:
+                                        What TRUVX AI Automated:
                                       </span>
                                       <ul className="space-y-0.5 text-[11px] text-stone-700 list-disc pl-4">
                                         {appInfo.stepsDone.map((s, i) => (

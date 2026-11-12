@@ -1,4 +1,4 @@
-import fs from "fs";
+﻿import fs from "fs";
 import path from "path";
 
 export interface BuyerNotificationEvent {
@@ -135,7 +135,7 @@ class NotificationEngine {
     if (!resendKey) return "queued_no_resend_key";
 
     try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || "TradeOracle <onboarding@resend.dev>";
+      const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || "TRUVX <onboarding@resend.dev>";
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -168,7 +168,7 @@ class NotificationEngine {
     const emailTo = params.emailTo || "buyer@pacifichardware.us";
     const emailStatus = await this.sendEmailViaResend({
       to: emailTo,
-      subject: `[TradeOracle] ${params.orderNumber}: ${params.title}`,
+      subject: `[TRUVX] ${params.orderNumber}: ${params.title}`,
       text: `${params.title}\n\n${params.message}\n${
         params.govtCargoService ? `\nGovernment Cargo Carrier: ${params.govtCargoService}` : ""
       }${params.trackingNumber ? `\nTracking / Waybill: ${params.trackingNumber}` : ""}`,

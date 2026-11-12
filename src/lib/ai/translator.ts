@@ -1,4 +1,4 @@
-const LANGUAGE_CODE_MAP: Record<string, string> = {
+﻿const LANGUAGE_CODE_MAP: Record<string, string> = {
   english: "en",
   en: "en",
   gujarati: "gu",
@@ -49,7 +49,7 @@ function protectTechnicalTokens(text: string): {
 } {
   const tokens: string[] = [];
   const pattern =
-    /\b(?:CW617N|CZ121|C36000|AISI\s?\d+|SS\d+|Ti-6Al-4V|Inconel\s?\d+|ASTM\s?[A-Z]?\d+|DIN\s?[A-Z0-9-]+|EN\s?\d+|ISO\s?\d+(?::\d+)?|UL\s?\d+|FCC|UKCA|SASO|SABER|BIS|ISI|ROHS|REACH|GOTS|OEKO-TEX|PVD|QIMA|IEC|GSTIN|STPI|TradeOracle|PayPal|DHL|ORD-[A-Z0-9-]+|PO-\d+|HS\s?\d[\d.]+)\b|\$\d[\d,]*(?:\.\d{1,2})?/gi;
+    /\b(?:CW617N|CZ121|C36000|AISI\s?\d+|SS\d+|Ti-6Al-4V|Inconel\s?\d+|ASTM\s?[A-Z]?\d+|DIN\s?[A-Z0-9-]+|EN\s?\d+|ISO\s?\d+(?::\d+)?|UL\s?\d+|FCC|UKCA|SASO|SABER|BIS|ISI|ROHS|REACH|GOTS|OEKO-TEX|PVD|QIMA|IEC|GSTIN|STPI|TRUVX|PayPal|DHL|ORD-[A-Z0-9-]+|PO-\d+|HS\s?\d[\d.]+)\b|\$\d[\d,]*(?:\.\d{1,2})?/gi;
 
   const masked = text.replace(pattern, (match) => {
     const idx = tokens.length;
@@ -71,7 +71,7 @@ export interface TranslationResult {
   translatedText: string;
   detectedSourceLanguage: string;
   targetLanguage: string;
-  engine: "TradeOracle Neural Translator" | "TradeOracle Backup Translator" | "Passthrough";
+  engine: "TRUVX Neural Translator" | "TRUVX Backup Translator" | "Passthrough";
 }
 
 export async function translateTradeText(params: {
@@ -122,7 +122,7 @@ export async function translateTradeText(params: {
           translatedText: restored,
           detectedSourceLanguage: data?.[2] || (sl === "auto" ? "auto" : sourceLanguage),
           targetLanguage,
-          engine: "TradeOracle Neural Translator",
+          engine: "TRUVX Neural Translator",
         };
       }
     }
@@ -147,7 +147,7 @@ export async function translateTradeText(params: {
           translatedText: restoreTechnicalTokens(rawTranslated, tokens),
           detectedSourceLanguage: sl === "auto" ? "English" : sourceLanguage,
           targetLanguage,
-          engine: "TradeOracle Backup Translator",
+          engine: "TRUVX Backup Translator",
         };
       }
     }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { translateTradeText } from "@/lib/ai/translator";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
@@ -111,9 +111,9 @@ function buildFallbackPlan(
   }
 
   return {
-    poweredBy: "TradeOracle AI",
+    poweredBy: "TRUVX AI",
     hsCode: "8301.40 / 7318.15",
-    nativeSummary: `For ${productName} (${material}), TradeOracle AI has mapped ${certs.length} official government certificates for ${countries.join(", ")}. All English Declaration of Conformity paperwork is prepared automatically so you can apply directly on each government portal.`,
+    nativeSummary: `For ${productName} (${material}), TRUVX AI has mapped ${certs.length} official government certificates for ${countries.join(", ")}. All English Declaration of Conformity paperwork is prepared automatically so you can apply directly on each government portal.`,
     requiredCertificates: certs,
     generatedDossier: `OFFICIAL DECLARATION OF CONFORMITY & GOVT FILING DOSSIER\nManufacturer: ${companyName}\nProduct: ${productName}\nDeclared Material: ${material}\nTarget Markets: ${countries.join(", ")}\nCompliance Scope: Batch traceability, statutory material grade verification, and official export markings.`,
     packagingLabelSpecs: [
@@ -144,11 +144,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const systemPrompt = `You are TradeOracle AI's International Export Quality & Certification Assistant for Indian manufacturers.
+    const systemPrompt = `You are TRUVX AI's International Export Quality & Certification Assistant for Indian manufacturers.
 Given a product, raw material, and target export countries, return ONLY the official government quality certificates, statutory markings, and government issuing authorities (such as BIS/ISI Govt of India, EIC/DGFT Govt of India, European Commission CE Mark, UK Govt UKCA/OPSS, U.S. Govt NIST/CPSC/FCC/CBP, Saudi Govt SASO/SABER, Japanese Govt METI PSE/JIS).
 NEVER recommend or name private corporate inspection/testing companies (do NOT mention QIMA, SGS, TÜV, Intertek, UL, Bureau Veritas, etc.). Every "labPartner" MUST be an official government ministry, statutory standards body, or government regulatory authority.
 Also generate:
-1. "nativeSummary": A clear, friendly 2-3 sentence summary in simple English explaining what government certificates are needed and reassuring the seller that TradeOracle handles the English paperwork for direct government portal filing.
+1. "nativeSummary": A clear, friendly 2-3 sentence summary in simple English explaining what government certificates are needed and reassuring the seller that TRUVX handles the English paperwork for direct government portal filing.
 2. "generatedDossier": A clean English Technical File & Declaration of Conformity draft ready for direct submission to the official government standards portal.
 3. "packagingLabelSpecs": 4 short strings to print on the export carton label.
 
@@ -242,7 +242,7 @@ Seller Preferred Language: ${preferredLanguage}`;
           ).translatedText;
 
     return NextResponse.json({
-      poweredBy: "TradeOracle AI",
+      poweredBy: "TRUVX AI",
       hsCode: parsed.hsCode || fallback.hsCode,
       nativeSummary: translatedSummary,
       requiredCertificates:

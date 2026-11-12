@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { tradeStore } from "@/lib/trade/tradeStore";
 import { notificationEngine } from "@/lib/trade/notificationEngine";
 
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: "system",
-                content: `You are TradeOracle AI's Export Certificate PDF Verifier.
+                content: `You are TRUVX AI's Export Certificate PDF Verifier.
 Analyze the uploaded certificate metadata and extracted PDF text snippet.
 Return ONLY valid JSON:
 {
@@ -167,7 +167,7 @@ Extracted Document Text: ${extractedText || "Binary/scanned PDF stream (no uncom
 
     return NextResponse.json({
       success: true,
-      poweredBy: "TradeOracle AI",
+      poweredBy: "TRUVX AI",
       certificate: record,
       notification,
     });

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -178,7 +178,7 @@ export default function SignupPage() {
                 {role === "manufacturer" && onboardingCerts.length > 0 && (
                   <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] text-xs font-mono text-left space-y-2.5">
                     <div className="font-bold text-[#18280e]">
-                      TradeOracle AI Certification Plan ({preferredLanguage})
+                      TRUVX AI Certification Plan ({preferredLanguage})
                     </div>
                     {onboardingSummary && (
                       <p className="text-[11px] text-stone-600 leading-relaxed">{onboardingSummary}</p>
@@ -410,7 +410,7 @@ export default function SignupPage() {
 
                       <div>
                         <label className="text-stone-700 block mb-1 font-bold">
-                          Target Export Countries (TradeOracle AI will arrange required quality marks)
+                          Target Export Countries (TRUVX AI will arrange required quality marks)
                         </label>
                         <div className="flex flex-wrap gap-1.5">
                           {[

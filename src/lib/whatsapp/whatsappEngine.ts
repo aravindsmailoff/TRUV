@@ -1,4 +1,4 @@
-import fs from "fs";
+﻿import fs from "fs";
 import path from "path";
 import pino from "pino";
 import QRCode from "qrcode";
@@ -218,7 +218,7 @@ export async function connectWhatsApp(forceFreshQr = false): Promise<{
       ...(version ? { version } : {}),
       auth: authState,
       logger: pino({ level: "silent" }),
-      browser: Browsers.ubuntu("TradeOracle"),
+      browser: Browsers.ubuntu("TRUVX"),
       printQRInTerminal: false,
       markOnlineOnConnect: false,
       syncFullHistory: false,
@@ -256,7 +256,7 @@ export async function connectWhatsApp(forceFreshQr = false): Promise<{
         state.isInitializing = false;
         state.lastError = null;
         state.connectedPhone = extractPhoneFromJid(sock.user?.id);
-        state.connectedName = sock.user?.name || "TradeOracle Linked Device";
+        state.connectedName = sock.user?.name || "TRUVX Linked Device";
 
         // Default blank recipient numbers to connected phone so user sees messages immediately during testing
         if (state.connectedPhone) {
@@ -337,10 +337,10 @@ export async function connectWhatsApp(forceFreshQr = false): Promise<{
 
         if (upper === "1" || upper === "ACCEPT" || upper === "CONFIRM") {
           autoReplyText =
-            "✅ *Order Accepted on TradeOracle!*\n\nThank you! We have confirmed your order acceptance and notified the buyer.\nYour 30% PayPal advance protection is active. TradeOracle will send updates here as inspection & shipping progress.";
+            "✅ *Order Accepted on TRUVX!*\n\nThank you! We have confirmed your order acceptance and notified the buyer.\nYour 30% PayPal advance protection is active. TRUVX will send updates here as inspection & shipping progress.";
         } else if (upper === "STATUS" || upper === "HI" || upper === "HELLO" || upper === "HELP") {
           autoReplyText =
-            "🟢 *TradeOracle WhatsApp Assistant*\n\nYour account is connected to automated order & PayPal alerts.\n\nReply:\n• *1* to confirm latest pending order\n• *STATUS* to check active order escrow status";
+            "🟢 *TRUVX WhatsApp Assistant*\n\nYour account is connected to automated order & PayPal alerts.\n\nReply:\n• *1* to confirm latest pending order\n• *STATUS* to check active order escrow status";
         }
 
         state.incomingReplies.unshift({
@@ -478,10 +478,10 @@ export function formatPlainEnglishWhatsAppMessage(params: {
   if (role === "manufacturer") {
     switch (eventType) {
       case "new_order":
-        return `🟢 *TradeOracle — You Have Received a New Order!*\n\nNamaste ${manufacturerName},\n\nYou have received a confirmed export order *#${orderNumber}*:\n\n• *Buyer:* ${buyerName}\n• *Item:* ${quantity.toLocaleString()} units — ${productName}\n• *Total Order Value:* $${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)\n• *Advance Payment:* $${advanceUSD.toLocaleString()} USD (₹${advanceLakhs} Lakhs) goes into safe PayPal Escrow before you start.\n\n✅ *What to do next:*\nReply *1* here to accept this order, or open your TradeOracle Manufacturer Dashboard.\n_No confusing customs paperwork needed — TradeOracle handles bills and bank certificates automatically._`;
+        return `🟢 *TRUVX — You Have Received a New Order!*\n\nNamaste ${manufacturerName},\n\nYou have received a confirmed export order *#${orderNumber}*:\n\n• *Buyer:* ${buyerName}\n• *Item:* ${quantity.toLocaleString()} units — ${productName}\n• *Total Order Value:* $${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)\n• *Advance Payment:* $${advanceUSD.toLocaleString()} USD (₹${advanceLakhs} Lakhs) goes into safe PayPal Escrow before you start.\n\n✅ *What to do next:*\nReply *1* here to accept this order, or open your TRUVX Manufacturer Dashboard.\n_No confusing customs paperwork needed — TRUVX handles bills and bank certificates automatically._`;
 
       case "rfq_published":
-        return `📋 *New Buyer Request on TradeOracle*\n\nA verified foreign buyer (${buyerName}) wants *${quantity.toLocaleString()} units* of *${productName}*.\n• Target Budget: $${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)\n\nOpen your Manufacturer Dashboard to submit your price quotation.`;
+        return `📋 *New Buyer Request on TRUVX*\n\nA verified foreign buyer (${buyerName}) wants *${quantity.toLocaleString()} units* of *${productName}*.\n• Target Budget: $${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)\n\nOpen your Manufacturer Dashboard to submit your price quotation.`;
 
       case "paypal_escrow_locked":
         return `💰 *Advance Money Received in PayPal!*\n\nOrder: *#${orderNumber}*\nGood news! *${buyerName}* has paid the 30% advance deposit of *$${advanceUSD.toLocaleString()} USD (approx ₹${advanceLakhs} Lakhs)* into PayPal Escrow.\n\n🔒 Your payment is 100% safe. You can safely start raw material casting and production now.`;
@@ -493,14 +493,14 @@ export function formatPlainEnglishWhatsAppMessage(params: {
         return `🚢 *Cargo Shipped & Final Balance Released!*\n\nOrder: *#${orderNumber}*\nContainer shipping bill verified at port.\nThe remaining 70% payment (*$${balanceUSD.toLocaleString()} USD / approx ₹${balanceLakhs} Lakhs*) is being deposited into your Indian bank account via PayPal.\n\nYour CA tax & export statement (e-FIRC) is ready in your dashboard.`;
 
       default:
-        return `🟢 *TradeOracle Update for #${orderNumber}*\n\n${productName} (${quantity} units) — Total Value: $${amountUSD.toLocaleString()} USD.`;
+        return `🟢 *TRUVX Update for #${orderNumber}*\n\n${productName} (${quantity} units) — Total Value: $${amountUSD.toLocaleString()} USD.`;
     }
   }
 
   if (role === "buyer") {
     switch (eventType) {
       case "new_order":
-        return `📦 *TradeOracle Order Created (#${orderNumber})*\n\nYour Purchase Order with *${manufacturerName}* is live.\n• *Product:* ${quantity.toLocaleString()} units — ${productName}\n• *Total Deal:* $${amountUSD.toLocaleString()} USD\n• *Next Step:* Fund 30% PayPal Escrow ($${advanceUSD.toLocaleString()} USD) so the factory begins production.`;
+        return `📦 *TRUVX Order Created (#${orderNumber})*\n\nYour Purchase Order with *${manufacturerName}* is live.\n• *Product:* ${quantity.toLocaleString()} units — ${productName}\n• *Total Deal:* $${amountUSD.toLocaleString()} USD\n• *Next Step:* Fund 30% PayPal Escrow ($${advanceUSD.toLocaleString()} USD) so the factory begins production.`;
 
       case "rfq_published":
         return `📋 *RFQ #${orderNumber} Published to Verified Indian Suppliers*\n\nYour sourcing request for *${quantity.toLocaleString()} units of ${productName}* has been sent to vetted Indian manufacturers. You will receive quotes shortly.`;
@@ -515,7 +515,7 @@ export function formatPlainEnglishWhatsAppMessage(params: {
         return `🚢 *Shipment Dispatched from India (#${orderNumber})*\n\nYour cargo has been cleared and loaded onto the vessel. Ocean Bill of Lading and tracking are live in your Foreign Buyer Portal.`;
 
       default:
-        return `🌐 *TradeOracle Buyer Alert (#${orderNumber})*\n\nOrder status updated for ${productName} with ${manufacturerName}.`;
+        return `🌐 *TRUVX Buyer Alert (#${orderNumber})*\n\nOrder status updated for ${productName} with ${manufacturerName}.`;
     }
   }
 
@@ -523,7 +523,7 @@ export function formatPlainEnglishWhatsAppMessage(params: {
   switch (eventType) {
     case "new_order":
     case "service_milestone_funded":
-      return `💻 *TradeOracle — New Client Milestone Funded!*\n\nOrder: *#${orderNumber}*\nYour international client (*${buyerName}*) has funded *$${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)* into PayPal Escrow for *${productName}*.\n\n🔒 Funds are secured. You can start engineering work safely!`;
+      return `💻 *TRUVX — New Client Milestone Funded!*\n\nOrder: *#${orderNumber}*\nYour international client (*${buyerName}*) has funded *$${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)* into PayPal Escrow for *${productName}*.\n\n🔒 Funds are secured. You can start engineering work safely!`;
 
     case "service_delivery_submitted":
       return `🚀 *Deliverable Proof Logged (#${orderNumber})*\n\nYour GitHub PR, staging link, and Loom walkthrough have been verified and recorded onto the transaction ledger for client approval.`;
@@ -533,7 +533,7 @@ export function formatPlainEnglishWhatsAppMessage(params: {
       return `🎉 *PayPal Milestone Payout Released!*\n\nOrder: *#${orderNumber}*\n*$${amountUSD.toLocaleString()} USD (approx ₹${inrLakhs} Lakhs)* has been released to your Indian bank account, with automated service export compliance recorded.`;
 
     default:
-      return `💻 *TradeOracle Service Update (#${orderNumber})*\n\nProject milestone update for ${productName} ($${amountUSD.toLocaleString()} USD).`;
+      return `💻 *TRUVX Service Update (#${orderNumber})*\n\nProject milestone update for ${productName} ($${amountUSD.toLocaleString()} USD).`;
   }
 }
 
@@ -602,7 +602,7 @@ export async function sendRealWhatsAppMessage(params: {
         body: JSON.stringify({
           eventId: logEntry.id,
           timestamp: logEntry.timestamp,
-          source: "TradeOracle Cross-Border Platform",
+          source: "TRUVX Cross-Border Platform",
           channel: "whatsapp",
           eventType: params.eventType,
           role: params.role,

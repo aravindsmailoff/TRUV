@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -219,7 +219,7 @@ export function ForeignBuyerPortal({
             Find the Exact Indian Manufacturer for Your Specifications
           </h2>
           <p className="text-sm text-stone-300 leading-relaxed max-w-2xl">
-            Submit your engineering requirements or procurement scope. TradeOracle AI parses your technical tolerances, checks verified Indian export clusters, and connects you directly to a PayPal-verified merchant under one structured transaction.
+            Submit your engineering requirements or procurement scope. TRUVX AI parses your technical tolerances, checks verified Indian export clusters, and connects you directly to a PayPal-verified merchant under one structured transaction.
           </p>
 
           {/* Quick Preset Buttons */}
@@ -256,7 +256,7 @@ export function ForeignBuyerPortal({
             <Bot className="w-5 h-5 text-[#3f7308]" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#18280e]">TradeOracle AI Sourcing Assistant</h3>
+            <h3 className="text-sm font-bold text-[#18280e]">TRUVX AI Sourcing Assistant</h3>
             <p className="text-xs text-stone-500">
               Tell the AI what product, material grade, quantity, or service scope you are sourcing from India
             </p>
@@ -402,7 +402,7 @@ export function ForeignBuyerPortal({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 font-bold text-[#18280e]">
                   <CreditCard className="w-4 h-4 text-[#3f7308]" />
-                  <span>TradeOracle Protected Transaction (PayPal Orders v2 Rails)</span>
+                  <span>TRUVX Protected Transaction (PayPal Orders v2 Rails)</span>
                 </div>
                 <span className="text-[10px] bg-white px-2.5 py-0.5 rounded-full border border-[#d8e5ca] font-bold text-[#284905]">
                   Funds Never Disbursed Without Proof

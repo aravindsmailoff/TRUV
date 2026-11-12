@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -134,7 +134,7 @@ const DEAL_EXAMPLE: SimpleDealStepStory = {
     "See how an $85,750 (₹71.5 Lakhs) foreign order works smoothly without stress: price is locked first, 30% advance comes via PayPal before you start work, and shipping receipts protect your remaining 70%.",
 };
 
-export function TradeOracleStoryline() {
+export function TRUVXStoryline() {
   const [activeStep, setActiveStep] = useState<
     "find" | "agree" | "pay" | "deliver" | "prove" | "resolve"
   >("agree");

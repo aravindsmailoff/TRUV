@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const AI_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b";
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (!apiKey) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         hsCode: "8301.40.00",
         recommendedUnitPriceUSD: fallbackUnitUSD,
         totalDealUSD: fallbackTotalUSD,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemPrompt = `You are TradeOracle AI's Export Pricing & Quotation Assistant for Indian manufacturers.
+    const systemPrompt = `You are TRUVX AI's Export Pricing & Quotation Assistant for Indian manufacturers.
 Given a product, material, quantity, target country, and factory cost in INR, recommend:
 1. Accurate 8-digit Indian HS Code
 2. Recommended export unit price in USD (including ~18-25% healthy export margin + packaging/FOB port charges, assuming 1 USD = 83.5 INR)
@@ -77,7 +77,7 @@ Respond ONLY with valid JSON:
 
     if (!aiRes.ok) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         hsCode: "8301.40.00",
         recommendedUnitPriceUSD: fallbackUnitUSD,
         totalDealUSD: fallbackTotalUSD,
@@ -96,7 +96,7 @@ Respond ONLY with valid JSON:
 
     if (!jsonMatch) {
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         hsCode: "8301.40.00",
         recommendedUnitPriceUSD: fallbackUnitUSD,
         totalDealUSD: fallbackTotalUSD,
@@ -121,7 +121,7 @@ Respond ONLY with valid JSON:
     const totalUSD = Math.round(unitUSD * quantity);
 
     return NextResponse.json({
-      poweredBy: "TradeOracle AI",
+      poweredBy: "TRUVX AI",
       hsCode: parsed.hsCode || "8301.40.00",
       recommendedUnitPriceUSD: unitUSD,
       totalDealUSD: totalUSD,

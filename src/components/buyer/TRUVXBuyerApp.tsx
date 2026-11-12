@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -50,7 +50,7 @@ interface AiMatchItem {
 }
 
 interface AiMatchResponse {
-  poweredBy: "TradeOracle AI" | "Catalog Fallback";
+  poweredBy: "TRUVX AI" | "Catalog Fallback";
   model: string;
   extractedRequirements: {
     product: string;
@@ -96,7 +96,7 @@ interface OrderAiVerification {
   checks: string[];
 }
 
-export function TradeOracleBuyerApp() {
+export function TRUVXBuyerApp() {
   const router = useRouter();
   const { currentUser, isHydrated } = useSessionUser();
 
@@ -126,7 +126,7 @@ export function TradeOracleBuyerApp() {
   const [selectedOrder, setSelectedOrder] = useState<OrderWorkspaceItem>(orders[0]);
   const [compareQuotesForRfqId, setCompareQuotesForRfqId] = useState<string | null>(null);
 
-  // TradeOracle AI Exact Seller & Material Matcher
+  // TRUVX AI Exact Seller & Material Matcher
   const [aiQuery, setAiQuery] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -139,7 +139,7 @@ export function TradeOracleBuyerApp() {
   const [translatingMsg, setTranslatingMsg] = useState(false);
   const [samplePaypalLoading, setSamplePaypalLoading] = useState(false);
 
-  // TradeOracle AI Pre-Payment Spec & Risk Verification
+  // TRUVX AI Pre-Payment Spec & Risk Verification
   const [orderVerifyLoading, setOrderVerifyLoading] = useState(false);
   const [orderVerification, setOrderVerification] = useState<OrderAiVerification | null>(null);
 
@@ -903,7 +903,7 @@ export function TradeOracleBuyerApp() {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-base tracking-tight text-[#18280e] leading-tight">
-                TradeOracle<span className="text-[#3f7308]">.</span>
+                TRUVX<span className="text-[#3f7308]">.</span>
               </span>
               <span className="text-[10px] font-mono text-stone-400 uppercase font-semibold">
                 Foreign Buyer Portal
@@ -1031,7 +1031,7 @@ export function TradeOracleBuyerApp() {
               router.push("/signin");
             }}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-white hover:bg-rose-50 text-stone-700 hover:text-rose-700 border border-stone-200 hover:border-rose-200 text-xs font-sans font-medium transition-colors cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
-            title="Sign out of TradeOracle session"
+            title="Sign out of TRUVX session"
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span>Sign Out</span>
@@ -1291,7 +1291,7 @@ export function TradeOracleBuyerApp() {
                         AI Seller &amp; Material Finder
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-semibold">
-                        TradeOracle AI
+                        TRUVX AI
                       </span>
                     </div>
                     <span className="text-[11px] text-stone-400 hidden sm:inline">
@@ -1653,7 +1653,7 @@ export function TradeOracleBuyerApp() {
                   <Sparkles className="w-4 h-4 text-[#3f7308] shrink-0" />
                   <input
                     type="text"
-                    placeholder="Ask TradeOracle AI to find the exact seller by material, coating, or product specs..."
+                    placeholder="Ask TRUVX AI to find the exact seller by material, coating, or product specs..."
                     value={aiQuery}
                     onChange={(e) => setAiQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -2104,12 +2104,12 @@ export function TradeOracleBuyerApp() {
                   </div>
                 </div>
 
-                {/* TradeOracle AI Pre-Payment Spec & Risk Guard */}
+                {/* TRUVX AI Pre-Payment Spec & Risk Guard */}
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2 font-mono text-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 font-bold text-[#18280e]">
                       <Sparkles className="w-4 h-4 text-[#3f7308]" />
-                      <span>TradeOracle AI Spec &amp; Risk Check</span>
+                      <span>TRUVX AI Spec &amp; Risk Check</span>
                     </div>
                     <button
                       type="button"
@@ -2540,7 +2540,7 @@ export function TradeOracleBuyerApp() {
                       <div className="space-y-3 min-h-[140px]">
                         {activeThread.messages.length === 0 ? (
                           <p className="text-xs font-mono text-stone-400 py-6 text-center">
-                            No message sent to {activeThread.supplierName} yet. Write in English below — TradeOracle AI translates automatically to {activeThread.preferredLanguage}.
+                            No message sent to {activeThread.supplierName} yet. Write in English below — TRUVX AI translates automatically to {activeThread.preferredLanguage}.
                           </p>
                         ) : (
                           activeThread.messages.map((msg) =>

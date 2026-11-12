@@ -1,0 +1,63 @@
+[
+  {
+    "id": "notif_1794494811598_821",
+    "orderNumber": "ORD-803123",
+    "eventType": "packing_cargo_updated",
+    "title": "Order accepted · CONCOR (Container Corp of India - Govt. of India)",
+    "message": "Your order ORD-803123 (Architectural Solid Brass Mortise Locksets & Lever Handles) is accepted and safely secured for export to United States (California). Shipment is registered with CONCOR (Container Corp of India - Govt. of India) (Waybill: GOV-CARGO-811438). You can relax — your goods are protected and on schedule.",
+    "govtCargoService": "CONCOR (Container Corp of India - Govt. of India)",
+    "trackingNumber": "GOV-CARGO-811438",
+    "emailTo": "buyer@pacifichardware.us",
+    "emailStatus": "queued_no_resend_key",
+    "read": true,
+    "createdAt": "2026-11-12T14:46:51.598Z"
+  },
+  {
+    "id": "notif_1794494803317_543",
+    "orderNumber": "ORD-803123",
+    "eventType": "milestone_completed",
+    "title": "Order Accepted by Moradabad Precision Foundry & Castings LLP",
+    "message": "Your order ORD-803123 (Architectural Solid Brass Mortise Locksets & Lever Handles) is accepted and safely secured for export to United States (California). Shipment is registered with CONCOR (Container Corp of India - Govt. of India) (Waybill: PENDING-PACKING). You can relax — your goods are protected and on schedule.",
+    "emailTo": "buyer@pacifichardware.us",
+    "emailStatus": "queued_no_resend_key",
+    "read": true,
+    "createdAt": "2026-11-12T14:46:43.317Z"
+  },
+  {
+    "id": "notif_1794494775130_756",
+    "orderNumber": "ORD-108058",
+    "eventType": "packing_cargo_updated",
+    "title": "Order packed · CONCOR (Container Corp of India - Govt. of India)",
+    "message": "Your order ORD-108058 (Satin Gold Brass Door Handles) is packed and safely secured for export to United States. Shipment is registered with CONCOR (Container Corp of India - Govt. of India) (Waybill: CONCOR-GOV-2026-8841). You can relax — your goods are protected and on schedule.",
+    "govtCargoService": "CONCOR (Container Corp of India - Govt. of India)",
+    "trackingNumber": "CONCOR-GOV-2026-8841",
+    "emailTo": "buyer@pacifichardware.us",
+    "emailStatus": "queued_no_resend_key",
+    "read": true,
+    "createdAt": "2026-11-12T14:46:15.130Z"
+  },
+  {
+    "id": "notif_1794491109203_595",
+    "orderNumber": "ORD-108058",
+    "eventType": "milestone_completed",
+    "title": "Order Accepted by Patel Brass Works",
+    "message": "Your export order ORD-108058 for Satin Gold Brass Door Handles is safely packed and moving via the Government Freight Cargo service with CONCOR. The shipment is currently in transit and tracking will be updated shortly.",
+    "emailTo": "buyer@pacifichardware.us",
+    "emailStatus": "queued_no_resend_key",
+    "read": true,
+    "createdAt": "2026-11-12T13:45:09.203Z"
+  },
+  {
+    "id": "notif_1794488163828_270",
+    "orderNumber": "TRADE-IND-USA-2026-7719",
+    "eventType": "packing_cargo_updated",
+    "title": "Order handed to govt cargo · CONCOR (Container Corp of India - Govt. of India)",
+    "message": "Your export order TRADE-IND-USA-2026-7719 has been safely packed in export crates and is now moving via the Government Freight Cargo service. We confirm it is currently with CONCOR (Container Corp of India) under tracking reference CONCOR-GOV-2026-9901.",
+    "govtCargoService": "CONCOR (Container Corp of India - Govt. of India)",
+    "trackingNumber": "CONCOR-GOV-2026-9901",
+    "emailTo": "buyer@pacifichardware.us",
+    "emailStatus": "queued_no_resend_key",
+    "read": true,
+    "createdAt": "2026-11-12T12:56:03.828Z"
+  }
+]

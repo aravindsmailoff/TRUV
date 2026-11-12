@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -237,7 +237,7 @@ export function WhatsAppNotificationCenter({
       return {
         new_order: {
           title: "New Export Order Received",
-          body: `TradeOracle — You Have Received a New Order!\n\nNamaste ${recipientName},\n\nConfirmed export order #${orderNumber}:\n• Buyer: Pacific Architectural Hardware LLC (USA)\n• Item: 1,500 units — Solid Brass Mortise Handles\n• Total Value: $85,750 USD (approx ₹71.60 Lakhs)\n• Advance Payment: $25,725 USD (₹21.48 Lakhs) is protected in PayPal before you start.\n\nReply 1 here to accept this order, or open your TradeOracle dashboard.`,
+          body: `TRUVX — You Have Received a New Order!\n\nNamaste ${recipientName},\n\nConfirmed export order #${orderNumber}:\n• Buyer: Pacific Architectural Hardware LLC (USA)\n• Item: 1,500 units — Solid Brass Mortise Handles\n• Total Value: $85,750 USD (approx ₹71.60 Lakhs)\n• Advance Payment: $25,725 USD (₹21.48 Lakhs) is protected in PayPal before you start.\n\nReply 1 here to accept this order, or open your TRUVX dashboard.`,
         },
         paypal_escrow_locked: {
           title: "Advance Money Received in PayPal",
@@ -258,7 +258,7 @@ export function WhatsAppNotificationCenter({
       return {
         new_order: {
           title: "Order Created in India",
-          body: `TradeOracle Order Created (#${orderNumber})\n\nYour Purchase Order with Moradabad Precision Foundry is live.\n• Product: 1,500 units — Solid Brass Mortise Handles\n• Total Deal: $85,750 USD\n• Next Step: Fund 30% PayPal advance ($25,725 USD) to start production.`,
+          body: `TRUVX Order Created (#${orderNumber})\n\nYour Purchase Order with Moradabad Precision Foundry is live.\n• Product: 1,500 units — Solid Brass Mortise Handles\n• Total Deal: $85,750 USD\n• Next Step: Fund 30% PayPal advance ($25,725 USD) to start production.`,
         },
         paypal_escrow_locked: {
           title: "PayPal 30% Advance Funded",
@@ -278,7 +278,7 @@ export function WhatsAppNotificationCenter({
     return {
       new_order: {
         title: "New Client Milestone Funded",
-        body: `TradeOracle — New Client Milestone Funded!\n\nOrder: #${orderNumber}\nYour client has funded $2,500 USD (approx ₹2.09 Lakhs) via PayPal. Funds are protected so you can start engineering work safely.`,
+        body: `TRUVX — New Client Milestone Funded!\n\nOrder: #${orderNumber}\nYour client has funded $2,500 USD (approx ₹2.09 Lakhs) via PayPal. Funds are protected so you can start engineering work safely.`,
       },
       paypal_escrow_locked: {
         title: "PayPal Milestone Payout Released",
@@ -300,7 +300,7 @@ export function WhatsAppNotificationCenter({
 
   return (
     <>
-      {/* Trigger Pill — Matched cleanly to TradeOracle Spade theme + Geist Sans */}
+      {/* Trigger Pill — Matched cleanly to TRUVX Spade theme + Geist Sans */}
       {compact ? (
         <button
           type="button"
@@ -587,7 +587,7 @@ export function WhatsAppNotificationCenter({
                     <div className="pt-1 flex justify-end items-center gap-1 text-[#3f7308]">
                       <CheckCheck className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-sans font-semibold">
-                        Automated TradeOracle Alert
+                        Automated TRUVX Alert
                       </span>
                     </div>
                   </div>

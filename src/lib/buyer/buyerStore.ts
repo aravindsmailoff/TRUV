@@ -1,5 +1,5 @@
-/**
- * TradeOracle Buyer Data Store
+﻿/**
+ * TRUVX Buyer Data Store
  * In-memory & localStorage-backed state for Foreign Buyer Portal:
  * - Suppliers directory (Indian manufacturers & tech service agencies)
  * - RFQs (Goods & Services)

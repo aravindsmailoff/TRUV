@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { translateTradeText } from "@/lib/ai/translator";
 
 interface TranslateRequest {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (Array.isArray(body.texts)) {
       const items = body.texts.map((t) => String(t ?? ""));
       if (items.length === 0) {
-        return NextResponse.json({ poweredBy: "TradeOracle AI", translations: [] });
+        return NextResponse.json({ poweredBy: "TRUVX AI", translations: [] });
       }
 
       // Translate in chunks of 30 items using a newline-numbered separator
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         targetLanguage,
         translations,
       });
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      poweredBy: "TradeOracle AI",
+      poweredBy: "TRUVX AI",
       translatedText: result.translatedText,
       detectedSourceLanguage: result.detectedSourceLanguage,
       targetLanguage: result.targetLanguage,

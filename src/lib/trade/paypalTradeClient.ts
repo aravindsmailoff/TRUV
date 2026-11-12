@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PayPal Commercial Trade Client
  *
  * Implements PayPal Orders v2 for cross-border commercial trade:
@@ -97,7 +97,7 @@ export class PayPalTradeClient {
         },
       ],
       application_context: {
-        brand_name: "TradeOracle",
+        brand_name: "TRUVX",
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
         return_url: returnUrl || "http://localhost:3000/buyer?paypal=approved",

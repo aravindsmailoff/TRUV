@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const AI_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const AI_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b";
@@ -48,7 +48,7 @@ function buildFallbackParsedRfq(prompt: string) {
   if (specs.length === 0) specs.push("Export-grade ISPM-15 crated packaging", "Batch quality & dimensional report");
 
   return {
-    poweredBy: "TradeOracle AI",
+    poweredBy: "TRUVX AI",
     title: prompt.trim().slice(0, 65),
     category,
     quantity,
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               role: "system",
-              content: `You are TradeOracle AI's One-Sentence RFQ Builder for international buyers sourcing from Indian manufacturers.
+              content: `You are TRUVX AI's One-Sentence RFQ Builder for international buyers sourcing from Indian manufacturers.
 Convert a single buyer sentence into a structured export RFQ. Only list official government certificates (never private companies).
 Respond ONLY with valid JSON:
 {
@@ -125,7 +125,7 @@ Respond ONLY with valid JSON:
 
       const parsed = JSON.parse(jsonMatch[0]) as Partial<typeof fallback>;
       return NextResponse.json({
-        poweredBy: "TradeOracle AI",
+        poweredBy: "TRUVX AI",
         title: parsed.title || fallback.title,
         category: parsed.category || fallback.category,
         quantity: typeof parsed.quantity === "number" && parsed.quantity > 0 ? parsed.quantity : fallback.quantity,
