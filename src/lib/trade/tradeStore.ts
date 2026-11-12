@@ -405,6 +405,72 @@ class TradeStore {
     }
     return ms;
   }
+
+  public updateSellerPackingAndCargo(params: {
+    tradeId?: string;
+    orderNumber?: string;
+    packingStatus: "accepted" | "packing" | "packed" | "handed_to_govt_cargo" | "in_transit";
+    govtCargoService: CommercialTradeOrder["freightForwarder"]["name"];
+    trackingNumber?: string;
+    buyerReassuranceNote?: string;
+  }): { trade: CommercialTradeOrder; milestone: TradeMilestone } {
+    const trade =
+      (params.tradeId ? this.trades.find((t) => t.id === params.tradeId) : undefined) ||
+      (params.orderNumber ? this.trades.find((t) => t.orderNumber === params.orderNumber) : undefined) ||
+      this.trades[0];
+
+    if (!trade) {
+      throw new Error("No active trade order found");
+    }
+
+    const trackingNo =
+      (params.trackingNumber || "").trim() ||
+      `GOV-CARGO-${Date.now().toString().slice(-6)}`;
+    const reassurance =
+      (params.buyerReassuranceNote || "").trim() ||
+      "Your order is safely packed, sealed in export-grade packaging, and handed over to Government Freight Cargo. You can relax — your goods are insured and on the way.";
+
+    trade.freightForwarder = {
+      ...trade.freightForwarder,
+      name: params.govtCargoService,
+      bookingReference: trackingNo,
+    };
+
+    if (params.packingStatus === "handed_to_govt_cargo" || params.packingStatus === "in_transit") {
+      trade.currentStage = "customs_export_cleared";
+    }
+
+    trade.sellerDispatchUpdate = {
+      packingStatus: params.packingStatus,
+      govtCargoService: params.govtCargoService,
+      trackingNumber: trackingNo,
+      buyerReassuranceNote: reassurance,
+      sealedAndSafe: true,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const milestone: TradeMilestone = {
+      id: `ms_cargo_${Date.now()}`,
+      tradeOrderId: trade.id,
+      stage: "customs_export_cleared",
+      title: `Order Packed & Safe · ${params.govtCargoService}`,
+      description: `${reassurance} (Govt Cargo Ref: ${trackingNo})`,
+      serviceProviderName: params.govtCargoService,
+      completedAt: new Date().toISOString(),
+      status: "completed",
+    };
+
+    const existingIdx = this.milestones.findIndex(
+      (m) => m.tradeOrderId === trade.id && m.id.startsWith("ms_cargo_")
+    );
+    if (existingIdx >= 0) {
+      this.milestones[existingIdx] = milestone;
+    } else {
+      this.milestones.push(milestone);
+    }
+
+    return { trade, milestone };
+  }
 }
 
 export const tradeStore = new TradeStore();

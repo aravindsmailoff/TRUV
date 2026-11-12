@@ -167,6 +167,59 @@ export function TradeOracleBuyerApp() {
   const [paypalLoading, setPaypalLoading] = useState(false);
   const [paypalSuccessMsg, setPaypalSuccessMsg] = useState<{ orderId: string; amount: string } | null>(null);
 
+  // Live Seller Packing & Government Freight Cargo Updates from /api/trade
+  const [liveCargoUpdates, setLiveCargoUpdates] = useState<
+    Array<{
+      orderNumber: string;
+      productName: string;
+      manufacturerName: string;
+      packingStatus: string;
+      govtCargoService: string;
+      trackingNumber: string;
+      buyerReassuranceNote: string;
+      updatedAt: string;
+    }>
+  >([]);
+
+  const fetchLiveCargoUpdates = async () => {
+    try {
+      const res = await fetch("/api/trade");
+      if (!res.ok) return;
+      const data = await res.json();
+      const trades = Array.isArray(data.trades) ? data.trades : [];
+      const mapped = trades
+        .filter((t: { sellerDispatchUpdate?: unknown }) => Boolean(t.sellerDispatchUpdate))
+        .map(
+          (t: {
+            orderNumber: string;
+            productName: string;
+            manufacturerName: string;
+            sellerDispatchUpdate: {
+              packingStatus: string;
+              govtCargoService: string;
+              trackingNumber: string;
+              buyerReassuranceNote: string;
+              updatedAt: string;
+            };
+          }) => ({
+            orderNumber: t.orderNumber,
+            productName: t.productName,
+            manufacturerName: t.manufacturerName,
+            ...t.sellerDispatchUpdate,
+          })
+        );
+      setLiveCargoUpdates(mapped);
+    } catch {
+      // Ignore network error
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "orders") {
+      void fetchLiveCargoUpdates();
+    }
+  }, [activeTab]);
+
   // Handle Supplier Shortlist Toggle
   const toggleShortlist = (supplierId: string) => {
     setSuppliers((prev) =>
@@ -1984,6 +2037,43 @@ export function TradeOracleBuyerApp() {
                   </div>
                 )}
               </div>
+
+              {/* Live Seller Packing & Government Freight Cargo Reassurance Card */}
+              {liveCargoUpdates.length > 0 && (
+                <div className="p-6 rounded-3xl bg-[#f4faed] border border-[#d8e5ca] space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2.5 rounded-full bg-emerald-600 animate-pulse" />
+                      <h3 className="font-bold text-sm text-[#18280e]">
+                        Live Seller &amp; Government Freight Cargo Update
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void fetchLiveCargoUpdates()}
+                      className="text-xs font-bold text-[#3f7308] hover:underline cursor-pointer"
+                    >
+                      Refresh Status
+                    </button>
+                  </div>
+                  {liveCargoUpdates.map((u, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-white border border-[#d8e5ca] space-y-1.5 text-xs">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <strong className="text-[#18280e]">
+                          {u.orderNumber} • {u.productName} ({u.manufacturerName})
+                        </strong>
+                        <span className="font-mono px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                          {u.trackingNumber}
+                        </span>
+                      </div>
+                      <p className="text-[#3f7308] font-bold">
+                        Status: {u.packingStatus.replace(/_/g, " ").toUpperCase()} · Carrier: {u.govtCargoService}
+                      </p>
+                      <p className="text-stone-700 leading-relaxed">{u.buyerReassuranceNote}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Order Progress Steps (Simplified) */}
               <div className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4">

@@ -185,6 +185,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, milestone: updated, whatsappDispatch });
     }
 
+    // 6. Seller Packing, Buyer Reassurance & Government Freight Cargo Dispatch
+    if (action === "seller_update_packing_cargo") {
+      const {
+        tradeId,
+        orderNumber,
+        packingStatus = "packed",
+        govtCargoService = "CONCOR (Container Corp of India - Govt. of India)",
+        trackingNumber,
+        buyerReassuranceNote,
+      } = body;
+
+      const { trade, milestone } = tradeStore.updateSellerPackingAndCargo({
+        tradeId,
+        orderNumber,
+        packingStatus,
+        govtCargoService,
+        trackingNumber,
+        buyerReassuranceNote,
+      });
+
+      let whatsappDispatch = null;
+      if (getWhatsAppStatusSnapshot().config.autoNotifyOnEvents) {
+        whatsappDispatch = await sendRealWhatsAppMessage({
+          role: "buyer",
+          eventType: "shipment_dispatched",
+          orderNumber: trade.orderNumber,
+          buyerName: `${trade.buyerCompany} (${trade.buyerCountry})`,
+          manufacturerName: trade.manufacturerName,
+          productName: trade.productName,
+          quantity: trade.quantityUnits,
+          amountUSD: trade.totalAmountUSD,
+        });
+      }
+
+      return NextResponse.json({ success: true, trade, milestone, whatsappDispatch });
+    }
+
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (err) {
     return NextResponse.json(

@@ -96,12 +96,27 @@ export interface CommercialTradeOrder {
     reportNumber?: string;
   };
   freightForwarder: {
-    name: "Maersk Logistics India" | "DHL Global Forwarding" | "Kuehne+Nagel India";
+    name:
+      | "CONCOR (Container Corp of India - Govt. of India)"
+      | "Shipping Corporation of India (SCI - Govt. of India)"
+      | "India Post International Cargo (Govt. of India)"
+      | "JNPT / Mundra Port Authority (Govt. of India)"
+      | "Maersk Logistics India"
+      | "DHL Global Forwarding"
+      | "Kuehne+Nagel India";
     bookingReference?: string;
     vesselVoyage?: string;
     containerNumber?: string;
     portOfLoading: string;
     portOfDischarge: string;
+  };
+  sellerDispatchUpdate?: {
+    packingStatus: "accepted" | "packing" | "packed" | "handed_to_govt_cargo" | "in_transit";
+    govtCargoService: string;
+    trackingNumber: string;
+    buyerReassuranceNote: string;
+    sealedAndSafe: boolean;
+    updatedAt: string;
   };
   customsBroker: {
     brokerLicense: string;

@@ -235,6 +235,28 @@ export default function DashboardPage() {
   const [autoApplyingMark, setAutoApplyingMark] = useState<string | null>(null);
   const [autoApplyingAll, setAutoApplyingAll] = useState(false);
   const [autoApplyNotice, setAutoApplyNotice] = useState<string>("");
+
+  // Seller Packing, Buyer Reassurance & Government Freight Cargo Engine (Step 6)
+  const [cargoOrderNumber, setCargoOrderNumber] = useState("ORD-USA-9921");
+  const [cargoStatus, setCargoStatus] = useState<
+    "accepted" | "packing" | "packed" | "handed_to_govt_cargo" | "in_transit"
+  >("packed");
+  const [cargoGovtService, setCargoGovtService] = useState(
+    "CONCOR (Container Corp of India - Govt. of India)"
+  );
+  const [cargoTrackingNo, setCargoTrackingNo] = useState("CONCOR-GOV-2026-8841");
+  const [cargoBuyerNote, setCargoBuyerNote] = useState(
+    "Your order is safely packed, sealed in export-grade crates, and booked with Government Freight Cargo. You can relax — your goods are insured and on the way."
+  );
+  const [cargoSubmitting, setCargoSubmitting] = useState(false);
+  const [cargoLiveSaved, setCargoLiveSaved] = useState<{
+    orderNumber: string;
+    packingStatus: string;
+    govtCargoService: string;
+    trackingNumber: string;
+    buyerReassuranceNote: string;
+    updatedAt: string;
+  } | null>(null);
   const [autoApplications, setAutoApplications] = useState<
     Record<
       string,
@@ -749,6 +771,35 @@ export default function DashboardPage() {
       );
     } finally {
       setAutoApplyingAll(false);
+    }
+  };
+
+  const handleSellerDispatchUpdate = async () => {
+    setCargoSubmitting(true);
+    try {
+      const res = await fetch("/api/trade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "seller_update_packing_cargo",
+          orderNumber: cargoOrderNumber,
+          packingStatus: cargoStatus,
+          govtCargoService: cargoGovtService,
+          trackingNumber: cargoTrackingNo,
+          buyerReassuranceNote: cargoBuyerNote,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.trade?.sellerDispatchUpdate) {
+        setCargoLiveSaved({
+          orderNumber: cargoOrderNumber,
+          ...data.trade.sellerDispatchUpdate,
+        });
+      }
+    } catch {
+      // Ignore network error
+    } finally {
+      setCargoSubmitting(false);
     }
   };
 
@@ -2506,24 +2557,125 @@ export default function DashboardPage() {
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
               <div className="pb-4 border-b border-stone-100">
                 <h2 className="text-lg font-bold text-[#18280e]">
-                  6. Goods Shipped &amp; Final Money Sent to Bank
+                  6. Order Packed, Safe &amp; Sent via Government Freight Cargo
                 </h2>
                 <p className="text-xs text-stone-600 mt-0.5">
-                  As soon as your boxes clear port customs and load onto the ship, the remaining 70% payment is sent.
+                  Confirm that the accepted order is packed safely and booked with Government Freight Cargo so your buyer can relax and track it live.
                 </p>
               </div>
-              <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
-                <div className="flex flex-wrap justify-between items-center gap-2">
-                  <strong className="text-sm text-[#18280e]">Order #ORD-USA-9921 • Container Loaded on Ship</strong>
-                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
-                    Left Gujarat Port ✓
-                  </span>
+
+              <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">Accepted Order</label>
+                    <select
+                      value={cargoOrderNumber}
+                      onChange={(e) => setCargoOrderNumber(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    >
+                      {LAYMAN_ORDERS.map((ord) => (
+                        <option key={ord.id} value={ord.orderNumber}>
+                          {ord.orderNumber} — {ord.productName} ({ord.foreignBuyer.company})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">Order Packing &amp; Dispatch Status</label>
+                    <select
+                      value={cargoStatus}
+                      onChange={(e) =>
+                        setCargoStatus(
+                          e.target.value as
+                            | "accepted"
+                            | "packing"
+                            | "packed"
+                            | "handed_to_govt_cargo"
+                            | "in_transit"
+                        )
+                      }
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    >
+                      <option value="accepted">Order Accepted — Preparing</option>
+                      <option value="packing">Packing in Factory</option>
+                      <option value="packed">Order Packed &amp; Sealed Safe ✓</option>
+                      <option value="handed_to_govt_cargo">Handed Over to Govt Freight Cargo ✓</option>
+                      <option value="in_transit">In Transit to Buyer Port ✓</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">Government Freight Cargo Service</label>
+                    <select
+                      value={cargoGovtService}
+                      onChange={(e) => setCargoGovtService(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    >
+                      <option value="CONCOR (Container Corp of India - Govt. of India)">
+                        CONCOR — Container Corporation of India (Govt. of India)
+                      </option>
+                      <option value="Shipping Corporation of India (SCI - Govt. of India)">
+                        Shipping Corporation of India (SCI — Govt. of India)
+                      </option>
+                      <option value="India Post International Cargo (Govt. of India)">
+                        India Post International Air Cargo / EMS (Govt. of India)
+                      </option>
+                      <option value="JNPT / Mundra Port Authority (Govt. of India)">
+                        JNPT / Mundra Port Authority Cargo Desk (Govt. of India)
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">Govt Cargo Waybill / Tracking No.</label>
+                    <input
+                      type="text"
+                      value={cargoTrackingNo}
+                      onChange={(e) => setCargoTrackingNo(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] font-mono outline-none"
+                    />
+                  </div>
                 </div>
-                <p className="text-stone-700 text-xs leading-relaxed">
-                  Loaded at Mundra Port onto Maersk cargo ship going to California, USA. Final balance of{" "}
-                  <strong>$60,025 (≈ ₹50.12 Lakhs)</strong> is approved for your bank account.
-                </p>
+
+                <div className="text-xs">
+                  <label className="font-bold text-stone-700 block mb-1">
+                    Buyer Reassurance Message (Shown Live in Buyer Portal)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={cargoBuyerNote}
+                    onChange={(e) => setCargoBuyerNote(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  disabled={cargoSubmitting}
+                  onClick={() => void handleSellerDispatchUpdate()}
+                  className="px-5 py-2.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50"
+                >
+                  {cargoSubmitting
+                    ? "Updating Live Order Engine..."
+                    : "Confirm Packed & Send Live Update to Buyer →"}
+                </button>
               </div>
+
+              {cargoLiveSaved && (
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-bold text-emerald-900">
+                      ✓ Live Status Saved &amp; Synced to Buyer Portal ({cargoLiveSaved.orderNumber})
+                    </span>
+                    <span className="font-mono px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                      {cargoLiveSaved.trackingNumber}
+                    </span>
+                  </div>
+                  <p className="text-emerald-900">
+                    Carrier: <strong>{cargoLiveSaved.govtCargoService}</strong> · Status:{" "}
+                    <strong className="uppercase">{cargoLiveSaved.packingStatus.replace(/_/g, " ")}</strong>
+                  </p>
+                  <p className="text-emerald-800">{cargoLiveSaved.buyerReassuranceNote}</p>
+                </div>
+              )}
             </div>
           )}
 
