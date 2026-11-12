@@ -1402,7 +1402,7 @@ export default function DashboardPage() {
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-stone-200/80 px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-2xs">
           <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-            <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap truncate">
+            <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap shrink-0">
               {activeNav === "dashboard" && "Dashboard"}
               {activeNav === "storyline" && "How Deals Work"}
               {activeNav === "buyer_portal" && "Buyer Sourcing Portal"}
@@ -1422,7 +1422,7 @@ export default function DashboardPage() {
               {activeNav === "settings" && "Settings"}
               {activeNav === "help" && "Help & Support"}
             </h1>
-            <span className="text-xs font-sans text-stone-400 hidden xl:inline whitespace-nowrap truncate">
+            <span className="text-xs font-sans text-stone-400 hidden 2xl:inline whitespace-nowrap">
               • Factory Export Workspace
             </span>
           </div>
@@ -1441,7 +1441,7 @@ export default function DashboardPage() {
                 onChange={(e) => setPortalLanguage(e.target.value)}
                 className="bg-transparent text-xs font-sans font-medium text-[#18280e] focus:outline-none cursor-pointer pr-1"
               >
-                <option value="">Select Language (English)</option>
+                <option value="">Language (English)</option>
                 <option value="Gujarati">Gujarati (ગુજરાતી)</option>
                 <option value="Hindi">Hindi (हिन्दी)</option>
                 <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
