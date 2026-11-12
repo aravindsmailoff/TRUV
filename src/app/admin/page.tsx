@@ -279,7 +279,7 @@ export default function AdminWhitelistDashboard() {
         )}
 
         {/* 4 Summary Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
           <div className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs space-y-1">
             <span className="text-[10px] text-stone-500 uppercase tracking-wider block font-bold">
               Pending Whitelist Reviews
@@ -332,7 +332,7 @@ export default function AdminWhitelistDashboard() {
 
         {/* Whitelisting Verification Table Container */}
         <div
-          className="relative bg-white rounded-2xl border border-stone-200/80 shadow-xl overflow-hidden font-mono"
+          className="relative bg-white rounded-2xl border border-stone-200/80 shadow-xl overflow-hidden font-sans"
           style={{ "--corner-size-desktop": "17px", "--corner-size-mobile": "13px" } as React.CSSProperties}
         >
           {/* Cut Corners */}
@@ -525,7 +525,7 @@ export default function AdminWhitelistDashboard() {
         </div>
 
         {/* Live Dispatched Emails Log Feed */}
-        <div className="space-y-4 font-mono">
+        <div className="space-y-4 font-sans">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#3f7308]" />

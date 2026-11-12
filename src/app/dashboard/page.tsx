@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -238,6 +238,139 @@ export default function DashboardPage() {
   >({});
   const [certNumberInputs, setCertNumberInputs] = useState<Record<string, string>>({});
   const [dossierCopied, setDossierCopied] = useState(false);
+
+  // Global Seller Portal Language Selector (defaults to "" = no language selected / English)
+  const [portalLanguage, setPortalLanguage] = useState<string>("");
+  const [portalTranslating, setPortalTranslating] = useState(false);
+  const portalRootRef = useRef<HTMLDivElement>(null);
+  const portalOriginalTextRef = useRef<WeakMap<Text, string>>(new WeakMap());
+  const portalTranslationCacheRef = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    const root = portalRootRef.current;
+    if (!root) return;
+
+    let cancelled = false;
+
+    const collectTextNodes = (): Text[] => {
+      const nodes: Text[] = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          const tag = parent.tagName;
+          if (
+            tag === "SCRIPT" ||
+            tag === "STYLE" ||
+            tag === "NOSCRIPT" ||
+            tag === "SELECT" ||
+            tag === "OPTION" ||
+            tag === "INPUT" ||
+            tag === "TEXTAREA" ||
+            tag === "CODE" ||
+            tag === "PRE" ||
+            parent.closest("[data-no-translate]")
+          ) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          const raw = node.nodeValue ?? "";
+          if (!raw.trim()) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      });
+      let current = walker.nextNode();
+      while (current) {
+        nodes.push(current as Text);
+        current = walker.nextNode();
+      }
+      return nodes;
+    };
+
+    const runTranslation = async () => {
+      const textNodes = collectTextNodes();
+
+      // Always restore original English text first so switching languages never double-translates
+      for (const node of textNodes) {
+        const saved = portalOriginalTextRef.current.get(node);
+        if (saved !== undefined && node.nodeValue !== saved) {
+          node.nodeValue = saved;
+        } else if (saved === undefined && node.nodeValue !== null) {
+          portalOriginalTextRef.current.set(node, node.nodeValue);
+        }
+      }
+
+      if (!portalLanguage) {
+        setPortalTranslating(false);
+        return;
+      }
+
+      const uniqueToTranslate: string[] = [];
+      const seen = new Set<string>();
+      const nodeOriginals: Array<{ node: Text; orig: string; trimmed: string; leading: string; trailing: string }> = [];
+
+      for (const node of textNodes) {
+        const orig = portalOriginalTextRef.current.get(node) ?? node.nodeValue ?? "";
+        const match = orig.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        const leading = match?.[1] ?? "";
+        const trimmed = match?.[2] ?? "";
+        const trailing = match?.[3] ?? "";
+        if (!trimmed || !/[a-zA-Z]/.test(trimmed)) continue;
+
+        nodeOriginals.push({ node, orig, trimmed, leading, trailing });
+        const cacheKey = `${portalLanguage}::${trimmed}`;
+        if (!portalTranslationCacheRef.current.has(cacheKey) && !seen.has(trimmed)) {
+          seen.add(trimmed);
+          uniqueToTranslate.push(trimmed);
+        }
+      }
+
+      if (uniqueToTranslate.length > 0) {
+        setPortalTranslating(true);
+        try {
+          const res = await fetch("/api/ai/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              texts: uniqueToTranslate,
+              targetLanguage: portalLanguage,
+              sourceLanguage: "English",
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const translatedList: string[] = Array.isArray(data.translations) ? data.translations : [];
+            uniqueToTranslate.forEach((src, idx) => {
+              const out = translatedList[idx];
+              if (out) {
+                portalTranslationCacheRef.current.set(`${portalLanguage}::${src}`, out);
+              }
+            });
+          }
+        } catch {
+          // Ignore network error and keep original text
+        } finally {
+          if (!cancelled) setPortalTranslating(false);
+        }
+      }
+
+      if (cancelled) return;
+      for (const item of nodeOriginals) {
+        const cached = portalTranslationCacheRef.current.get(`${portalLanguage}::${item.trimmed}`);
+        if (cached) {
+          item.node.nodeValue = `${item.leading}${cached}${item.trailing}`;
+        }
+      }
+    };
+
+    const timer = window.setTimeout(() => {
+      void runTranslation();
+    }, 60);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [portalLanguage, activeNav]);
 
   // TradeOracle AI 2-Way Seller Translator (Dashboard + Buyer Requests)
   const [sellerAiInput, setSellerAiInput] = useState(
@@ -534,7 +667,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4faed] text-[#18280e] font-sans selection:bg-[#b2eb76] selection:text-[#18280e] flex relative">
+    <div
+      ref={portalRootRef}
+      className="min-h-screen bg-[#f4faed] text-[#18280e] font-sans selection:bg-[#b2eb76] selection:text-[#18280e] flex relative"
+    >
       {/* React Bits ClickSpark Particle Glow Canvas */}
       <ClickSpark sparkColor="#b2eb76" sparkCount={9} sparkRadius={26} duration={400} />
 
@@ -1041,6 +1177,37 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
+            {/* Global Seller Portal Language Selector (defaults to no language selected) */}
+            <div
+              data-no-translate
+              className="flex items-center gap-1.5 h-9 bg-[#f4faed] border border-[#d8e5ca] px-2.5 rounded-lg text-xs font-sans text-[#18280e] shrink-0"
+              title="Translate entire Seller Portal into your preferred language"
+            >
+              <Globe className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
+              <select
+                aria-label="Seller Portal Language"
+                value={portalLanguage}
+                onChange={(e) => setPortalLanguage(e.target.value)}
+                className="bg-transparent text-xs font-sans font-medium text-[#18280e] focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="">Select Language (English)</option>
+                <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                <option value="Hindi">Hindi (हिन्दी)</option>
+                <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                <option value="Tamil">Tamil (தமிழ்)</option>
+                <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                <option value="Marathi">Marathi (मराठी)</option>
+                <option value="Bengali">Bengali (বাংলা)</option>
+                <option value="Telugu">Telugu (తెలుగు)</option>
+                <option value="Malayalam">Malayalam (മലയാളം)</option>
+              </select>
+              {portalTranslating && (
+                <span className="text-[10px] font-medium text-[#3f7308] animate-pulse">
+                  Translating...
+                </span>
+              )}
+            </div>
+
             {/* Date Range Selector */}
             <div className="hidden xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
               <Calendar className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />

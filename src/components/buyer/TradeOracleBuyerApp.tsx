@@ -1244,7 +1244,7 @@ export function TradeOracleBuyerApp() {
               </div>
 
               {/* 4 Metric Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
                 <div className="p-5 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-2">
                   <div className="flex justify-between items-center text-xs text-stone-500 font-medium">
                     <span>Active Orders</span>
@@ -1299,7 +1299,7 @@ export function TradeOracleBuyerApp() {
               {/* Recent Orders Table & Trade Activity Timeline */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Orders Table */}
-                <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-mono text-xs">
+                <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-sans text-xs">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-sm font-bold text-[#18280e] font-sans">Recent Trade Orders</h3>
@@ -1350,7 +1350,7 @@ export function TradeOracleBuyerApp() {
                 </div>
 
                 {/* Trade Activity Timeline */}
-                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-mono text-xs">
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4 font-sans text-xs">
                   <h3 className="text-sm font-bold text-[#18280e] font-sans">Trade Activity Timeline</h3>
                   <div className="space-y-4 pt-1">
                     <div className="flex items-start gap-3">
@@ -2361,7 +2361,7 @@ export function TradeOracleBuyerApp() {
           {/* TAB 8: SETTINGS                                                         */}
           {/* ======================================================================= */}
           {activeTab === "settings" && (
-            <div className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-6 font-mono text-xs">
+            <div className="p-6 md:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-6 font-sans text-xs">
               <h2 className="text-base font-bold text-[#18280e] font-sans">Buyer Company Profile &amp; Preferences</h2>
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
@@ -2410,7 +2410,7 @@ export function TradeOracleBuyerApp() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateRFQ} className="space-y-4 font-mono text-xs">
+            <form onSubmit={handleCreateRFQ} className="space-y-4 font-sans text-xs">
               <div className="space-y-1">
                 <label className="text-stone-700 font-bold block">Product Name</label>
                 <input
@@ -2521,7 +2521,7 @@ export function TradeOracleBuyerApp() {
               </button>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="space-y-3 font-sans text-xs">
               <div className="p-3.5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-1">
                 <span className="font-bold text-[#284905] block">
                   ✓ Verification: {selectedSupplier.verificationSource}
