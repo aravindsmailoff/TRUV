@@ -6,6 +6,39 @@ import {
   TradeMilestone,
 } from "@/types/trade";
 
+export interface VerifiedCertificateRecord {
+  id: string;
+  markName: string;
+  country: string;
+  fileName: string;
+  certNumber: string;
+  verdict: "verified" | "needs_review" | "mismatch";
+  confidenceScore: number;
+  detectedIssuer: string;
+  detectedCompany: string;
+  detectedExpiry: string;
+  findings: string[];
+  verifiedAt: string;
+}
+
+function getServerFs(): { fs: typeof import("fs"); path: typeof import("path"); tradeFile: string; dataDir: string } | null {
+  if (typeof window !== "undefined") return null;
+  try {
+    const req = Function("return require")() as NodeRequire;
+    const fsMod = req("fs") as typeof import("fs");
+    const pathMod = req("path") as typeof import("path");
+    const dataDir = pathMod.join(process.cwd(), ".data");
+    return {
+      fs: fsMod,
+      path: pathMod,
+      dataDir,
+      tradeFile: pathMod.join(dataDir, "trade-engine.json"),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const SEED_MANUFACTURERS: IndianManufacturer[] = [
   {
     id: "mfg_brass_moradabad",
@@ -285,6 +318,67 @@ class TradeStore {
   private quotes: ManufacturerQuotation[] = [...SEED_QUOTES];
   private trades: CommercialTradeOrder[] = [...SEED_TRADES];
   private milestones: TradeMilestone[] = [...SEED_MILESTONES];
+  private verifiedCertificates: VerifiedCertificateRecord[] = [];
+
+  constructor() {
+    this.loadFromDisk();
+  }
+
+  private loadFromDisk() {
+    try {
+      const srv = getServerFs();
+      if (!srv || !srv.fs.existsSync(srv.tradeFile)) return;
+      const raw = srv.fs.readFileSync(srv.tradeFile, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.rfqs)) this.rfqs = parsed.rfqs;
+      if (Array.isArray(parsed.trades)) this.trades = parsed.trades;
+      if (Array.isArray(parsed.milestones)) this.milestones = parsed.milestones;
+      if (Array.isArray(parsed.verifiedCertificates)) {
+        this.verifiedCertificates = parsed.verifiedCertificates;
+      }
+    } catch {
+      // Ignore disk read error
+    }
+  }
+
+  private saveToDisk() {
+    try {
+      const srv = getServerFs();
+      if (!srv) return;
+      if (!srv.fs.existsSync(srv.dataDir)) {
+        srv.fs.mkdirSync(srv.dataDir, { recursive: true });
+      }
+      srv.fs.writeFileSync(
+        srv.tradeFile,
+        JSON.stringify(
+          {
+            rfqs: this.rfqs,
+            trades: this.trades,
+            milestones: this.milestones,
+            verifiedCertificates: this.verifiedCertificates,
+          },
+          null,
+          2
+        ),
+        "utf8"
+      );
+    } catch {
+      // Ignore disk write error
+    }
+  }
+
+  public getVerifiedCertificates(): VerifiedCertificateRecord[] {
+    return this.verifiedCertificates;
+  }
+
+  public addVerifiedCertificate(record: VerifiedCertificateRecord): VerifiedCertificateRecord {
+    this.verifiedCertificates = [
+      record,
+      ...this.verifiedCertificates.filter((c) => c.markName !== record.markName),
+    ];
+    this.saveToDisk();
+    return record;
+  }
 
   public getManufacturers(): IndianManufacturer[] {
     return this.manufacturers;
@@ -326,6 +420,7 @@ class TradeStore {
       createdAt: new Date().toISOString(),
     };
     this.rfqs.unshift(newRFQ);
+    this.saveToDisk();
     return newRFQ;
   }
 
@@ -394,6 +489,7 @@ class TradeStore {
     };
 
     this.trades.unshift(newTrade);
+    this.saveToDisk();
     return newTrade;
   }
 
@@ -402,6 +498,7 @@ class TradeStore {
     if (ms) {
       ms.status = "completed";
       ms.completedAt = new Date().toISOString();
+      this.saveToDisk();
     }
     return ms;
   }
@@ -469,6 +566,7 @@ class TradeStore {
       this.milestones.push(milestone);
     }
 
+    this.saveToDisk();
     return { trade, milestone };
   }
 }

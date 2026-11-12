@@ -8,6 +8,7 @@ import {
   getWhatsAppStatusSnapshot,
   sendRealWhatsAppMessage,
 } from "@/lib/whatsapp/whatsappEngine";
+import { notificationEngine } from "@/lib/trade/notificationEngine";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -38,6 +39,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     trades: tradeStore.getTrades(),
     rfqs: tradeStore.getRFQs(),
+    verifiedCertificates: tradeStore.getVerifiedCertificates(),
+    notifications: notificationEngine.getEvents(),
     paypalStatus: payPalTradeClient.getStatus(),
     sponsorsIntegrated: ["PayPal (Orders v2 Sandbox)", "Elastic (Semantic Match)", "Zapier (Trade Automation)", "Astropods (Satellite AIS)"],
   });
@@ -185,7 +188,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, milestone: updated, whatsappDispatch });
     }
 
-    // 6. Seller Packing, Buyer Reassurance & Government Freight Cargo Dispatch
+    // 6. Seller Packing, AI Reassurance, Buyer Notification & Government Freight Cargo Dispatch
     if (action === "seller_update_packing_cargo") {
       const {
         tradeId,
@@ -194,6 +197,7 @@ export async function POST(req: NextRequest) {
         govtCargoService = "CONCOR (Container Corp of India - Govt. of India)",
         trackingNumber,
         buyerReassuranceNote,
+        useAIReassurance = true,
       } = body;
 
       const { trade, milestone } = tradeStore.updateSellerPackingAndCargo({
@@ -203,6 +207,32 @@ export async function POST(req: NextRequest) {
         govtCargoService,
         trackingNumber,
         buyerReassuranceNote,
+      });
+
+      const finalMessage = useAIReassurance
+        ? await notificationEngine.generateAIReassurance({
+            orderNumber: trade.orderNumber,
+            productName: trade.productName,
+            packingStatus,
+            govtCargoService,
+            trackingNumber: trade.freightForwarder.bookingReference || "GOV-CARGO",
+            buyerCompany: trade.buyerCompany,
+            buyerCountry: trade.buyerCountry,
+            sellerNote: buyerReassuranceNote,
+          })
+        : trade.sellerDispatchUpdate?.buyerReassuranceNote || "";
+
+      if (trade.sellerDispatchUpdate && finalMessage) {
+        trade.sellerDispatchUpdate.buyerReassuranceNote = finalMessage;
+      }
+
+      const notification = await notificationEngine.emitBuyerNotification({
+        orderNumber: trade.orderNumber,
+        eventType: "packing_cargo_updated",
+        title: `Order ${packingStatus.replace(/_/g, " ")} · ${govtCargoService}`,
+        message: finalMessage,
+        govtCargoService,
+        trackingNumber: trade.freightForwarder.bookingReference,
       });
 
       let whatsappDispatch = null;
@@ -219,7 +249,13 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      return NextResponse.json({ success: true, trade, milestone, whatsappDispatch });
+      return NextResponse.json({
+        success: true,
+        trade,
+        milestone,
+        notification,
+        whatsappDispatch,
+      });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });

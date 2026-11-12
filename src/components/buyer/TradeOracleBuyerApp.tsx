@@ -220,6 +220,96 @@ export function TradeOracleBuyerApp() {
     }
   }, [activeTab]);
 
+  // Real-time SSE Buyer Notifications + Persistent Inbox
+  const [buyerNotifications, setBuyerNotifications] = useState<
+    Array<{
+      id: string;
+      orderNumber: string;
+      title: string;
+      message: string;
+      govtCargoService?: string;
+      trackingNumber?: string;
+      emailStatus?: string;
+      read: boolean;
+      createdAt: string;
+    }>
+  >([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [liveToast, setLiveToast] = useState<{ title: string; message: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/trade/events?mode=inbox")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.events)) {
+          setBuyerNotifications(data.events);
+        }
+      })
+      .catch(() => {});
+
+    const es = new EventSource("/api/trade/events");
+    es.onmessage = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.data);
+        if (parsed.type === "notification" && parsed.event) {
+          setBuyerNotifications((prev) => [parsed.event, ...prev.filter((p) => p.id !== parsed.event.id)]);
+          setLiveToast({ title: parsed.event.title, message: parsed.event.message });
+          void fetchLiveCargoUpdates();
+          window.setTimeout(() => setLiveToast(null), 7000);
+        }
+      } catch {
+        // Ignore parse error
+      }
+    };
+    return () => es.close();
+  }, []);
+
+  // One-Sentence AI RFQ Builder State
+  const [aiRfqSentence, setAiRfqSentence] = useState("");
+  const [aiRfqParsing, setAiRfqParsing] = useState(false);
+  const [aiRfqMeta, setAiRfqMeta] = useState<{
+    hsCode: string;
+    requiredCertificates: string[];
+    aiNotes: string;
+  } | null>(null);
+
+  const handleParseRfqSentence = async () => {
+    if (!aiRfqSentence.trim()) return;
+    setAiRfqParsing(true);
+    try {
+      const res = await fetch("/api/ai/parse-rfq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence: aiRfqSentence }),
+      });
+      const data = await res.json();
+      if (res.ok && data.title) {
+        setRfqForm((prev) => ({
+          ...prev,
+          title: data.title || prev.title,
+          category: data.category || prev.category,
+          specifications: Array.isArray(data.specifications)
+            ? data.specifications.join(", ")
+            : prev.specifications,
+          quantity: data.quantity || prev.quantity,
+          unit: data.unit || prev.unit,
+          budgetUSD: data.budgetUSD || prev.budgetUSD,
+          destinationPort: data.destinationPort || prev.destinationPort,
+          deliveryDate: data.deliveryDate || prev.deliveryDate,
+        }));
+        setAiRfqMeta({
+          hsCode: data.hsCode || "8301.40",
+          requiredCertificates: Array.isArray(data.requiredCertificates) ? data.requiredCertificates : [],
+          aiNotes: data.aiNotes || "",
+        });
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setAiRfqParsing(false);
+    }
+  };
+
   // Handle Supplier Shortlist Toggle
   const toggleShortlist = (supplierId: string) => {
     setSuppliers((prev) =>
@@ -809,15 +899,76 @@ export function TradeOracleBuyerApp() {
         </div>
 
         {/* Right: Notifications, Help, User Profile & Sign Out */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="p-2 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors relative"
-            title="Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="size-2 rounded-full bg-emerald-600 absolute top-1.5 right-1.5" />
-          </button>
+        <div className="flex items-center gap-3 relative">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                const nextOpen = !notifOpen;
+                setNotifOpen(nextOpen);
+                if (nextOpen && buyerNotifications.some((n) => !n.read)) {
+                  fetch("/api/trade/events", { method: "POST" }).catch(() => {});
+                  setBuyerNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                }
+              }}
+              className="p-2 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors relative cursor-pointer"
+              title="Live Order & Cargo Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              {buyerNotifications.some((n) => !n.read) && (
+                <span className="min-w-4 h-4 px-1 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center absolute -top-0.5 -right-0.5">
+                  {buyerNotifications.filter((n) => !n.read).length}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-stone-200 shadow-xl z-50 p-3 space-y-2 max-h-96 overflow-y-auto">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <span className="text-xs font-bold text-[#18280e]">
+                    Live Buyer Notifications ({buyerNotifications.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setNotifOpen(false)}
+                    className="text-xs text-stone-400 hover:text-stone-700 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+                {buyerNotifications.length === 0 ? (
+                  <p className="text-xs text-stone-500 py-4 text-center">
+                    No notifications yet. Seller packing, certificate, and cargo updates appear here in real time.
+                  </p>
+                ) : (
+                  buyerNotifications.slice(0, 12).map((n) => (
+                    <div key={n.id} className="p-2.5 rounded-xl bg-[#f4faed] border border-[#d8e5ca] space-y-1 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <strong className="text-[#18280e]">{n.orderNumber}</strong>
+                        <span className="text-[10px] font-mono text-[#3f7308]">
+                          {n.emailStatus === "sent_via_resend" ? "Email Sent ✓" : "Live Push ✓"}
+                        </span>
+                      </div>
+                      <div className="font-semibold text-[#18280e]">{n.title}</div>
+                      <p className="text-stone-700 text-[11px] leading-snug">{n.message}</p>
+                      {n.trackingNumber && (
+                        <span className="inline-block font-mono text-[10px] px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                          {n.trackingNumber}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {liveToast && (
+            <div className="fixed bottom-5 right-5 z-50 max-w-sm p-4 rounded-2xl bg-[#18280e] text-white shadow-2xl border border-[#b2eb76]/40 space-y-1 animate-in fade-in">
+              <div className="text-xs font-bold text-[#b2eb76]">🔔 {liveToast.title}</div>
+              <p className="text-xs text-stone-200 leading-snug">{liveToast.message}</p>
+            </div>
+          )}
 
           <button
             type="button"
@@ -2501,6 +2652,44 @@ export function TradeOracleBuyerApp() {
             </div>
 
             <form onSubmit={handleCreateRFQ} className="space-y-4 font-sans text-xs">
+              {/* One-Sentence AI RFQ Builder */}
+              <div className="p-3.5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-[#18280e]">
+                    ✨ One-Sentence AI RFQ Builder
+                  </span>
+                  <span className="text-[10px] font-semibold text-[#3f7308]">
+                    Auto-fills specs, HS code &amp; govt certs
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={aiRfqSentence}
+                    onChange={(e) => setAiRfqSentence(e.target.value)}
+                    placeholder="e.g. Need 2,000 satin gold brass door handles delivered to Los Angeles for $12 each"
+                    className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={aiRfqParsing}
+                    onClick={() => void handleParseRfqSentence()}
+                    className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
+                  >
+                    {aiRfqParsing ? "Building RFQ..." : "Auto-Fill RFQ →"}
+                  </button>
+                </div>
+                {aiRfqMeta && (
+                  <div className="p-2.5 rounded-xl bg-white border border-[#d8e5ca] space-y-1 text-[11px] text-[#18280e]">
+                    <div>
+                      <strong>HS Code:</strong> <span className="font-mono">{aiRfqMeta.hsCode}</span> ·{" "}
+                      <strong>Required Govt Certs:</strong> {aiRfqMeta.requiredCertificates.join(", ")}
+                    </div>
+                    <p className="text-stone-600">{aiRfqMeta.aiNotes}</p>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-1">
                 <label className="text-stone-700 font-bold block">Product Name</label>
                 <input
