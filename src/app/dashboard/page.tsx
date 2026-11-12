@@ -317,8 +317,63 @@ export default function DashboardPage() {
     );
   };
 
+  const [certError, setCertError] = useState("");
+  const [quoteProduct, setQuoteProduct] = useState("Brass Mortise Locksets");
+  const [quoteMaterial, setQuoteMaterial] = useState("CW617N Solid Brass");
+  const [quoteQty, setQuoteQty] = useState(1000);
+  const [quoteCostInr, setQuoteCostInr] = useState(1450);
+  const [quoteCountry, setQuoteCountry] = useState("United States");
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteResult, setQuoteResult] = useState<{
+    hsCode: string;
+    recommendedUnitPriceUSD: number;
+    totalDealUSD: number;
+    advance30USD: number;
+    balance70USD: number;
+    incoterm: string;
+    quoteText: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedBooked = localStorage.getItem("truv_booked_certificates");
+    if (savedBooked) {
+      try {
+        setBookedCerts(JSON.parse(savedBooked));
+      } catch {
+        // Ignore invalid localStorage
+      }
+    }
+  }, []);
+
+  const handleGenerateSellerQuote = async () => {
+    setQuoteLoading(true);
+    try {
+      const res = await fetch("/api/ai/seller-quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productName: quoteProduct,
+          material: quoteMaterial,
+          quantity: quoteQty,
+          unitCostINR: quoteCostInr,
+          targetCountry: quoteCountry,
+        }),
+      });
+      const data = await res.json();
+      if (data.recommendedUnitPriceUSD) {
+        setQuoteResult(data);
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
   const handleGenerateCompliancePlan = async () => {
     setCertLoading(true);
+    setCertError("");
     try {
       const res = await fetch("/api/ai/compliance-plan", {
         method: "POST",
@@ -329,15 +384,17 @@ export default function DashboardPage() {
           material: certMaterial,
           targetCountries:
             certCountries.length > 0 ? certCountries : ["United States", "European Union (CE)"],
-          preferredLanguage: certLanguage,
+          preferredLanguage: "English",
         }),
       });
       const data = await res.json();
-      if (data.requiredCertificates) {
+      if (!res.ok || !data.requiredCertificates) {
+        setCertError(data.error || "Could not generate export certificates right now.");
+      } else {
         setCertPlan(data);
       }
     } catch {
-      // Ignore error
+      setCertError("Network error while generating export certificates.");
     } finally {
       setCertLoading(false);
     }
@@ -345,10 +402,41 @@ export default function DashboardPage() {
 
   const handleBookLabCertificate = (markName: string, labPartner: string) => {
     const trackingId = `LAB-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    setBookedCerts((prev) => ({
-      ...prev,
-      [markName]: `Booked with ${labPartner} · Sample Courier Pickup Scheduled (Ref: ${trackingId})`,
-    }));
+    const bookingText = `Booked with ${labPartner} · Sample Courier Pickup Scheduled (Ref: ${trackingId})`;
+    setBookedCerts((prev) => {
+      const next = { ...prev, [markName]: bookingText };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("truv_booked_certificates", JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  const handleDownloadDossier = () => {
+    if (!certPlan) return;
+    const blob = new Blob([certPlan.generatedDossier], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${certProduct.replace(/\s+/g, "_")}_Compliance_Dossier.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrintCartonLabel = () => {
+    if (!certPlan || typeof window === "undefined") return;
+    const w = window.open("", "_blank", "width=520,height=420");
+    if (!w) return;
+    w.document.write(
+      `<html><head><title>Export Carton Label</title><style>body{font-family:system-ui,sans-serif;padding:24px;} .box{border:2px dashed #18280e;padding:20px;border-radius:12px;} h2{margin:0 0 12px;color:#18280e;font-size:18px;} p{margin:6px 0;font-size:14px;}</style></head><body><div class="box"><h2>EXPORT CARTON LABEL</h2>${certPlan.packagingLabelSpecs
+        .map((l) => `<p><strong>${l}</strong></p>`)
+        .join("")}<hr/><p>Exporter: ${
+        currentUser?.companyName || "Verified Indian Manufacturer"
+      } | HS Code: ${certPlan.hsCode}</p></div><script>window.print();</script></body></html>`
+    );
+    w.document.close();
   };
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
   const [selectedLaymanOrder, setSelectedLaymanOrder] = useState<LaymanTradeOrder>(LAYMAN_ORDERS[0]);
@@ -984,58 +1072,120 @@ export default function DashboardPage() {
           {/* ========================================================================= */}
           {activeNav === "dashboard" && (
             <>
-              {/* TRADEORACLE AI: MANUFACTURER EXPORT & TRANSLATION ASSISTANT */}
-              <div className="bg-white p-5 md:p-6 rounded-3xl border border-[#d8e5ca] shadow-xs space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              {/* TRADEORACLE AI: MANUFACTURER EXPORT ASSISTANT */}
+              <div className="bg-white p-5 md:p-6 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-stone-100">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
                         TradeOracle AI
                       </span>
-                      <span className="text-xs font-bold text-[#18280e]">
-                        Factory Export, Translation &amp; Certification Assistant
+                      <span className="text-sm font-bold text-[#18280e]">
+                        Factory Export Pricing, Quote &amp; Translation Assistant
                       </span>
                     </div>
                     <p className="text-xs text-stone-600">
-                      Read foreign buyer requests in your own language, reply in export English, and get BIS / CE / UL / ISO certificates.
+                      Calculate USD export prices with HS codes, draft buyer quotes, translate foreign messages, or get country quality certificates.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <select
-                      value={certLanguage}
-                      onChange={(e) => setCertLanguage(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl bg-[#f4faed] border border-[#d8e5ca] text-xs font-bold text-[#18280e] outline-none"
-                    >
-                      <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-                      <option value="Hindi">Hindi (हिन्दी)</option>
-                      <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-                      <option value="Tamil">Tamil (தமிழ்)</option>
-                      <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-                      <option value="English">English</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setActiveNav("quality_qima")}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors"
-                    >
-                      Get BIS / CE / UL Certificates →
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveNav("quality_qima")}
+                    className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] text-xs font-bold cursor-pointer transition-colors shrink-0"
+                  >
+                    Get Export Certificates (BIS / CE / UL) →
+                  </button>
                 </div>
 
+                {/* 1. AI Export Quote & Price Calculator */}
                 <div className="p-4 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#18280e]">
+                      1. AI Export Quote &amp; HS Code Calculator
+                    </span>
+                    <span className="text-[11px] text-[#3f7308] font-semibold">
+                      Converts factory cost (₹) to FOB USD quote
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">
+                    <input
+                      type="text"
+                      value={quoteProduct}
+                      onChange={(e) => setQuoteProduct(e.target.value)}
+                      placeholder="Product Name"
+                      className="px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={quoteMaterial}
+                      onChange={(e) => setQuoteMaterial(e.target.value)}
+                      placeholder="Material"
+                      className="px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    />
+                    <input
+                      type="number"
+                      min={1}
+                      value={quoteQty}
+                      onChange={(e) => setQuoteQty(Number(e.target.value) || 1)}
+                      placeholder="Qty"
+                      className="px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    />
+                    <input
+                      type="number"
+                      min={1}
+                      value={quoteCostInr}
+                      onChange={(e) => setQuoteCostInr(Number(e.target.value) || 1)}
+                      placeholder="Cost / unit (INR)"
+                      className="px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={quoteLoading}
+                      onClick={() => void handleGenerateSellerQuote()}
+                      className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50"
+                    >
+                      {quoteLoading ? "Calculating..." : "Calculate Export Quote"}
+                    </button>
+                  </div>
+                  {quoteResult && (
+                    <div className="p-3.5 rounded-xl bg-white border border-[#d8e5ca] space-y-2 text-xs">
+                      <div className="flex flex-wrap items-center gap-3 text-[#18280e]">
+                        <span>HS Code: <strong>{quoteResult.hsCode}</strong></span>
+                        <span>•</span>
+                        <span>Recommended Price: <strong>${quoteResult.recommendedUnitPriceUSD} / unit</strong> ({quoteResult.incoterm})</span>
+                        <span>•</span>
+                        <span>Total Deal: <strong>${quoteResult.totalDealUSD.toLocaleString()} USD</strong> (30% Adv: ${quoteResult.advance30USD.toLocaleString()})</span>
+                      </div>
+                      <p className="text-stone-700 leading-relaxed">{quoteResult.quoteText}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Two-Way Buyer Message Translator */}
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-bold text-[#18280e]">
-                      Two-Way Buyer Message Translator
+                      2. Two-Way Buyer Message Translator
                     </span>
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <select
+                        value={certLanguage}
+                        onChange={(e) => setCertLanguage(e.target.value)}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-xs font-semibold text-[#18280e] outline-none"
+                      >
+                        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                        <option value="Hindi">Hindi (हिन्दी)</option>
+                        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                        <option value="Tamil">Tamil (தமிழ்)</option>
+                        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                      </select>
                       <button
                         type="button"
                         onClick={() => setSellerAiDirection("toNative")}
                         className={`px-2.5 py-1 rounded-lg font-bold cursor-pointer ${
                           sellerAiDirection === "toNative"
                             ? "bg-[#18280e] text-[#b2eb76]"
-                            : "bg-white text-stone-700 border border-[#d8e5ca]"
+                            : "bg-white text-stone-700 border border-stone-200"
                         }`}
                       >
                         English → {certLanguage}
@@ -1046,7 +1196,7 @@ export default function DashboardPage() {
                         className={`px-2.5 py-1 rounded-lg font-bold cursor-pointer ${
                           sellerAiDirection === "toEnglish"
                             ? "bg-[#18280e] text-[#b2eb76]"
-                            : "bg-white text-stone-700 border border-[#d8e5ca]"
+                            : "bg-white text-stone-700 border border-stone-200"
                         }`}
                       >
                         {certLanguage} → English
@@ -1063,7 +1213,7 @@ export default function DashboardPage() {
                           ? "Paste foreign buyer message in English..."
                           : `Type your reply in ${certLanguage} to send in English...`
                       }
-                      className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e] outline-none"
+                      className="flex-1 px-3 py-2 rounded-xl bg-white border border-stone-200 text-xs text-[#18280e] outline-none"
                     />
                     <button
                       type="button"
@@ -1075,8 +1225,8 @@ export default function DashboardPage() {
                     </button>
                   </div>
                   {sellerAiOutput && (
-                    <div className="p-3 rounded-xl bg-white border border-[#d8e5ca] text-xs text-[#18280e] space-y-1">
-                      <span className="text-[10px] font-mono text-[#3f7308] font-bold block">
+                    <div className="p-3 rounded-xl bg-white border border-stone-200 text-xs text-[#18280e] space-y-1">
+                      <span className="text-[11px] text-[#3f7308] font-bold block">
                         Translated to {sellerAiDirection === "toNative" ? certLanguage : "English"}:
                       </span>
                       <p className="leading-relaxed">{sellerAiOutput}</p>
@@ -1842,8 +1992,8 @@ export default function DashboardPage() {
                 <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
-                        TradeOracle AI Compliance Assistant
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                        TradeOracle AI
                       </span>
                       <h3 className="font-bold text-base text-[#18280e] mt-1">
                         Get International Quality Certificates for Your Products
@@ -1851,7 +2001,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <div>
                       <label className="text-stone-700 font-bold block mb-1">Product Name</label>
                       <input
@@ -1870,21 +2020,6 @@ export default function DashboardPage() {
                         className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none focus:border-[#18280e]"
                       />
                     </div>
-                    <div>
-                      <label className="text-stone-700 font-bold block mb-1">Explain In Your Language</label>
-                      <select
-                        value={certLanguage}
-                        onChange={(e) => setCertLanguage(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none focus:border-[#18280e]"
-                      >
-                        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-                        <option value="Hindi">Hindi (हिन्दी)</option>
-                        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-                        <option value="Tamil">Tamil (தமிழ்)</option>
-                        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-                        <option value="English">English</option>
-                      </select>
-                    </div>
                   </div>
 
                   <div>
@@ -1897,6 +2032,7 @@ export default function DashboardPage() {
                         "European Union (CE)",
                         "United Kingdom (UKCA)",
                         "UAE / Saudi (SASO)",
+                        "Japan (PSE)",
                         "India (BIS)",
                       ].map((c) => {
                         const active = certCountries.includes(c);
@@ -1929,12 +2065,18 @@ export default function DashboardPage() {
                       : "Generate Certification Plan & English Paperwork →"}
                   </button>
 
+                  {certError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 font-medium">
+                      {certError}
+                    </div>
+                  )}
+
                   {certPlan && (
                     <div className="pt-4 border-t border-[#d8e5ca] space-y-4">
-                      {/* Native Language Explanation */}
+                      {/* Summary */}
                       <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] space-y-1">
-                        <div className="flex items-center justify-between text-[11px] font-mono text-[#3f7308] font-bold">
-                          <span>Summary in {certLanguage}</span>
+                        <div className="flex items-center justify-between text-xs text-[#3f7308] font-bold">
+                          <span>Export Compliance Overview</span>
                           <span>HS Code: {certPlan.hsCode}</span>
                         </div>
                         <p className="text-xs text-[#18280e] leading-relaxed">{certPlan.nativeSummary}</p>
@@ -1952,21 +2094,21 @@ export default function DashboardPage() {
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between gap-2">
                                   <span className="font-bold text-sm text-[#18280e]">{cert.markName}</span>
-                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
+                                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
                                     {cert.country}
                                   </span>
                                 </div>
-                                <div className="text-[11px] font-mono text-[#3f7308] font-semibold">
+                                <div className="text-xs text-[#3f7308] font-semibold">
                                   {cert.standardCode} · {cert.labPartner}
                                 </div>
                                 <p className="text-xs text-stone-600">{cert.purpose}</p>
-                                <div className="text-[11px] font-mono text-stone-500">
-                                  Est. {cert.estimatedDays} · Lab Fee: ${cert.estimatedFeeUSD} USD
+                                <div className="text-xs text-stone-500">
+                                  Est. {cert.estimatedDays} days · Lab Fee: ${cert.estimatedFeeUSD} USD
                                 </div>
                               </div>
 
                               {bookedStatus ? (
-                                <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-mono text-emerald-800 font-bold">
+                                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold">
                                   ✓ {bookedStatus}
                                 </div>
                               ) : (
@@ -1986,38 +2128,56 @@ export default function DashboardPage() {
                       {/* Auto-Generated English Dossier & Export Label Preview */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="text-xs font-bold text-[#18280e]">
                               Auto-Generated English Declaration &amp; Lab Form
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard?.writeText(certPlan.generatedDossier);
-                                setDossierCopied(true);
-                                setTimeout(() => setDossierCopied(false), 2000);
-                              }}
-                              className="text-[11px] font-mono px-2.5 py-1 rounded bg-[#ebf7d9] text-[#284905] font-bold cursor-pointer"
-                            >
-                              {dossierCopied ? "Copied ✓" : "Copy Dossier"}
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(certPlan.generatedDossier);
+                                  setDossierCopied(true);
+                                  setTimeout(() => setDossierCopied(false), 2000);
+                                }}
+                                className="text-xs px-2.5 py-1 rounded-lg bg-[#ebf7d9] text-[#284905] font-bold cursor-pointer"
+                              >
+                                {dossierCopied ? "Copied ✓" : "Copy"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleDownloadDossier}
+                                className="text-xs px-2.5 py-1 rounded-lg bg-[#18280e] text-[#b2eb76] font-bold cursor-pointer"
+                              >
+                                Download .txt
+                              </button>
+                            </div>
                           </div>
-                          <pre className="text-[11px] font-mono text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200 whitespace-pre-wrap leading-relaxed">
+                          <pre className="text-xs font-sans text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200 whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
                             {certPlan.generatedDossier}
                           </pre>
                         </div>
 
                         <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-                          <span className="text-xs font-bold text-[#18280e] block">
-                            Export Carton Label Preview (Ready to Print)
-                          </span>
-                          <div className="p-4 rounded-xl border-2 border-dashed border-[#18280e]/40 bg-[#fbfdf9] font-mono text-xs space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-bold text-[#18280e]">
+                              Export Carton Label Preview
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handlePrintCartonLabel}
+                              className="text-xs px-2.5 py-1 rounded-lg bg-[#18280e] text-[#b2eb76] font-bold cursor-pointer"
+                            >
+                              Print Label
+                            </button>
+                          </div>
+                          <div className="p-4 rounded-xl border-2 border-dashed border-[#18280e]/40 bg-[#fbfdf9] text-xs space-y-1.5">
                             {certPlan.packagingLabelSpecs.map((line, i) => (
                               <div key={i} className="text-[#18280e] font-semibold">
                                 {line}
                               </div>
                             ))}
-                            <div className="pt-2 text-[10px] text-stone-500 border-t border-stone-200">
+                            <div className="pt-2 text-xs text-stone-500 border-t border-stone-200">
                               Exporter: {currentUser?.companyName || "Verified Indian Manufacturer"} · HS {certPlan.hsCode}
                             </div>
                           </div>
