@@ -1309,7 +1309,7 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-stone-200/80 px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-2xs">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
             <h1 className="text-lg lg:text-xl font-bold text-[#18280e] tracking-tight font-sans whitespace-nowrap truncate">
               {activeNav === "dashboard" && "Dashboard"}
               {activeNav === "storyline" && "How Deals Work"}
@@ -1330,12 +1330,12 @@ export default function DashboardPage() {
               {activeNav === "settings" && "Settings"}
               {activeNav === "help" && "Help & Support"}
             </h1>
-            <span className="text-xs font-sans text-stone-400 hidden 2xl:inline whitespace-nowrap shrink-0">
+            <span className="text-xs font-sans text-stone-400 hidden xl:inline whitespace-nowrap truncate">
               • Factory Export Workspace
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {/* Global Seller Portal Language Selector (defaults to no language selected) */}
             <div
               data-no-translate
@@ -1368,7 +1368,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Date Range Selector */}
-            <div className="hidden xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
+            <div className="hidden 2xl:flex items-center gap-2 h-9 bg-[#f4faed] border border-[#d8e5ca] px-3.5 rounded-lg text-xs font-sans font-medium text-[#18280e] whitespace-nowrap shrink-0">
               <Calendar className="w-3.5 h-3.5 text-[#3f7308] shrink-0" />
               <span>Jan 1 – Feb 1, 2026</span>
               <span className="text-[#d8e5ca]">|</span>
