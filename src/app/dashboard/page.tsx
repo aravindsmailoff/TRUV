@@ -468,6 +468,25 @@ export default function DashboardPage() {
                 {activeNav === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-[#b2eb76] shrink-0" />}
               </button>
 
+              {/* AI Quality Certificates & Export Markings (Top-Level) */}
+              <button
+                type="button"
+                onClick={() => setActiveNav("quality_qima")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                  activeNav === "quality_qima"
+                    ? "bg-[#18280e] text-[#b2eb76] font-semibold shadow-xs"
+                    : "text-stone-700 bg-[#f4faed] hover:bg-[#ebf7d9] hover:text-[#18280e]"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <ShieldCheck className="w-4 h-4 shrink-0 text-[#3f7308]" />
+                  <span className="text-xs font-bold">Export Certificates</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                  AI
+                </span>
+              </button>
+
               {/* 2. Simple Order Cards View */}
               <button
                 type="button"
@@ -2006,28 +2025,6 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Existing Completed Batch Inspections */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
-                    <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
-                      Passed ✓ • Ready to Pack
-                    </span>
-                    <h4 className="font-bold text-base text-[#18280e]">Solid Brass Door Handles (1,500 units)</h4>
-                    <p className="text-stone-700 text-xs leading-relaxed">
-                      Inspector tested 125 sample handles for rust resistance, color finish, and strength. Zero defects found.
-                    </p>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                    <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
-                      Passed ✓ • Approved
-                    </span>
-                    <h4 className="font-bold text-base text-[#18280e]">Heavy Steel Machine Bolts (25,000 units)</h4>
-                    <p className="text-stone-700 text-xs leading-relaxed">
-                      Strength test and anti-rust silver coating passed cleanly. Photos saved to your order record.
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
