@@ -208,6 +208,91 @@ export default function DashboardPage() {
   }, [currentUser, isHydrated, router]);
 
   const [financesOpen, setFinancesOpen] = useState(true);
+
+  // TradeOracle AI International Quality & Markings Assistant (Seller Onboarding & Export Compliance)
+  const [certProduct, setCertProduct] = useState("Solid Brass Door Handles");
+  const [certMaterial, setCertMaterial] = useState("CW617N Solid Brass, PVD Satin Gold");
+  const [certLanguage, setCertLanguage] = useState("Gujarati");
+  const [certCountries, setCertCountries] = useState<string[]>([
+    "United States",
+    "European Union (CE)",
+    "India (BIS)",
+  ]);
+  const [certLoading, setCertLoading] = useState(false);
+  const [certPlan, setCertPlan] = useState<{
+    hsCode: string;
+    nativeSummary: string;
+    requiredCertificates: Array<{
+      markName: string;
+      country: string;
+      standardCode: string;
+      purpose: string;
+      labPartner: string;
+      estimatedDays: string;
+      estimatedFeeUSD: number;
+    }>;
+    generatedDossier: string;
+    packagingLabelSpecs: string[];
+  } | null>(null);
+  const [bookedCerts, setBookedCerts] = useState<Record<string, string>>({});
+  const [dossierCopied, setDossierCopied] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("truv_seller_onboarding_compliance");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.productName) setCertProduct(parsed.productName);
+        if (parsed.material) setCertMaterial(parsed.material);
+        if (parsed.preferredLanguage) setCertLanguage(parsed.preferredLanguage);
+        if (Array.isArray(parsed.targetCountries)) setCertCountries(parsed.targetCountries);
+        if (parsed.plan) setCertPlan(parsed.plan);
+      } catch {
+        // Ignore invalid localStorage
+      }
+    }
+  }, []);
+
+  const toggleCertCountry = (country: string) => {
+    setCertCountries((prev) =>
+      prev.includes(country) ? prev.filter((c) => c !== country) : [...prev, country]
+    );
+  };
+
+  const handleGenerateCompliancePlan = async () => {
+    setCertLoading(true);
+    try {
+      const res = await fetch("/api/ai/compliance-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: currentUser?.companyName || "Indian Export Manufacturer",
+          productName: certProduct,
+          material: certMaterial,
+          targetCountries:
+            certCountries.length > 0 ? certCountries : ["United States", "European Union (CE)"],
+          preferredLanguage: certLanguage,
+        }),
+      });
+      const data = await res.json();
+      if (data.requiredCertificates) {
+        setCertPlan(data);
+      }
+    } catch {
+      // Ignore error
+    } finally {
+      setCertLoading(false);
+    }
+  };
+
+  const handleBookLabCertificate = (markName: string, labPartner: string) => {
+    const trackingId = `LAB-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    setBookedCerts((prev) => ({
+      ...prev,
+      [markName]: `Booked with ${labPartner} · Sample Courier Pickup Scheduled (Ref: ${trackingId})`,
+    }));
+  };
   const [tradeRailsOpen, setTradeRailsOpen] = useState(true);
   const [selectedLaymanOrder, setSelectedLaymanOrder] = useState<LaymanTradeOrder>(LAYMAN_ORDERS[0]);
   const [lockedOrderIds, setLockedOrderIds] = useState<Record<string, boolean>>({});
@@ -1536,35 +1621,228 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 5. Factory Quality Check */}
+          {/* 5. Factory Quality Check & International Export Markings */}
           {activeNav === "quality_qima" && (
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5 font-sans animate-in fade-in">
-              <div className="pb-4 border-b border-stone-100">
-                <h2 className="text-lg font-bold text-[#18280e]">
-                  5. Factory Quality Check Before Packing
-                </h2>
-                <p className="text-xs text-stone-600 mt-0.5">
-                  An independent inspector checks samples at your workshop so the foreign buyer cannot complain later.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
-                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
-                    Passed ✓ • Ready to Pack
-                  </span>
-                  <h4 className="font-bold text-base text-[#18280e]">Solid Brass Door Handles (1,500 units)</h4>
-                  <p className="text-stone-700 text-xs leading-relaxed">
-                    Inspector tested 125 sample handles for rust resistance, color finish, and strength. Zero defects found.
+            <div className="space-y-6 font-sans animate-in fade-in">
+              <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-200/90 shadow-xs space-y-5">
+                <div className="pb-4 border-b border-stone-100">
+                  <h2 className="text-lg font-bold text-[#18280e]">
+                    5. Factory Quality Check &amp; International Certificates
+                  </h2>
+                  <p className="text-xs text-stone-600 mt-0.5">
+                    Get required country markings (BIS, CE, UKCA, ASTM, SASO, ISO 9001) with auto-generated English paperwork and one-click lab booking.
                   </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
-                    Passed ✓ • Approved
-                  </span>
-                  <h4 className="font-bold text-base text-[#18280e]">Heavy Steel Machine Bolts (25,000 units)</h4>
-                  <p className="text-stone-700 text-xs leading-relaxed">
-                    Strength test and anti-rust silver coating passed cleanly. Photos saved to your order record.
-                  </p>
+
+                {/* TradeOracle AI Certification & Country Markings Builder */}
+                <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#18280e] text-[#b2eb76] font-bold">
+                        TradeOracle AI Compliance Assistant
+                      </span>
+                      <h3 className="font-bold text-base text-[#18280e] mt-1">
+                        Get International Quality Certificates for Your Products
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label className="text-stone-700 font-bold block mb-1">Product Name</label>
+                      <input
+                        type="text"
+                        value={certProduct}
+                        onChange={(e) => setCertProduct(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none focus:border-[#18280e]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-stone-700 font-bold block mb-1">Material &amp; Finish</label>
+                      <input
+                        type="text"
+                        value={certMaterial}
+                        onChange={(e) => setCertMaterial(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none focus:border-[#18280e]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-stone-700 font-bold block mb-1">Explain In Your Language</label>
+                      <select
+                        value={certLanguage}
+                        onChange={(e) => setCertLanguage(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-[#d8e5ca] text-[#18280e] outline-none focus:border-[#18280e]"
+                      >
+                        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                        <option value="Hindi">Hindi (हिन्दी)</option>
+                        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                        <option value="Tamil">Tamil (தமிழ்)</option>
+                        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                        <option value="English">English</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-stone-700 font-bold block mb-1.5">
+                      Select Countries You Want to Export To
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "United States",
+                        "European Union (CE)",
+                        "United Kingdom (UKCA)",
+                        "UAE / Saudi (SASO)",
+                        "India (BIS)",
+                      ].map((c) => {
+                        const active = certCountries.includes(c);
+                        return (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => toggleCertCountry(c)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                              active
+                                ? "bg-[#18280e] text-[#b2eb76] border-[#18280e]"
+                                : "bg-white text-stone-700 border-[#d8e5ca]"
+                            }`}
+                          >
+                            {active ? "✓ " : ""}{c}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={certLoading}
+                    onClick={() => void handleGenerateCompliancePlan()}
+                    className="px-5 py-2.5 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50"
+                  >
+                    {certLoading
+                      ? "Generating Required Marks & Paperwork..."
+                      : "Generate Certification Plan & English Paperwork →"}
+                  </button>
+
+                  {certPlan && (
+                    <div className="pt-4 border-t border-[#d8e5ca] space-y-4">
+                      {/* Native Language Explanation */}
+                      <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[#3f7308] font-bold">
+                          <span>Summary in {certLanguage}</span>
+                          <span>HS Code: {certPlan.hsCode}</span>
+                        </div>
+                        <p className="text-xs text-[#18280e] leading-relaxed">{certPlan.nativeSummary}</p>
+                      </div>
+
+                      {/* Required Country Certificates & One-Click Lab Booking */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {certPlan.requiredCertificates.map((cert, idx) => {
+                          const bookedStatus = bookedCerts[cert.markName];
+                          return (
+                            <div
+                              key={idx}
+                              className="p-4 rounded-xl bg-white border border-stone-200 space-y-2 flex flex-col justify-between"
+                            >
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-bold text-sm text-[#18280e]">{cert.markName}</span>
+                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ebf7d9] text-[#284905] font-bold">
+                                    {cert.country}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] font-mono text-[#3f7308] font-semibold">
+                                  {cert.standardCode} · {cert.labPartner}
+                                </div>
+                                <p className="text-xs text-stone-600">{cert.purpose}</p>
+                                <div className="text-[11px] font-mono text-stone-500">
+                                  Est. {cert.estimatedDays} · Lab Fee: ${cert.estimatedFeeUSD} USD
+                                </div>
+                              </div>
+
+                              {bookedStatus ? (
+                                <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-mono text-emerald-800 font-bold">
+                                  ✓ {bookedStatus}
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleBookLabCertificate(cert.markName, cert.labPartner)}
+                                  className="w-full py-2 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors"
+                                >
+                                  Book Lab Test &amp; Sample Pickup →
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Auto-Generated English Dossier & Export Label Preview */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#18280e]">
+                              Auto-Generated English Declaration &amp; Lab Form
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard?.writeText(certPlan.generatedDossier);
+                                setDossierCopied(true);
+                                setTimeout(() => setDossierCopied(false), 2000);
+                              }}
+                              className="text-[11px] font-mono px-2.5 py-1 rounded bg-[#ebf7d9] text-[#284905] font-bold cursor-pointer"
+                            >
+                              {dossierCopied ? "Copied ✓" : "Copy Dossier"}
+                            </button>
+                          </div>
+                          <pre className="text-[11px] font-mono text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200 whitespace-pre-wrap leading-relaxed">
+                            {certPlan.generatedDossier}
+                          </pre>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
+                          <span className="text-xs font-bold text-[#18280e] block">
+                            Export Carton Label Preview (Ready to Print)
+                          </span>
+                          <div className="p-4 rounded-xl border-2 border-dashed border-[#18280e]/40 bg-[#fbfdf9] font-mono text-xs space-y-1.5">
+                            {certPlan.packagingLabelSpecs.map((line, i) => (
+                              <div key={i} className="text-[#18280e] font-semibold">
+                                {line}
+                              </div>
+                            ))}
+                            <div className="pt-2 text-[10px] text-stone-500 border-t border-stone-200">
+                              Exporter: {currentUser?.companyName || "Verified Indian Manufacturer"} · HS {certPlan.hsCode}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Existing Completed Batch Inspections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-5 rounded-2xl bg-[#f4faed] border border-[#d8e5ca] space-y-2">
+                    <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                      Passed ✓ • Ready to Pack
+                    </span>
+                    <h4 className="font-bold text-base text-[#18280e]">Solid Brass Door Handles (1,500 units)</h4>
+                    <p className="text-stone-700 text-xs leading-relaxed">
+                      Inspector tested 125 sample handles for rust resistance, color finish, and strength. Zero defects found.
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                    <span className="text-emerald-800 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                      Passed ✓ • Approved
+                    </span>
+                    <h4 className="font-bold text-base text-[#18280e]">Heavy Steel Machine Bolts (25,000 units)</h4>
+                    <p className="text-stone-700 text-xs leading-relaxed">
+                      Strength test and anti-rust silver coating passed cleanly. Photos saved to your order record.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

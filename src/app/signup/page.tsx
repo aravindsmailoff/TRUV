@@ -22,11 +22,29 @@ export default function SignupPage() {
   const [country, setCountry] = useState("United States");
   const [iecCode, setIecCode] = useState("");
   const [gstin, setGstin] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState("Gujarati");
+  const [primaryProduct, setPrimaryProduct] = useState("");
+  const [primaryMaterial, setPrimaryMaterial] = useState("");
+  const [targetCountries, setTargetCountries] = useState<string[]>([
+    "United States",
+    "European Union (CE)",
+    "India (BIS)",
+  ]);
+  const [onboardingCerts, setOnboardingCerts] = useState<
+    Array<{ markName: string; country: string; standardCode: string; labPartner: string }>
+  >([]);
+  const [onboardingSummary, setOnboardingSummary] = useState("");
 
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toggleTargetCountry = (c: string) => {
+    setTargetCountries((prev) =>
+      prev.includes(c) ? prev.filter((item) => item !== c) : [...prev, c]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !companyName) {
       setErrorMsg("Please fill in all required fields.");
@@ -47,6 +65,45 @@ export default function SignupPage() {
     if (!result.success) {
       setErrorMsg("An account with this email address already exists.");
       return;
+    }
+
+    if (role === "manufacturer") {
+      try {
+        const res = await fetch("/api/ai/compliance-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            companyName,
+            gstin,
+            iecCode,
+            productName: primaryProduct || "Industrial Export Goods",
+            material: primaryMaterial || "Standard Alloy / Cotton",
+            targetCountries:
+              targetCountries.length > 0 ? targetCountries : ["United States", "European Union (CE)"],
+            preferredLanguage,
+          }),
+        });
+        const plan = await res.json();
+        if (plan.requiredCertificates) {
+          setOnboardingCerts(plan.requiredCertificates);
+          setOnboardingSummary(plan.nativeSummary || "");
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              "truv_seller_onboarding_compliance",
+              JSON.stringify({
+                companyName,
+                productName: primaryProduct || "Industrial Export Goods",
+                material: primaryMaterial || "Standard Alloy / Cotton",
+                targetCountries,
+                preferredLanguage,
+                plan,
+              })
+            );
+          }
+        }
+      } catch {
+        // Non-blocking fallback
+      }
     }
 
     setSubmitted(true);
@@ -117,6 +174,30 @@ export default function SignupPage() {
                     The TRUV trade compliance admin will verify your business credentials for <strong>{companyName}</strong>. Once whitelisted, your access will be activated and an approval confirmation email will be dispatched to <strong>{email}</strong>.
                   </p>
                 </div>
+
+                {role === "manufacturer" && onboardingCerts.length > 0 && (
+                  <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] text-xs font-mono text-left space-y-2.5">
+                    <div className="font-bold text-[#18280e]">
+                      TradeOracle AI Certification Plan ({preferredLanguage})
+                    </div>
+                    {onboardingSummary && (
+                      <p className="text-[11px] text-stone-600 leading-relaxed">{onboardingSummary}</p>
+                    )}
+                    <div className="space-y-1.5">
+                      {onboardingCerts.map((cert, idx) => (
+                        <div key={idx} className="p-2 rounded-lg bg-[#f4faed] border border-[#d8e5ca] flex justify-between gap-2 text-[11px]">
+                          <div>
+                            <strong className="text-[#18280e]">{cert.markName}</strong> ({cert.country})
+                            <div className="text-[10px] text-stone-500">{cert.standardCode} · {cert.labPartner}</div>
+                          </div>
+                          <span className="px-2 py-0.5 h-fit rounded bg-white text-[#3f7308] font-bold text-[10px]">
+                            Dossier Ready
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link
@@ -260,30 +341,102 @@ export default function SignupPage() {
                     </div>
                   </div>
 
-                  {/* Manufacturer Specific Fields: DGFT IEC & GSTIN */}
+                  {/* Manufacturer Specific Fields: DGFT IEC, GSTIN & International Quality Onboarding */}
                   {role === "manufacturer" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-[#ebf7d9] border border-[#d8e5ca]">
-                      <div>
-                        <label className="text-stone-700 block mb-1 font-bold">DGFT IEC Code *</label>
-                        <input
-                          type="text"
-                          required
-                          value={iecCode}
-                          onChange={(e) => setIecCode(e.target.value)}
-                          placeholder="e.g. 0508012491"
-                          className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
-                        />
+                    <div className="space-y-3 p-3.5 rounded-lg bg-[#ebf7d9] border border-[#d8e5ca]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-stone-700 block mb-1 font-bold">DGFT IEC Code *</label>
+                          <input
+                            type="text"
+                            required
+                            value={iecCode}
+                            onChange={(e) => setIecCode(e.target.value)}
+                            placeholder="e.g. 0508012491"
+                            className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-stone-700 block mb-1 font-bold">GSTIN Registration *</label>
+                          <input
+                            type="text"
+                            required
+                            value={gstin}
+                            onChange={(e) => setGstin(e.target.value)}
+                            placeholder="e.g. 09AAHFM9201L1Z4"
+                            className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
+                          />
+                        </div>
                       </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-stone-700 block mb-1 font-bold">Primary Product *</label>
+                          <input
+                            type="text"
+                            value={primaryProduct}
+                            onChange={(e) => setPrimaryProduct(e.target.value)}
+                            placeholder="e.g. Brass Mortise Locksets"
+                            className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-stone-700 block mb-1 font-bold">Material Grade *</label>
+                          <input
+                            type="text"
+                            value={primaryMaterial}
+                            onChange={(e) => setPrimaryMaterial(e.target.value)}
+                            placeholder="e.g. CW617N Solid Brass"
+                            className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
+                          />
+                        </div>
+                      </div>
+
                       <div>
-                        <label className="text-stone-700 block mb-1 font-bold">GSTIN Registration *</label>
-                        <input
-                          type="text"
-                          required
-                          value={gstin}
-                          onChange={(e) => setGstin(e.target.value)}
-                          placeholder="e.g. 09AAHFM9201L1Z4"
+                        <label className="text-stone-700 block mb-1 font-bold">Your Preferred Language</label>
+                        <select
+                          value={preferredLanguage}
+                          onChange={(e) => setPreferredLanguage(e.target.value)}
                           className="w-full bg-white border border-[#d8e5ca] rounded-md px-3 py-2 text-[#18280e] focus:outline-none focus:border-[#3f7308]"
-                        />
+                        >
+                          <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                          <option value="Hindi">Hindi (हिन्दी)</option>
+                          <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                          <option value="Tamil">Tamil (தமிழ்)</option>
+                          <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                          <option value="English">English</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-stone-700 block mb-1 font-bold">
+                          Target Export Countries (TradeOracle AI will arrange required quality marks)
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            "United States",
+                            "European Union (CE)",
+                            "United Kingdom (UKCA)",
+                            "UAE / Saudi (SASO)",
+                            "India (BIS)",
+                          ].map((c) => {
+                            const active = targetCountries.includes(c);
+                            return (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => toggleTargetCountry(c)}
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-colors cursor-pointer ${
+                                  active
+                                    ? "bg-[#18280e] text-[#b2eb76] border-[#18280e]"
+                                    : "bg-white text-stone-700 border-[#d8e5ca]"
+                                }`}
+                              >
+                                {active ? "✓ " : ""}{c}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}
