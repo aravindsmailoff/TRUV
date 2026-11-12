@@ -232,7 +232,23 @@ export default function DashboardPage() {
     generatedDossier: string;
     packagingLabelSpecs: string[];
   } | null>(null);
-  const [bookedCerts, setBookedCerts] = useState<Record<string, string>>({});
+  const [autoApplyingMark, setAutoApplyingMark] = useState<string | null>(null);
+  const [autoApplyingAll, setAutoApplyingAll] = useState(false);
+  const [autoApplications, setAutoApplications] = useState<
+    Record<
+      string,
+      {
+        applicationRef: string;
+        status: string;
+        submittedAt: string;
+        authorityName: string;
+        portalUrl: string;
+        summaryForSeller: string;
+        stepsDone: string[];
+        nextManufacturerSteps: string[];
+      }
+    >
+  >({});
   const [verifiedCerts, setVerifiedCerts] = useState<
     Record<string, { certNumber: string; fileName: string; attachedAt: string }>
   >({});
@@ -473,10 +489,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const savedBooked = localStorage.getItem("truv_booked_certificates");
-    if (savedBooked) {
+    const savedApps = localStorage.getItem("truv_govt_applications");
+    if (savedApps) {
       try {
-        setBookedCerts(JSON.parse(savedBooked));
+        setAutoApplications(JSON.parse(savedApps));
       } catch {
         // Ignore invalid localStorage
       }
@@ -584,16 +600,59 @@ export default function DashboardPage() {
     }
   };
 
-  const handleBookLabCertificate = (markName: string, labPartner: string) => {
-    const trackingId = `LAB-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    const bookingText = `Booked with ${labPartner} · Sample Courier Pickup Scheduled (Ref: ${trackingId})`;
-    setBookedCerts((prev) => {
-      const next = { ...prev, [markName]: bookingText };
-      if (typeof window !== "undefined") {
-        localStorage.setItem("truv_booked_certificates", JSON.stringify(next));
+  const handleAutoApplyCertificate = async (cert: {
+    markName: string;
+    country: string;
+    standardCode: string;
+    labPartner: string;
+  }) => {
+    setAutoApplyingMark(cert.markName);
+    const portal = getOfficialPortalInfo(cert.markName, cert.country);
+    try {
+      const res = await fetch("/api/ai/apply-certificate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: currentUser?.companyName || "Indian Export Manufacturer",
+          productName: certProduct,
+          material: certMaterial,
+          hsCode: certPlan?.hsCode || "8301.40",
+          markName: cert.markName,
+          country: cert.country,
+          standardCode: cert.standardCode,
+          authorityName: cert.labPartner,
+          portalUrl: portal.url,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.applicationRef) {
+        setAutoApplications((prev) => {
+          const next = { ...prev, [cert.markName]: data };
+          if (typeof window !== "undefined") {
+            localStorage.setItem("truv_govt_applications", JSON.stringify(next));
+          }
+          return next;
+        });
       }
-      return next;
-    });
+    } catch {
+      // Ignore network error
+    } finally {
+      setAutoApplyingMark(null);
+    }
+  };
+
+  const handleAutoApplyAllCertificates = async () => {
+    if (!certPlan || certPlan.requiredCertificates.length === 0) return;
+    setAutoApplyingAll(true);
+    try {
+      await Promise.all(
+        certPlan.requiredCertificates
+          .filter((cert) => !autoApplications[cert.markName])
+          .map((cert) => handleAutoApplyCertificate(cert))
+      );
+    } finally {
+      setAutoApplyingAll(false);
+    }
   };
 
   const handleDownloadDossier = () => {
@@ -1344,7 +1403,7 @@ export default function DashboardPage() {
                       {Object.keys(verifiedCerts).length} Attached
                     </span>
                     <span className="text-xs font-bold text-[#3f7308]">
-                      {Object.keys(bookedCerts).length} Booked
+                      {Object.keys(autoApplications).length} Auto-Filed
                     </span>
                   </div>
                   <span className="text-[11px] text-stone-500 block">
@@ -2117,21 +2176,37 @@ export default function DashboardPage() {
 
                   {certPlan && (
                     <div className="pt-4 border-t border-[#d8e5ca] space-y-4">
-                      {/* Summary */}
-                      <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] space-y-1">
-                        <div className="flex items-center justify-between text-xs text-[#3f7308] font-bold">
+                      {/* Summary + 1-Click Auto-Apply All */}
+                      <div className="p-4 rounded-xl bg-white border border-[#d8e5ca] space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#3f7308] font-bold">
                           <span>Export Compliance Overview</span>
-                          <span>HS Code: {certPlan.hsCode}</span>
+                          <span className="font-mono">HS Code: {certPlan.hsCode}</span>
                         </div>
                         <p className="text-xs text-[#18280e] leading-relaxed">{certPlan.nativeSummary}</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stone-100">
+                          <span className="text-[11px] text-stone-600">
+                            One-click automation prepares your factory GSTIN/IEC dossier, files with each government authority, and walks you through what happens next.
+                          </span>
+                          <button
+                            type="button"
+                            disabled={autoApplyingAll}
+                            onClick={() => void handleAutoApplyAllCertificates()}
+                            className="px-4 py-2 rounded-xl bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 shrink-0"
+                          >
+                            {autoApplyingAll
+                              ? "Auto-Applying to Govt Portals..."
+                              : "1-Click Auto-Apply All Govt Certificates →"}
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Required Country Certificates, Official Portal Links & Issued Certificate Attachment */}
+                      {/* Required Country Certificates, Automated Govt Filing & Issued Certificate Attachment */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {certPlan.requiredCertificates.map((cert, idx) => {
-                          const bookedStatus = bookedCerts[cert.markName];
+                          const appInfo = autoApplications[cert.markName];
                           const verifiedInfo = verifiedCerts[cert.markName];
                           const portal = getOfficialPortalInfo(cert.markName, cert.country);
+                          const isApplyingThis = autoApplyingMark === cert.markName;
                           return (
                             <div
                               key={idx}
@@ -2153,17 +2228,61 @@ export default function DashboardPage() {
                                 </div>
                               </div>
 
-                              <div className="space-y-2 pt-2 border-t border-stone-100">
+                              <div className="space-y-2.5 pt-2 border-t border-stone-100">
                                 <div className="flex flex-wrap gap-2">
+                                  {!appInfo && (
+                                    <button
+                                      type="button"
+                                      disabled={isApplyingThis || autoApplyingAll}
+                                      onClick={() => void handleAutoApplyCertificate(cert)}
+                                      className="flex-1 py-2 px-3 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50"
+                                    >
+                                      {isApplyingThis ? "Auto-Applying..." : "1-Click Auto-Apply →"}
+                                    </button>
+                                  )}
                                   <a
                                     href={portal.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex-1 text-center py-2 px-3 rounded-lg bg-[#18280e] hover:bg-[#253d16] text-[#b2eb76] font-bold text-xs transition-colors"
+                                    className="flex-1 text-center py-2 px-3 rounded-lg bg-[#ebf7d9] hover:bg-[#d8e5ca] text-[#18280e] font-bold text-xs transition-colors"
                                   >
                                     {portal.label} ↗
                                   </a>
                                 </div>
+
+                                {appInfo && (
+                                  <div className="p-3 rounded-xl bg-[#f4faed] border border-[#d8e5ca] space-y-2 text-xs">
+                                    <div className="flex flex-wrap items-center justify-between gap-1">
+                                      <span className="font-bold text-[#18280e]">
+                                        ✓ Automated Govt Filing Prepared
+                                      </span>
+                                      <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#18280e] text-[#b2eb76] font-bold">
+                                        {appInfo.applicationRef}
+                                      </span>
+                                    </div>
+                                    <p className="text-stone-700 leading-relaxed">{appInfo.summaryForSeller}</p>
+                                    <div>
+                                      <span className="text-[11px] font-bold text-[#3f7308] block mb-1">
+                                        What TradeOracle AI Automated:
+                                      </span>
+                                      <ul className="space-y-0.5 text-[11px] text-stone-700 list-disc pl-4">
+                                        {appInfo.stepsDone.map((s, i) => (
+                                          <li key={i}>{s}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                    <div>
+                                      <span className="text-[11px] font-bold text-[#18280e] block mb-1">
+                                        What Happens Next (Your Step-by-Step Process):
+                                      </span>
+                                      <ol className="space-y-0.5 text-[11px] text-stone-700 list-decimal pl-4">
+                                        {appInfo.nextManufacturerSteps.map((s, i) => (
+                                          <li key={i}>{s}</li>
+                                        ))}
+                                      </ol>
+                                    </div>
+                                  </div>
+                                )}
 
                                 {verifiedInfo ? (
                                   <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-0.5">
