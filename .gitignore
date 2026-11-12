@@ -52,6 +52,9 @@ temp/
 .whatsapp-auth/
 .whatsapp-config.json
 
+# Runtime notification/event state written by the app at runtime
+.data/
+
 # SQLite temporary files (the database snapshot itself is intentionally tracked)
 data/*.sqlite3-journal
 data/*.sqlite3-wal
